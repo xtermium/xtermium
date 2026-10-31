@@ -1,0 +1,123 @@
+# Releases follow semantic versioning: Cargo.toml's version is the app's. A merge to main that
+# raises it builds Windows and Linux and publishes them as release v<version>; a merge that
+# doesn't publishes nothing. It runs on GitHub-hosted runners, as GitHub advises for a public
+# repository, where a self-hosted runner can be made to run anyone's code. Running it by hand
+# (Actions tab, `gh workflow run release.yml`) publishes the version on main if it has no release
+# yet.
+name: release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # Is Cargo.toml's version new, i.e. without a tag yet?
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      new: ${{ steps.v.outputs.new }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: v
+        run: |
+          v=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n 1)
+          if git rev-parse -q --verify "refs/tags/v$v" >/dev/null; then
+            echo "v$v is released already: nothing to publish."
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: version
+    if: needs.version.outputs.new == 'true'
+    # Only this job writes: it creates the release and uploads to it.
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            args: ""
+          # The oldest Ubuntu runner: the Linux packages run on its glibc (2.35) or newer.
+          - os: ubuntu-22.04
+            args: ""
+          # macOS: off. Its build failed when last tried (2026-10-15), and the app hasn't been run
+          # on a Mac.
+          # - os: macos-latest
+          #   args: --target universal-apple-darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+      # The WezTerm git dependency has paths longer than 260 characters.
+      - if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
+
+      - uses: actions/checkout@v7
+        with:
+          # The release notes read the history back to the previous release's tag.
+          fetch-depth: 0
+
+      # What Tauri needs (libdbus for its window layer), plus libudev for serial ports.
+      - if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf \
+            libudev-dev libdbus-1-dev pkg-config
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ runner.os == 'macOS' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - run: npm ci
+
+      # THIRD-PARTY-NOTICES.txt for exactly what this build ships (scripts/notices.mjs); the
+      # installers carry it with LICENSE and NOTICE.
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-about@0.9.3
+      - run: npm run notices
+
+      # What changed since the last release, by pull request (scripts/changelog.mjs).
+      - id: notes
+        run: node scripts/changelog.mjs
+
+      - id: tauri
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Shown in Settings › About, to tell builds apart (src/support.rs).
+          XTERMIUM_BUILD: ${{ github.run_number }}
+        with:
+          tagName: v__VERSION__
+          releaseName: xtermium __VERSION__
+          releaseBody: ${{ steps.notes.outputs.body }}
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }}
+
+      # The portable build, a download beside the installers (Scoop unpacks the MSI instead): the
+      # files the MSI puts in its folder, without an installer. A missing one fails the step.
+      - if: runner.os == 'Windows'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.tauri.outputs.appVersion }}
+        run: |
+          $zip = "xtermium_${env:VERSION}_x64-portable.zip"
+          $files = 'xtermium.exe', 'xtermium-rdp.exe', 'WebView2Loader.dll', 'LICENSE', 'NOTICE', 'THIRD-PARTY-NOTICES.txt'
+          Compress-Archive -LiteralPath ($files | ForEach-Object { "target/release/$_" }) -DestinationPath $zip
+          gh release upload "v$env:VERSION" $zip

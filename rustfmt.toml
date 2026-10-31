@@ -1,0 +1,3 @@
+# Match the existing style: long, flat lines rather than deep wrapping.
+max_width = 120
+use_small_heuristics = "Max"

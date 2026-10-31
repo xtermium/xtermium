@@ -1,0 +1,752 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T18:41:49.786Z",
+  "title": "Design System: xtermium",
+  "extensions": {
+    "colorMeta": {
+      "gold": {
+        "role": "primary",
+        "displayName": "Brushed Gold",
+        "canonical": "#d8a84e",
+        "tonalRamp": [
+          "oklch(15% 0.121 80.8)",
+          "oklch(26% 0.121 80.8)",
+          "oklch(37% 0.121 80.8)",
+          "oklch(48% 0.121 80.8)",
+          "oklch(60% 0.121 80.8)",
+          "oklch(71% 0.121 80.8)",
+          "oklch(83% 0.121 80.8)",
+          "oklch(95% 0.121 80.8)"
+        ],
+        "light": "#85590a"
+      },
+      "gold-ink": {
+        "role": "primary",
+        "displayName": "Gold Ink",
+        "canonical": "#1d1608",
+        "tonalRamp": [
+          "oklch(15% 0.027 83.7)",
+          "oklch(26% 0.027 83.7)",
+          "oklch(37% 0.027 83.7)",
+          "oklch(48% 0.027 83.7)",
+          "oklch(60% 0.027 83.7)",
+          "oklch(71% 0.027 83.7)",
+          "oklch(83% 0.027 83.7)",
+          "oklch(95% 0.027 83.7)"
+        ],
+        "light": "#ffffff"
+      },
+      "gold-soft": {
+        "role": "primary",
+        "displayName": "Gold Wash",
+        "canonical": "rgba(216, 168, 78, 0.16)",
+        "light": "rgba(133, 89, 10, 0.14)"
+      },
+      "k-ssh": {
+        "role": "secondary",
+        "displayName": "Cobalt",
+        "canonical": "#5c8df0",
+        "tonalRamp": [
+          "oklch(15% 0.157 262.9)",
+          "oklch(26% 0.157 262.9)",
+          "oklch(37% 0.157 262.9)",
+          "oklch(48% 0.157 262.9)",
+          "oklch(60% 0.157 262.9)",
+          "oklch(71% 0.157 262.9)",
+          "oklch(83% 0.157 262.9)",
+          "oklch(95% 0.157 262.9)"
+        ],
+        "light": "#2f62d0"
+      },
+      "k-shell": {
+        "role": "secondary",
+        "displayName": "Teal",
+        "canonical": "#33b8a6",
+        "tonalRamp": [
+          "oklch(15% 0.115 181.8)",
+          "oklch(26% 0.115 181.8)",
+          "oklch(37% 0.115 181.8)",
+          "oklch(48% 0.115 181.8)",
+          "oklch(60% 0.115 181.8)",
+          "oklch(71% 0.115 181.8)",
+          "oklch(83% 0.115 181.8)",
+          "oklch(95% 0.115 181.8)"
+        ],
+        "light": "#138a7b"
+      },
+      "k-serial": {
+        "role": "secondary",
+        "displayName": "Chartreuse",
+        "canonical": "#b5c14a",
+        "tonalRamp": [
+          "oklch(15% 0.143 114.6)",
+          "oklch(26% 0.143 114.6)",
+          "oklch(37% 0.143 114.6)",
+          "oklch(48% 0.143 114.6)",
+          "oklch(60% 0.143 114.6)",
+          "oklch(71% 0.143 114.6)",
+          "oklch(83% 0.143 114.6)",
+          "oklch(95% 0.143 114.6)"
+        ],
+        "light": "#6f7d0c"
+      },
+      "k-rdp": {
+        "role": "secondary",
+        "displayName": "Violet",
+        "canonical": "#9c70e6",
+        "tonalRamp": [
+          "oklch(15% 0.173 298.6)",
+          "oklch(26% 0.173 298.6)",
+          "oklch(37% 0.173 298.6)",
+          "oklch(48% 0.173 298.6)",
+          "oklch(60% 0.173 298.6)",
+          "oklch(71% 0.173 298.6)",
+          "oklch(83% 0.173 298.6)",
+          "oklch(95% 0.173 298.6)"
+        ],
+        "light": "#7444c8"
+      },
+      "k-browser": {
+        "role": "secondary",
+        "displayName": "Rose",
+        "canonical": "#dd6b9c",
+        "tonalRamp": [
+          "oklch(15% 0.152 354.9)",
+          "oklch(26% 0.152 354.9)",
+          "oklch(37% 0.152 354.9)",
+          "oklch(48% 0.152 354.9)",
+          "oklch(60% 0.152 354.9)",
+          "oklch(71% 0.152 354.9)",
+          "oklch(83% 0.152 354.9)",
+          "oklch(95% 0.152 354.9)"
+        ],
+        "light": "#b83f75"
+      },
+      "k-telnet": {
+        "role": "secondary",
+        "displayName": "Copper",
+        "canonical": "#d98a4a",
+        "tonalRamp": [
+          "oklch(15% 0.125 57.7)",
+          "oklch(26% 0.125 57.7)",
+          "oklch(37% 0.125 57.7)",
+          "oklch(48% 0.125 57.7)",
+          "oklch(60% 0.125 57.7)",
+          "oklch(71% 0.125 57.7)",
+          "oklch(83% 0.125 57.7)",
+          "oklch(95% 0.125 57.7)"
+        ],
+        "light": "#a65a1c"
+      },
+      "k-winrm": {
+        "role": "secondary",
+        "displayName": "Cyan",
+        "canonical": "#4aa8d9",
+        "tonalRamp": [
+          "oklch(15% 0.114 234.5)",
+          "oklch(26% 0.114 234.5)",
+          "oklch(37% 0.114 234.5)",
+          "oklch(48% 0.114 234.5)",
+          "oklch(60% 0.114 234.5)",
+          "oklch(71% 0.114 234.5)",
+          "oklch(83% 0.114 234.5)",
+          "oklch(95% 0.114 234.5)"
+        ],
+        "light": "#1f6f9c"
+      },
+      "k-vnc": {
+        "role": "secondary",
+        "displayName": "Orchid",
+        "canonical": "#c46fd1",
+        "tonalRamp": [
+          "oklch(15% 0.165 322.1)",
+          "oklch(26% 0.165 322.1)",
+          "oklch(37% 0.165 322.1)",
+          "oklch(48% 0.165 322.1)",
+          "oklch(60% 0.165 322.1)",
+          "oklch(71% 0.165 322.1)",
+          "oklch(83% 0.165 322.1)",
+          "oklch(95% 0.165 322.1)"
+        ],
+        "light": "#8d3a9c"
+      },
+      "k-kvm": {
+        "role": "secondary",
+        "displayName": "Bare Titanium",
+        "canonical": "#8fa3b8",
+        "tonalRamp": [
+          "oklch(15% 0.038 249.7)",
+          "oklch(26% 0.038 249.7)",
+          "oklch(37% 0.038 249.7)",
+          "oklch(48% 0.038 249.7)",
+          "oklch(60% 0.038 249.7)",
+          "oklch(71% 0.038 249.7)",
+          "oklch(83% 0.038 249.7)",
+          "oklch(95% 0.038 249.7)"
+        ],
+        "light": "#4f6378"
+      },
+      "k-agent": {
+        "role": "secondary",
+        "displayName": "Ember",
+        "canonical": "#ec6a6a",
+        "tonalRamp": [
+          "oklch(15% 0.162 22.3)",
+          "oklch(26% 0.162 22.3)",
+          "oklch(37% 0.162 22.3)",
+          "oklch(48% 0.162 22.3)",
+          "oklch(60% 0.162 22.3)",
+          "oklch(71% 0.162 22.3)",
+          "oklch(83% 0.162 22.3)",
+          "oklch(95% 0.162 22.3)"
+        ],
+        "light": "#b8443a"
+      },
+      "ok": {
+        "role": "tertiary",
+        "displayName": "Live Green",
+        "canonical": "#4fc08d",
+        "tonalRamp": [
+          "oklch(15% 0.128 161.1)",
+          "oklch(26% 0.128 161.1)",
+          "oklch(37% 0.128 161.1)",
+          "oklch(48% 0.128 161.1)",
+          "oklch(60% 0.128 161.1)",
+          "oklch(71% 0.128 161.1)",
+          "oklch(83% 0.128 161.1)",
+          "oklch(95% 0.128 161.1)"
+        ],
+        "light": "#1b6a44"
+      },
+      "warn": {
+        "role": "tertiary",
+        "displayName": "Amber",
+        "canonical": "#e0b04a",
+        "tonalRamp": [
+          "oklch(15% 0.130 83.4)",
+          "oklch(26% 0.130 83.4)",
+          "oklch(37% 0.130 83.4)",
+          "oklch(48% 0.130 83.4)",
+          "oklch(60% 0.130 83.4)",
+          "oklch(71% 0.130 83.4)",
+          "oklch(83% 0.130 83.4)",
+          "oklch(95% 0.130 83.4)"
+        ],
+        "light": "#8a5d00"
+      },
+      "error": {
+        "role": "tertiary",
+        "displayName": "Signal Red",
+        "canonical": "#ec6a6a",
+        "tonalRamp": [
+          "oklch(15% 0.162 22.3)",
+          "oklch(26% 0.162 22.3)",
+          "oklch(37% 0.162 22.3)",
+          "oklch(48% 0.162 22.3)",
+          "oklch(60% 0.162 22.3)",
+          "oklch(71% 0.162 22.3)",
+          "oklch(83% 0.162 22.3)",
+          "oklch(95% 0.162 22.3)"
+        ],
+        "light": "#b42a33"
+      },
+      "error-ink": {
+        "role": "tertiary",
+        "displayName": "Red Ink",
+        "canonical": "#200a0a",
+        "tonalRamp": [
+          "oklch(15% 0.038 21.6)",
+          "oklch(26% 0.038 21.6)",
+          "oklch(37% 0.038 21.6)",
+          "oklch(48% 0.038 21.6)",
+          "oklch(60% 0.038 21.6)",
+          "oklch(71% 0.038 21.6)",
+          "oklch(83% 0.038 21.6)",
+          "oklch(95% 0.038 21.6)"
+        ],
+        "light": "#ffffff"
+      },
+      "window": {
+        "role": "neutral",
+        "displayName": "Gunmetal",
+        "canonical": "#101215",
+        "tonalRamp": [
+          "oklch(15% 0.007 258.4)",
+          "oklch(26% 0.007 258.4)",
+          "oklch(37% 0.007 258.4)",
+          "oklch(48% 0.007 258.4)",
+          "oklch(60% 0.007 258.4)",
+          "oklch(71% 0.007 258.4)",
+          "oklch(83% 0.007 258.4)",
+          "oklch(95% 0.007 258.4)"
+        ],
+        "light": "#d8dce2"
+      },
+      "deep": {
+        "role": "neutral",
+        "displayName": "Inset Well",
+        "canonical": "#15181c",
+        "tonalRamp": [
+          "oklch(15% 0.009 255.6)",
+          "oklch(26% 0.009 255.6)",
+          "oklch(37% 0.009 255.6)",
+          "oklch(48% 0.009 255.6)",
+          "oklch(60% 0.009 255.6)",
+          "oklch(71% 0.009 255.6)",
+          "oklch(83% 0.009 255.6)",
+          "oklch(95% 0.009 255.6)"
+        ],
+        "light": "#ffffff"
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "Slate",
+        "canonical": "#1c2025",
+        "tonalRamp": [
+          "oklch(15% 0.011 254.1)",
+          "oklch(26% 0.011 254.1)",
+          "oklch(37% 0.011 254.1)",
+          "oklch(48% 0.011 254.1)",
+          "oklch(60% 0.011 254.1)",
+          "oklch(71% 0.011 254.1)",
+          "oklch(83% 0.011 254.1)",
+          "oklch(95% 0.011 254.1)"
+        ],
+        "light": "#eef0f3"
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Titanium Panel",
+        "canonical": "#22262c",
+        "tonalRamp": [
+          "oklch(15% 0.013 258.4)",
+          "oklch(26% 0.013 258.4)",
+          "oklch(37% 0.013 258.4)",
+          "oklch(48% 0.013 258.4)",
+          "oklch(60% 0.013 258.4)",
+          "oklch(71% 0.013 258.4)",
+          "oklch(83% 0.013 258.4)",
+          "oklch(95% 0.013 258.4)"
+        ],
+        "light": "#e5e8ec"
+      },
+      "raised": {
+        "role": "neutral",
+        "displayName": "Raised",
+        "canonical": "#2b3037",
+        "tonalRamp": [
+          "oklch(15% 0.014 256.8)",
+          "oklch(26% 0.014 256.8)",
+          "oklch(37% 0.014 256.8)",
+          "oklch(48% 0.014 256.8)",
+          "oklch(60% 0.014 256.8)",
+          "oklch(71% 0.014 256.8)",
+          "oklch(83% 0.014 256.8)",
+          "oklch(95% 0.014 256.8)"
+        ],
+        "light": "#d9dde3"
+      },
+      "hover": {
+        "role": "neutral",
+        "displayName": "Polished",
+        "canonical": "#353b44",
+        "tonalRamp": [
+          "oklch(15% 0.018 258.4)",
+          "oklch(26% 0.018 258.4)",
+          "oklch(37% 0.018 258.4)",
+          "oklch(48% 0.018 258.4)",
+          "oklch(60% 0.018 258.4)",
+          "oklch(71% 0.018 258.4)",
+          "oklch(83% 0.018 258.4)",
+          "oklch(95% 0.018 258.4)"
+        ],
+        "light": "#cdd2d9"
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#353b43",
+        "tonalRamp": [
+          "oklch(15% 0.016 255.6)",
+          "oklch(26% 0.016 255.6)",
+          "oklch(37% 0.016 255.6)",
+          "oklch(48% 0.016 255.6)",
+          "oklch(60% 0.016 255.6)",
+          "oklch(71% 0.016 255.6)",
+          "oklch(83% 0.016 255.6)",
+          "oklch(95% 0.016 255.6)"
+        ],
+        "light": "#c9ced6"
+      },
+      "fg": {
+        "role": "neutral",
+        "displayName": "Cold White",
+        "canonical": "#e3e6ea",
+        "tonalRamp": [
+          "oklch(15% 0.006 255.5)",
+          "oklch(26% 0.006 255.5)",
+          "oklch(37% 0.006 255.5)",
+          "oklch(48% 0.006 255.5)",
+          "oklch(60% 0.006 255.5)",
+          "oklch(71% 0.006 255.5)",
+          "oklch(83% 0.006 255.5)",
+          "oklch(95% 0.006 255.5)"
+        ],
+        "light": "#1d2127"
+      },
+      "weak": {
+        "role": "neutral",
+        "displayName": "Brushed Steel",
+        "canonical": "#959da8",
+        "tonalRamp": [
+          "oklch(15% 0.019 256.3)",
+          "oklch(26% 0.019 256.3)",
+          "oklch(37% 0.019 256.3)",
+          "oklch(48% 0.019 256.3)",
+          "oklch(60% 0.019 256.3)",
+          "oklch(71% 0.019 256.3)",
+          "oklch(83% 0.019 256.3)",
+          "oklch(95% 0.019 256.3)"
+        ],
+        "light": "#5d6571"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The ASCII banner on the start screen only, filled with the spectrum gradient."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The lead sentence on the start screen (--t-xl)."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Dialog and page titles (h2, --t-l)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default interface text: buttons, fields, rows, menus (--t)."
+      },
+      "prose": {
+        "displayName": "Prose",
+        "purpose": "Paragraphs and text areas; a line is as tall as a list row (line-height φ)."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Status bar, counts, tags, kbd, hints (--t-s)."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "code, kbd, pre in Recursive's strict monospace; always left to right."
+      }
+    },
+    "shadows": [
+      {
+        "name": "--shadow-float",
+        "value": "0 4px 14px rgba(0, 0, 0, 0.3)",
+        "purpose": "Bars floating over a view (find, reconnect) and the hint over a detached window."
+      },
+      {
+        "name": "--shadow-menu",
+        "value": "0 6px 20px rgba(0, 0, 0, 0.36)",
+        "purpose": "Context menus, dropdown lists and toasts."
+      },
+      {
+        "name": "--shadow-dialog",
+        "value": "0 8px 28px rgba(0, 0, 0, 0.4)",
+        "purpose": "Modal dialogs and the command palette."
+      },
+      {
+        "name": "scrim-dialog",
+        "value": "rgba(8, 10, 12, 0.4)",
+        "purpose": "Backdrop behind a dialog."
+      },
+      {
+        "name": "scrim-palette",
+        "value": "rgba(8, 10, 12, 0.32)",
+        "purpose": "Backdrop behind the command palette."
+      }
+    ],
+    "motion": [
+      {
+        "name": "--ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Arrivals: fast to where they land, then settle."
+      },
+      {
+        "name": "float-in",
+        "value": "0.16s var(--ease-out)",
+        "purpose": "Dialogs, the palette, find and reconnect bars, toasts: a fade from 5px short of where they hang (--from, -5px for top-hung)."
+      },
+      {
+        "name": "fade-in",
+        "value": "0.16s ease-out",
+        "purpose": "The scrim behind a dialog or the palette, and the lock screen."
+      },
+      {
+        "name": "focus-ring",
+        "value": "left/top/width/height 0.2s var(--ease-out)",
+        "purpose": "The focused pane's ring glides to the next pane; no transition while an edge is dragged."
+      },
+      {
+        "name": "toast-out",
+        "value": "fade 0.1s",
+        "purpose": "A toast leaves faster than it came (Svelte out:fade, 0 under reduced motion)."
+      },
+      {
+        "name": "search-open",
+        "value": "0.14s ease-out",
+        "purpose": "The sidebar search field opens out from its button."
+      },
+      {
+        "name": "caret",
+        "value": "transform 0.12s",
+        "purpose": "A folder's caret turning open or closed."
+      },
+      {
+        "name": "step-back",
+        "value": "opacity 0.15s",
+        "purpose": "Chrome dims to 45% while the sidebar search is open."
+      },
+      {
+        "name": "drop-zone",
+        "value": "background 0.1s, border-color 0.1s",
+        "purpose": "Pane drop zones lighting up under a dragged tab."
+      },
+      {
+        "name": "anodize",
+        "value": "1.6s cubic-bezier(0.3, 0.7, 0.2, 1) once",
+        "purpose": "The banner's spectrum runs across it once on arrival."
+      },
+      {
+        "name": "found",
+        "value": "2.6s ease-in",
+        "purpose": "A gold wash held, then fading off the setting a search went to (Settings.svelte)."
+      },
+      {
+        "name": "spinner",
+        "value": "1.25s linear infinite",
+        "purpose": "Busy icon (Icon.svelte `spin`), in gold."
+      },
+      {
+        "name": "outline-breathe",
+        "value": "2.6s ease-in-out infinite",
+        "purpose": "Broadcast outline style: a 16px inner glow swells and settles."
+      },
+      {
+        "name": "outline-ring",
+        "value": "3s linear infinite",
+        "purpose": "Broadcast outline style (also rainbow): a conic sweep around the pane."
+      },
+      {
+        "name": "outline-march",
+        "value": "0.8s linear infinite",
+        "purpose": "Broadcast outline style: 45° stripes walking along the edge."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "Every animation and transition collapses under prefers-reduced-motion."
+      },
+      {
+        "name": "outline-fade",
+        "value": "2.2s ease-in-out infinite",
+        "purpose": "Broadcast outline style: the colour dims to 25% and back."
+      }
+    ],
+    "breakpoints": [],
+    "gradients": [
+      {
+        "name": "spectrum",
+        "value": "linear-gradient(100deg, #c98a45 0%, #d8a84e 16%, #dd6b9c 38%, #9c70e6 58%, #5c8df0 78%, #33b8a6 100%)",
+        "light": "linear-gradient(100deg, #9a5f1f 0%, #946410 16%, #b83f75 38%, #7444c8 58%, #2f62d0 78%, #138a7b 100%)",
+        "purpose": "The start-screen banner only."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "The default face: raised titanium that brightens a step under the pointer.",
+      "html": "<button class=\"ds-btn\">Connect</button>",
+      "css": ".ds-btn { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: inline-flex; align-items: center; gap: 5px; min-height: var(--control, 26px); padding: 3px 8px; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: var(--raised, #2b3037); color: var(--fg, #e3e6ea); cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--hover, #353b44); } .ds-btn:focus-visible { outline: 1px solid var(--gold, #d8a84e); outline-offset: -1px; } .ds-btn:disabled { opacity: 0.45; cursor: default; }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Gold fill with gold ink, one per dialog, on its main action.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Save</button>",
+      "css": ".ds-btn { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: inline-flex; align-items: center; gap: 5px; min-height: var(--control, 26px); padding: 3px 8px; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: var(--raised, #2b3037); color: var(--fg, #e3e6ea); cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--hover, #353b44); } .ds-btn:focus-visible { outline: 1px solid var(--gold, #d8a84e); outline-offset: -1px; } .ds-btn:disabled { opacity: 0.45; cursor: default; } .ds-btn-primary { background: var(--gold, #d8a84e); color: var(--gold-ink, #1d1608); } .ds-btn-primary:hover { background: color-mix(in srgb, var(--gold, #d8a84e) 86%, white); }"
+    },
+    {
+      "name": "Toggle (on)",
+      "kind": "button",
+      "refersTo": "button-on",
+      "description": "A toggle that is on or an option that is picked: gold wash, gold text, 55% gold border.",
+      "html": "<span style=\"display:inline-flex;gap:5px\"><button class=\"ds-btn ds-btn-on\">Dark</button><button class=\"ds-btn\">Light</button></span>",
+      "css": ".ds-btn { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: inline-flex; align-items: center; gap: 5px; min-height: var(--control, 26px); padding: 3px 8px; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: var(--raised, #2b3037); color: var(--fg, #e3e6ea); cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--hover, #353b44); } .ds-btn:focus-visible { outline: 1px solid var(--gold, #d8a84e); outline-offset: -1px; } .ds-btn:disabled { opacity: 0.45; cursor: default; } .ds-btn-on, .ds-btn-on:hover { background: var(--gold-soft, rgba(216, 168, 78, 0.16)); border-color: color-mix(in srgb, var(--gold, #d8a84e) 55%, transparent); color: var(--gold, #d8a84e); }"
+    },
+    {
+      "name": "Tool Button",
+      "kind": "button",
+      "refersTo": "button-icon-only",
+      "description": "Flat, icon-only, weak at rest, gold when on, always with a tooltip.",
+      "html": "<span style=\"display:inline-flex;gap:2px\"><button class=\"ds-tool\" title=\"Search\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z\"/></svg></button><button class=\"ds-tool on\" title=\"Files\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M2.165 19.551c.186.28.499.449.835.449h15c.4 0 .762-.238.919-.606l3-7A.998.998 0 0 0 21 11h-1V7c0-1.103-.897-2-2-2h-6.1L9.616 3.213A.997.997 0 0 0 9 3H4c-1.103 0-2 .897-2 2v14h.007a1 1 0 0 0 .158.551zM17.341 18H4.517l2.143-5h12.824l-2.143 5zM18 7v4H6c-.4 0-.762.238-.919.606L4 14.129V7h14z\"/></svg></button><button class=\"ds-tool\" title=\"Settings\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M12 16c2.206 0 4-1.794 4-4s-1.794-4-4-4-4 1.794-4 4 1.794 4 4 4zm0-6c1.084 0 2 .916 2 2s-.916 2-2 2-2-.916-2-2 .916-2 2-2z\"/><path d=\"m2.845 16.136 1 1.73c.531.917 1.809 1.261 2.73.73l.529-.306A8.1 8.1 0 0 0 9 19.402V20c0 1.103.897 2 2 2h2c1.103 0 2-.897 2-2v-.598a8.132 8.132 0 0 0 1.896-1.111l.529.306c.923.53 2.198.188 2.731-.731l.999-1.729a2.001 2.001 0 0 0-.731-2.732l-.505-.292a7.718 7.718 0 0 0 0-2.224l.505-.292a2.002 2.002 0 0 0 .731-2.732l-.999-1.729c-.531-.92-1.808-1.265-2.731-.732l-.529.306A8.1 8.1 0 0 0 15 4.598V4c0-1.103-.897-2-2-2h-2c-1.103 0-2 .897-2 2v.598a8.132 8.132 0 0 0-1.896 1.111l-.529-.306c-.924-.531-2.2-.187-2.731.732l-.999 1.729a2.001 2.001 0 0 0 .731 2.732l.505.292a7.683 7.683 0 0 0 0 2.223l-.505.292a2.003 2.003 0 0 0-.731 2.733zm3.326-2.758A5.703 5.703 0 0 1 6 12c0-.462.058-.926.17-1.378a.999.999 0 0 0-.47-1.108l-1.123-.65.998-1.729 1.145.662a.997.997 0 0 0 1.188-.142 6.071 6.071 0 0 1 2.384-1.399A1 1 0 0 0 11 5.3V4h2v1.3a1 1 0 0 0 .708.956 6.083 6.083 0 0 1 2.384 1.399.999.999 0 0 0 1.188.142l1.144-.661 1 1.729-1.124.649a1 1 0 0 0-.47 1.108c.112.452.17.916.17 1.378 0 .461-.058.925-.171 1.378a1 1 0 0 0 .471 1.108l1.123.649-.998 1.729-1.145-.661a.996.996 0 0 0-1.188.142 6.071 6.071 0 0 1-2.384 1.399A1 1 0 0 0 13 18.7l.002 1.3H11v-1.3a1 1 0 0 0-.708-.956 6.083 6.083 0 0 1-2.384-1.399.992.992 0 0 0-1.188-.141l-1.144.662-1-1.729 1.124-.651a1 1 0 0 0 .471-1.108z\"/></svg></button></span>",
+      "css": ".ds-tool { display: inline-flex; align-items: center; min-height: var(--control, 26px); padding: 3px 5px; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: transparent; color: var(--weak, #959da8); cursor: pointer; } .ds-tool:hover { background: var(--raised, #2b3037); } .ds-tool.on { color: var(--gold, #d8a84e); } .ds-tool:focus-visible { outline: 1px solid var(--gold, #d8a84e); outline-offset: -1px; }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "An inset well with a hairline; the border turns gold on focus. The icon sits 8px in.",
+      "html": "<label class=\"ds-search\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z\"/></svg><input class=\"ds-input\" placeholder=\"Search sessions\"></label>",
+      "css": ".ds-search { position: relative; display: flex; align-items: center; width: 233px; color: var(--weak, #959da8); } .ds-search svg { position: absolute; inset-inline-start: 8px; pointer-events: none; } .ds-input { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; box-sizing: border-box; width: 100%; min-height: var(--control, 26px); padding: 3px 8px; padding-inline-start: calc(8px + 16px + 5px); background: rgba(var(--deep-rgb, 21, 24, 28), 1); border: 1px solid var(--line, #353b43); border-radius: var(--r-control, 3px); color: var(--fg, #e3e6ea); outline: none; } .ds-input:focus { border-color: var(--gold, #d8a84e); }"
+    },
+    {
+      "name": "Menu",
+      "kind": "custom",
+      "refersTo": "menu",
+      "description": "Floating panel, 5px corners, groups started by a hairline, the destructive item last.",
+      "html": "<div class=\"ds-menu\"><button><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M20 2H10c-1.103 0-2 .897-2 2v4H4c-1.103 0-2 .897-2 2v10c0 1.103.897 2 2 2h10c1.103 0 2-.897 2-2v-4h4c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zM4 20V10h10l.002 10H4zm16-6h-4v-4c0-1.103-.897-2-2-2h-4V4h10v10z\"/></svg>Duplicate</button><button><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"m7 17.013 4.413-.015 9.632-9.54c.378-.378.586-.88.586-1.414s-.208-1.036-.586-1.414l-1.586-1.586c-.756-.756-2.075-.752-2.825-.003L7 12.583v4.43zM18.045 4.458l1.589 1.583-1.597 1.582-1.586-1.585 1.594-1.58zM9 13.417l6.03-5.973 1.586 1.586-6.029 5.971L9 15.006v-1.589z\"/><path d=\"M5 21h14c1.103 0 2-.897 2-2v-8.668l-2 2V19H8.158c-.026 0-.053.01-.079.01-.033 0-.066-.009-.1-.01H5V5h6.847l2-2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2z\"/></svg>Edit…</button><button class=\"sep\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M19.924 10.383a1 1 0 0 0-.217-1.09l-5-5-1.414 1.414L16.586 9H4v2h15a1 1 0 0 0 .924-.617zM4.076 13.617a1 1 0 0 0 .217 1.09l5 5 1.414-1.414L7.414 15H20v-2H5a.999.999 0 0 0-.924.617z\"/></svg>Move to workspace…</button><button class=\"danger\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M5 20a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8h2V6h-4V4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v2H3v2h2zM9 4h6v2H9zM8 8h9v12H7V8z\"/><path d=\"M9 10h2v8H9zm4 0h2v8h-2z\"/></svg>Delete</button></div>",
+      "css": ".ds-menu { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: flex; flex-direction: column; width: 190px; padding: 3px; background: rgba(var(--panel-rgb, 34, 38, 44), 0.98); border: 1px solid var(--line, #353b43); border-radius: var(--r-menu, 5px); box-shadow: var(--shadow-menu, 0 6px 20px rgba(0, 0, 0, 0.36)); color: var(--fg, #e3e6ea); } .ds-menu button { font: inherit; color: inherit; display: flex; align-items: center; gap: 5px; min-height: var(--control, 26px); padding: 3px 8px; border: 0; border-radius: calc(var(--r-menu, 5px) - 3px); background: transparent; cursor: pointer; text-align: start; } .ds-menu button:hover { background: var(--raised, #2b3037); } .ds-menu .sep, .ds-menu .danger { position: relative; margin-top: 5px; } .ds-menu .sep::before, .ds-menu .danger::before { content: \"\"; position: absolute; top: -3px; inset-inline: 8px; border-top: 1px solid var(--line, #353b43); } .ds-menu .danger:hover { color: var(--error, #ec6a6a); background: color-mix(in srgb, var(--error, #ec6a6a) 14%, transparent); }"
+    },
+    {
+      "name": "Tab Strip",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Flat 34px tabs split by hairlines; a kind-coloured connector on top, the active tab joins its pane.",
+      "html": "<div class=\"ds-strip\"><div class=\"ds-tab active\" style=\"--kind: var(--k-ssh, #5c8df0)\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M12 14h6v2h-6zM6.293 9.707 8.586 12l-2.293 2.293 1.414 1.414L11.414 12 7.707 8.293z\"/><path d=\"M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM4 18V6h16l.002 12H4z\"/></svg><span>web-01</span></div><div class=\"ds-tab\" style=\"--kind: var(--k-rdp, #9c70e6)\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M20 3H4c-1.103 0-2 .897-2 2v11c0 1.103.897 2 2 2h7v2H8v2h8v-2h-3v-2h7c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zM4 14V5h16l.002 9H4z\"/></svg><span>dc-02</span></div><div class=\"ds-tab\" style=\"--kind: var(--k-serial, #b5c14a)\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M9 9h6v6H9z\"/><path d=\"M20 6c0-1.103-.897-2-2-2h-2V2h-2v2h-4V2H8v2H6c-1.103 0-2 .897-2 2v2H2v2h2v4H2v2h2v2c0 1.103.897 2 2 2h2v2h2v-2h4v2h2v-2h2c1.103 0 2-.897 2-2v-2h2v-2h-2v-4h2V8h-2V6zM6 18V6h12l.002 12H6z\"/></svg><span>COM3</span></div></div>",
+      "css": ".ds-strip { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: flex; height: var(--bar, 34px); background: rgba(var(--panel-rgb, 34, 38, 44), 1); box-shadow: inset 0 -1px var(--line, #353b43); } .ds-tab { position: relative; display: flex; align-items: center; gap: 5px; padding: 0 13px 0 8px; color: var(--weak, #959da8); border-inline-end: 1px solid var(--line, #353b43); box-shadow: inset 0 -1px var(--line, #353b43); } .ds-tab svg { color: var(--kind); } .ds-tab::before { content: \"\"; position: absolute; inset: 0 0 auto; height: 2px; background: var(--kind); opacity: 0; } .ds-tab:hover { color: var(--fg, #e3e6ea); } .ds-tab.active { background: rgba(var(--bg-rgb, 28, 32, 37), 1); box-shadow: none; color: var(--fg, #e3e6ea); } .ds-tab.active::before { opacity: 1; }"
+    },
+    {
+      "name": "Session Rack",
+      "kind": "nav",
+      "refersTo": "rack-row",
+      "description": "21px rows in the kind's hue, a guide line under each folder, a green dot on live sessions.",
+      "html": "<div class=\"ds-rack\"><div class=\"ds-row\"><svg class=\"caret\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\"><path d=\"M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z\"/></svg><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M20 5h-8.586L9.707 3.293A.997.997 0 0 0 9 3H4c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V7c0-1.103-.897-2-2-2zM4 19V7h16l.002 12H4z\"/></svg><span>Production</span></div><div class=\"ds-indent\"><div class=\"ds-row leaf live\" style=\"--kind: var(--k-ssh, #5c8df0)\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M12 14h6v2h-6zM6.293 9.707 8.586 12l-2.293 2.293 1.414 1.414L11.414 12 7.707 8.293z\"/><path d=\"M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM4 18V6h16l.002 12H4z\"/></svg><span>web-01</span></div><div class=\"ds-row leaf hit\" style=\"--kind: var(--k-browser, #dd6b9c)\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm7.931 9h-2.764a14.67 14.67 0 0 0-1.792-6.243A8.013 8.013 0 0 1 19.931 11zM12.53 4.027c1.035 1.364 2.427 3.78 2.627 6.973H9.03c.139-2.596.994-5.028 2.451-6.974.172-.01.344-.026.519-.026.179 0 .354.016.53.027zm-3.842.7C7.704 6.618 7.136 8.762 7.03 11H4.069a8.013 8.013 0 0 1 4.619-6.273zM4.069 13h2.974c.136 2.379.665 4.478 1.556 6.23A8.01 8.01 0 0 1 4.069 13zm7.381 6.973C10.049 18.275 9.222 15.896 9.041 13h6.113c-.208 2.773-1.117 5.196-2.603 6.972-.182.012-.364.028-.551.028-.186 0-.367-.016-.55-.027zm4.011-.772c.955-1.794 1.538-3.901 1.691-6.201h2.778a8.005 8.005 0 0 1-4.469 6.201z\"/></svg><span>grafana</span></div><div class=\"ds-row leaf\" style=\"--kind: var(--k-kvm, #8fa3b8)\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M20 3H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM4 9V5h16v4zm16 4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2zM4 19v-4h16v4z\"/><path d=\"M17 6h2v2h-2zm-3 0h2v2h-2zm3 10h2v2h-2zm-3 0h2v2h-2z\"/></svg><span>idrac-03</span></div></div></div>",
+      "css": ".ds-rack { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; width: 233px; padding: 5px; background: rgba(var(--panel-rgb, 34, 38, 44), 1); border: 1px solid var(--line, #353b43); border-radius: var(--r-window, 8px); color: var(--fg, #e3e6ea); } .ds-row { position: relative; display: flex; align-items: center; gap: 5px; min-height: var(--row, 21px); padding: 0 5px; border-radius: var(--r-control, 3px); cursor: pointer; } .ds-row:hover { background: var(--raised, #2b3037); } .ds-row svg { color: var(--kind, var(--weak, #959da8)); } .ds-row .caret { transform: rotate(90deg); color: var(--weak, #959da8); } .ds-row.hit { background: var(--gold-soft, rgba(216, 168, 78, 0.16)); } .ds-indent { margin-inline-start: calc(5px + 7px - 1px); border-inline-start: 1px solid var(--line, #353b43); } .ds-row.live::after { content: \"\"; position: absolute; inset-inline-start: calc(5px + 16px - 5px); top: 50%; translate: 0 2px; width: 7px; height: 7px; border-radius: 50%; background: var(--ok, #4fc08d); box-shadow: 0 0 0 1.5px rgb(var(--panel-rgb, 34, 38, 44)); }"
+    },
+    {
+      "name": "Tag",
+      "kind": "chip",
+      "refersTo": "tag",
+      "description": "A folder's tag (prod, lab…) on its row and under a pane: gold on the gold wash, the One Accent Rule's named exception, since a tag is a fact about where you are.",
+      "html": "<span class=\"ds-tag\">prod</span><span class=\"ds-tag\">eu-west</span><span class=\"ds-tag\">+2</span>",
+      "css": ".ds-tag { display: inline-block; max-width: 80px; overflow: hidden; text-overflow: ellipsis; margin-inline-end: 5px; padding: 0 5px; border-radius: 3px; font: 400 var(--t-s, 11.5px)/16px \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; color: var(--gold, #d8a84e); background: var(--gold-soft, rgba(216, 168, 78, 0.16)); vertical-align: middle; }"
+    },
+    {
+      "name": "Status Bar",
+      "kind": "custom",
+      "refersTo": "status-bar",
+      "description": "Under a pane: user@host, the session's folder with its tags as gold chips, the state dot and uptime, then cipher and round trip, and at the end the broadcast marker and the terminal's size.",
+      "html": "<div class=\"ds-status\"><span><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"var(--k-ssh, #5c8df0)\" stroke-width=\"2\"><rect x=\"4\" y=\"10\" width=\"16\" height=\"11\" rx=\"2\"/><path d=\"M8 10V7a4 4 0 0 1 8 0v3\"/></svg>root@web-01:22</span><span>Production/Web<i class=\"ds-tag\">prod</i></span><span><i class=\"dot up\"></i>up 12 min</span><span class=\"grow\"></span><span class=\"broadcast\">broadcast</span><span>118 × 45</span></div>",
+      "css": ".ds-status { box-sizing: border-box; font: 400 var(--t-s, 11.5px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: flex; align-items: center; gap: 13px; height: var(--row, 21px); padding: 0 8px; width: 610px; color: var(--weak, #959da8); background: rgba(var(--panel-rgb, 34, 38, 44), 1); border-top: 1px solid var(--line, #353b43); white-space: nowrap; } .ds-status span { display: inline-flex; align-items: center; gap: 5px; } .ds-status .grow { flex: 1; } .ds-status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--weak, #959da8); } .ds-status .dot.up { background: var(--ok, #4fc08d); } .ds-status .broadcast { color: var(--gold, #d8a84e); } .ds-status .ds-tag { font-style: normal; max-width: 80px; overflow: hidden; text-overflow: ellipsis; padding: 0 5px; border-radius: 3px; line-height: 16px; color: var(--gold, #d8a84e); background: var(--gold-soft, rgba(216, 168, 78, 0.16)); }"
+    },
+    {
+      "name": "Kind Glyph",
+      "kind": "custom",
+      "refersTo": "button",
+      "description": "Start-screen ways to start: a 21px tile in the kind's hue on 15% of itself.",
+      "html": "<div class=\"ds-starts\"><button style=\"--kind: var(--k-ssh, #5c8df0)\"><span class=\"glyph\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M12 14h6v2h-6zM6.293 9.707 8.586 12l-2.293 2.293 1.414 1.414L11.414 12 7.707 8.293z\"/><path d=\"M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM4 18V6h16l.002 12H4z\"/></svg></span>SSH</button><button style=\"--kind: var(--k-rdp, #9c70e6)\"><span class=\"glyph\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M20 3H4c-1.103 0-2 .897-2 2v11c0 1.103.897 2 2 2h7v2H8v2h8v-2h-3v-2h7c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zM4 14V5h16l.002 9H4z\"/></svg></span>Remote desktop</button><button style=\"--kind: var(--k-browser, #dd6b9c)\"><span class=\"glyph\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm7.931 9h-2.764a14.67 14.67 0 0 0-1.792-6.243A8.013 8.013 0 0 1 19.931 11zM12.53 4.027c1.035 1.364 2.427 3.78 2.627 6.973H9.03c.139-2.596.994-5.028 2.451-6.974.172-.01.344-.026.519-.026.179 0 .354.016.53.027zm-3.842.7C7.704 6.618 7.136 8.762 7.03 11H4.069a8.013 8.013 0 0 1 4.619-6.273zM4.069 13h2.974c.136 2.379.665 4.478 1.556 6.23A8.01 8.01 0 0 1 4.069 13zm7.381 6.973C10.049 18.275 9.222 15.896 9.041 13h6.113c-.208 2.773-1.117 5.196-2.603 6.972-.182.012-.364.028-.551.028-.186 0-.367-.016-.55-.027zm4.011-.772c.955-1.794 1.538-3.901 1.691-6.201h2.778a8.005 8.005 0 0 1-4.469 6.201z\"/></svg></span>Website</button></div>",
+      "css": ".ds-starts { display: flex; flex-wrap: wrap; gap: 5px; } .ds-starts button { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; min-height: var(--control, 26px); padding: 5px 8px 5px 5px; border: 1px solid var(--line, #353b43); border-radius: var(--r-menu, 5px); background: var(--raised, #2b3037); color: var(--fg, #e3e6ea); cursor: pointer; } .ds-starts button:hover { background: var(--hover, #353b44); } .ds-starts .glyph { display: grid; place-items: center; width: var(--row, 21px); height: var(--row, 21px); border-radius: var(--r-control, 3px); color: var(--kind); background: color-mix(in srgb, var(--kind) 15%, transparent); }"
+    },
+    {
+      "name": "Tooltip",
+      "kind": "custom",
+      "refersTo": "kbd",
+      "description": "A tool button's title in the app's own panel, its shortcut in a key cap; hangs under what it explains and takes no pointer.",
+      "html": "<div style=\"display:inline-flex;flex-direction:column;align-items:flex-start;gap:5px\"><button class=\"ds-tool\" aria-describedby=\"t\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z\"/></svg></button><div class=\"ds-tooltip\" id=\"t\" role=\"tooltip\">Search sessions<kbd>Ctrl+Shift+F</kbd></div></div>",
+      "css": ".ds-tool { display: inline-flex; align-items: center; min-height: var(--control, 26px); padding: 3px 5px; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: transparent; color: var(--weak, #959da8); cursor: pointer; } .ds-tool:hover { background: var(--raised, #2b3037); } .ds-tool:focus-visible { outline: 1px solid var(--gold, #d8a84e); outline-offset: -1px; } .ds-tooltip { font: 400 var(--t-s, 11.5px)/var(--phi, 1.618) \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: flex; align-items: baseline; gap: 8px; max-width: 377px; padding: 3px 8px; background: rgba(var(--panel-rgb, 34, 38, 44), 0.98); border: 1px solid var(--line, #353b43); border-radius: var(--r-menu, 5px); box-shadow: var(--shadow-menu, 0 6px 20px rgba(0, 0, 0, 0.36)); color: var(--fg, #e3e6ea); white-space: pre-line; pointer-events: none; animation: ds-float-in 0.16s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)); } .ds-tooltip kbd { flex: none; display: inline-block; padding: 0 5px; border: 1px solid var(--line, #353b43); border-bottom-width: 2px; border-radius: 3px; background: rgba(var(--deep-rgb, 21, 24, 28), 1); color: var(--weak, #959da8); font-family: \"Recursive Variable\", \"Cascadia Mono\", Consolas, monospace; font-variation-settings: \"MONO\" 1, \"CASL\" 0; font-size: var(--t-s, 11.5px); } @keyframes ds-float-in { from { opacity: 0; translate: 0 -5px; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Anodized Rack",
+    "overview": "**Creative North Star: \"The Anodized Rack\"**\n\nxtermium is a rack of live connections. The chrome is cool titanium, a stack of blue-grey metals that get lighter the nearer they sit to the hand. Each kind of connection gets the colour titanium turns when anodized, the way cables on a patch panel are colour-coded: SSH is cobalt, RDP violet, serial chartreuse. One brushed-gold accent marks where you are and what you picked. Nothing else is coloured, so a glance at the rack tells you which kind of session each row and tab is, and a glance at the gold tells you where the keyboard is.\n\nThe feel is machined and quiet, as dense as a modern code editor: 13px system text, 26px controls, 21px rows, small precise corners. The sidebar (the session rack), the tab area with its panes, and the file panel are rounded panels floating a few pixels apart on a darker window. They are flat at rest and are told apart by tone, not by shadow. Only things that float above the work cast a shadow: menus, dialogs, the command palette, toasts.\n\nEvery proportion comes from the golden ratio (φ ≈ 1.618). Spacing steps along the Fibonacci scale, padding pairs go 1 : φ from vertical to horizontal, type steps by a quarter of φ, and dialogs are 377, 610 or 987px wide. Settings is a golden rectangle, 987 × 610. `ui/lib/scale.test.ts` enforces the spacing and type scales in `npm test`, so they are rules, not guidelines.",
+    "keyCharacteristics": [
+      "Titanium neutrals in six tonal steps, a dark theme by default and a full light theme.",
+      "One accent, Brushed Gold, which the user can change. It is never decoration.",
+      "Ten anodized hues, one per kind of connection, used only to say \"this is an SSH/RDP/… thing\".",
+      "Fibonacci spacing (1 2 3 5 8 13 21 34px) and five type sizes, both enforced by a test.",
+      "Rounded panels on a darker window. Flat at rest; shadows only on floating layers.",
+      "Icon-only tool buttons with tooltips. Boxicons SVGs, animated only on session rows and tabs.",
+      "Right-to-left ready: logical properties throughout, with flips for chevrons, menus and carets.",
+      ""
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Gold says \"you are here\" or \"you picked this\", and nothing else. Two exceptions: the fill of a dialog's single primary button, and a folder's tag (`.tag`, `prod`, `lab`…), which is a fact about where you are and shows on the folder's row and under a pane. No gold headings, icons or decorative strokes.",
+        "section": "colors"
+      },
+      {
+        "name": "The Cable Colour Rule",
+        "body": "A kind hue identifies a kind of connection and nothing else, and nothing else takes its place: a session's icon is always in its kind's hue, whatever it is marked with. State (connected, waiting, failed) is always `ok` / `warn` / `error`, never a kind hue.",
+        "section": "colors"
+      },
+      {
+        "name": "The See-Through Chrome Rule",
+        "body": "Chrome backgrounds are written `rgba(var(--panel-rgb), var(--chrome-alpha))` (or the `window`/`bg`/`deep` triplet), never as a hex. `--chrome-alpha` drops below 1 while a window effect is on, and the desktop shows through.",
+        "section": "colors"
+      },
+      {
+        "name": "The Five Sizes Rule",
+        "body": "Every `font-size` is a type token (`var(--t-s)` … `var(--t-xxl)`), `inherit`, an `em`, or a `clamp()`. A raw `px` size fails `npm test`.",
+        "section": "typography"
+      },
+      {
+        "name": "The Golden Line Rule",
+        "body": "Prose and text areas set `line-height: var(--phi)`. Dense UI text stays at 1.4.",
+        "section": "typography"
+      },
+      {
+        "name": "The Fibonacci Rule",
+        "body": "Padding, margin, gap, inset and border-radius values are Fibonacci pixels. A stray 4px or 12px fails `npm test`.",
+        "section": "layout"
+      },
+      {
+        "name": "The Derived Value Rule",
+        "body": "A value worked out from others is written as `calc(…)` so it reads as derived: `calc(8px + 16px + 5px)` is a field's text start past its icon, and `calc(var(--r-menu) - 3px)` is a menu item's corner.",
+        "section": "layout"
+      },
+      {
+        "name": "The Float-Only Shadow Rule",
+        "body": "A surface casts a shadow only if it floats over the work and goes away again, and takes it from one of the three tokens. Panels, tabs, rows and buttons never do.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Nested Curve Rule",
+        "body": "A rounded thing inside another keeps the same curve: its radius is the outer one less the room between them, written as `calc()` (a menu item is `calc(var(--r-menu) - 3px)`, a segmented button `calc(var(--r-control) - 1px)`).",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do use only Fibonacci pixels for spacing and radii (1 2 3 5 8 13 21 34), with padding in 1 : φ pairs (`3px 8px`, `5px 8px`, `8px 13px`).",
+      "Do set every text size from the type tokens (`--t-s --t --t-l --t-xl --t-xxl`).",
+      "Do size things with `--row` (21px), `--control` (26px) and `--bar` (34px), and write any derived value as `calc(…)`.",
+      "Do keep gold for focus, selection, toggles that are on, links, drop targets and the one primary action. Read it as `var(--gold)`, since the user can change it.",
+      "Do colour a session by its kind hue (icon, tab connector, glyph tile) through `--kind`.",
+      "Do paint chrome as `rgba(var(--…-rgb), var(--chrome-alpha))` so window effects show through.",
+      "Do end a menu with its destructive item (`.danger`) and start groups with `.sep`.",
+      "Do offer Undo instead of a question when the thing can be put back, and ask (with a danger button) only when it can't: a running connection, a folder of sessions, a restore.",
+      "Do focus the safe answer when yes can't be undone or is a security call (Reject on a new host key, Cancel on a delete or restore, Keep editing on discard), so Enter never does the irreversible thing; an ordinary yes (Close tab, which Reopen can undo) keeps the focus.",
+      "Do make tool buttons icon-only with a tooltip.",
+      "Do keep motion to state and continuity: 0.1–0.2s, arrivals on `--ease-out`, a new floating layer through `float-in`, exits faster than entrances. CSS motion stops under `prefers-reduced-motion` through `ui/app.css`; a Svelte transition must check it itself.",
+      "Do use logical properties (`inset-inline-*`, `margin-inline-*`) so right-to-left mirrors."
+    ],
+    "donts": [
+      "Don't use off-scale spacing (4px, 6px, 10px, 12px, 16px) or a raw `font-size` in px; the scale test fails on them.",
+      "Don't put a shadow on a resting panel, tab, row or button, or write a new shadow value for a floating layer: use `--shadow-float`, `--shadow-menu` or `--shadow-dialog`.",
+      "Don't use gold for headings, icons, illustration or large fills other than the primary button.",
+      "Don't use a kind hue to show state, or a status colour to mean a kind of connection.",
+      "Don't let a user's colour recolour a session's icon: marks go on names (`.tinted`) and tab lines, and accent presets stay off the kind hues and the error red.",
+      "Don't hard-code the accent's hex, or the chrome as an opaque hex.",
+      "Don't animate the interface's own icons. Only session and folder icons move, and only on hover.",
+      "Don't add big padding or wide gaps. The densest comfortable layout is the house style.",
+      "Don't use the spectrum gradient anywhere but the start screen's banner, where it plays once."
+    ]
+  }
+}

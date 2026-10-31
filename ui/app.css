@@ -1,0 +1,816 @@
+/*
+  xtermium: "titanium". Cool metal greys for the chrome, one gold accent, and the colours
+  titanium takes when anodized, one per connection type (like cable colours on a patch panel).
+  One type family, Recursive: sans for the interface, its mono axis for the ASCII banner and
+  code. Dense like a modern code editor: 13px system text, 26px controls, small rounded
+  corners. The sidebar, the tabs and the file panel float as rounded panels on a darker
+  window, a few pixels apart.
+
+  Proportions follow the golden ratio, φ ≈ 1.618:
+  - spacing is on the Fibonacci scale, 1 2 3 5 8 13 21 34 px, each step about φ times the
+    last (ui/lib/scale.test.ts holds every stylesheet to it); padding pairs go 1 : φ, vertical
+    to horizontal (5px 8px, 8px 13px);
+  - type steps by a quarter of φ from 13px: 11.5, 13, 14.5, 16.5, 18.5 and 21 (13 × φ);
+  - a list row and a line of prose are 21px tall (13 × φ), a bar 34px (21 × φ);
+  - corners are 3, 5 and 8px, and a rounded thing inside another keeps the same curve: its
+    radius is the outer one less the room between them;
+  - dialogs are 377, 610 or 987px wide; Settings is a golden rectangle, 987 × 610.
+*/
+@import "@fontsource-variable/recursive/full.css";
+
+:root {
+  --ui: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Ubuntu", sans-serif;
+  --mono: "Recursive Variable", "Cascadia Mono", Consolas, monospace;
+  --phi: 1.618;
+  --r-window: 8px;
+  --r-menu: 5px;
+  --r-control: 3px;
+  --gap: 5px;
+  --row: 21px;
+  --control: 26px;
+  --bar: 34px;
+  --t-s: 11.5px;
+  --t: 13px;
+  --t-l: 14.5px;
+  --t-xl: 16.5px;
+  --t-xxl: 18.5px;
+  /* Opacity of the chrome; < 1 only while a window effect is on. */
+  --chrome-alpha: 1;
+  /* Only what floats over the work and goes away again casts a shadow: a bar over a view, a
+     menu or toast, a dialog or the palette. Panels, tabs, rows and buttons stay flat. */
+  --shadow-float: 0 4px 14px rgba(0, 0, 0, 0.3);
+  --shadow-menu: 0 6px 20px rgba(0, 0, 0, 0.36);
+  --shadow-dialog: 0 8px 28px rgba(0, 0, 0, 0.4);
+  /* The lightness a marked name's colour is held to (`.tinted`), so any mark reads on the theme
+     while keeping its hue and strength. */
+  --tint-lo: 0.72;
+  --tint-hi: 1;
+  /* Arrivals decelerate hard: fast to where they land, then settle. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: dark;
+  --window-rgb: 16, 18, 21;
+  --deep-rgb: 21, 24, 28;
+  --bg-rgb: 28, 32, 37;
+  --panel-rgb: 34, 38, 44;
+  --raised: #2b3037;
+  --hover: #353b44;
+  --line: #353b43;
+  --fg: #e3e6ea;
+  --weak: #959da8;
+  --gold: #d8a84e;
+  --gold-ink: #1d1608;
+  --gold-soft: rgba(216, 168, 78, 0.16);
+  --error: #ec6a6a;
+  --error-ink: #200a0a;
+  --ok: #4fc08d;
+  --warn: #e0b04a;
+  /* anodized titanium, one per kind of connection */
+  --k-ssh: #5c8df0;
+  --k-shell: #33b8a6;
+  --k-serial: #b5c14a;
+  --k-rdp: #9c70e6;
+  --k-browser: #dd6b9c;
+  --k-telnet: #d98a4a;
+  --k-winrm: #4aa8d9;
+  --k-vnc: #c46fd1;
+  --k-kvm: #8fa3b8;
+  --k-agent: #ec6a6a;
+  --fwd: var(--k-ssh);
+  --back: var(--k-shell);
+  --broadcast: var(--gold);
+  --spectrum: linear-gradient(100deg, #c98a45 0%, #d8a84e 16%, #dd6b9c 38%, #9c70e6 58%, #5c8df0 78%, #33b8a6 100%);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --window-rgb: 216, 220, 226;
+  --deep-rgb: 255, 255, 255;
+  --bg-rgb: 238, 240, 243;
+  --panel-rgb: 229, 232, 236;
+  --raised: #d9dde3;
+  --hover: #cdd2d9;
+  --line: #c9ced6;
+  --fg: #1d2127;
+  --weak: #5d6571;
+  /* gold, error and ok are 13px text (links, tags, states), so each holds 4.5:1 on the panel */
+  --gold: #85590a;
+  --gold-ink: #ffffff;
+  --gold-soft: rgba(133, 89, 10, 0.14);
+  --error: #b42a33;
+  --error-ink: #ffffff;
+  --tint-lo: 0;
+  --tint-hi: 0.48;
+  --ok: #1b6a44;
+  --warn: #8a5d00;
+  --k-ssh: #2f62d0;
+  --k-shell: #138a7b;
+  --k-serial: #6f7d0c;
+  --k-rdp: #7444c8;
+  --k-browser: #b83f75;
+  --k-telnet: #a65a1c;
+  --k-winrm: #1f6f9c;
+  --k-vnc: #8d3a9c;
+  --k-kvm: #4f6378;
+  --k-agent: #b8443a;
+  --spectrum: linear-gradient(100deg, #9a5f1f 0%, #946410 16%, #b83f75 38%, #7444c8 58%, #2f62d0 78%, #138a7b 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font: 400 var(--t)/1.4 var(--ui);
+  color: var(--fg);
+  background: rgba(var(--window-rgb), var(--chrome-alpha));
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.mono,
+code,
+kbd,
+pre {
+  font-family: var(--mono);
+  font-variation-settings: "MONO" 1, "CASL" 0;
+}
+
+kbd {
+  display: inline-block;
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  background: rgba(var(--deep-rgb), 1);
+  font-size: var(--t-s);
+  line-height: var(--phi);
+}
+
+code {
+  font-size: 0.92em;
+}
+
+/* a folder's tag (prod, lab…) on its row and under a pane: gold, the One Accent Rule's named
+   exception, since a tag is a fact about where you are */
+.tag {
+  flex: none;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 5px;
+  border-radius: 3px;
+  font-size: var(--t-s);
+  line-height: 16px;
+  color: var(--gold);
+  background: var(--gold-soft);
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="search"],
+input[type="email"],
+input:not([type]),
+textarea,
+select {
+  background: rgba(var(--deep-rgb), 1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-control);
+  padding: 3px 8px;
+  min-height: var(--control);
+  outline: none;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--gold);
+}
+
+/* An example in an empty field: dimmer than what's typed, still readable (the engine's own grey
+   isn't, on the wells). */
+::placeholder {
+  color: var(--weak);
+  opacity: 1;
+}
+
+/* Our own chevron, set in from the edge like the text (the system's sits on the border). */
+select {
+  appearance: none;
+  padding-inline-end: 21px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238a96a3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+[dir="rtl"] select {
+  background-position: left 8px center;
+}
+select option {
+  background: rgb(var(--panel-rgb));
+}
+
+/* Text that names another place (a setting, a dialog) and goes there. */
+button.link {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gold);
+  font: inherit;
+  text-align: inherit;
+}
+button.link:hover:not(:disabled) {
+  background: none;
+  text-decoration: underline;
+}
+/* a whole sentence that links: it reads as text, and shows it goes somewhere */
+button.link.quiet {
+  color: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+button.link.quiet:hover:not(:disabled) {
+  color: var(--gold);
+}
+
+input[type="number"] {
+  width: 96px;
+}
+
+/* dialogs keep their shape: a box of text doesn't stretch them */
+textarea {
+  resize: none;
+  line-height: var(--phi);
+}
+
+/* a value, placeholder or choice too long for its field ends in … */
+input,
+select {
+  text-overflow: ellipsis;
+}
+
+/* prose: golden lines, as tall as a list row */
+p {
+  line-height: var(--phi);
+}
+
+input[type="file"] {
+  padding: 5px 0;
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: var(--control);
+  padding: 3px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--r-control);
+  background: var(--raised);
+  font-weight: 400;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+button:hover:not(:disabled) {
+  background: var(--hover);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* toggles and picked options */
+button.on,
+button.selected {
+  background: var(--gold-soft);
+  border-color: color-mix(in srgb, var(--gold) 55%, transparent);
+  color: var(--gold);
+}
+
+button.flat {
+  background: transparent;
+}
+
+button.flat:hover:not(:disabled) {
+  background: var(--raised);
+}
+
+button.icon-only {
+  padding: 3px 5px;
+}
+
+button.primary {
+  background: var(--gold);
+  color: var(--gold-ink);
+}
+
+button.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--gold) 86%, white);
+}
+
+/* The main button of a question whose yes ends or deletes something. */
+button.primary.danger {
+  background: var(--error);
+  color: var(--error-ink);
+}
+
+button.primary.danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--error) 86%, white);
+}
+
+/* A name marked with a colour (a session's or its folder's, `--tint`), its lightness held where
+   it reads on the theme. The icon beside it keeps its kind's colour. */
+.tinted {
+  color: oklch(from var(--tint) clamp(var(--tint-lo), l, var(--tint-hi)) c h);
+}
+
+/* A kind of connection at a glance: its icon in its hue, on a tile of the same hue. */
+.glyph {
+  display: grid;
+  place-items: center;
+  width: var(--row);
+  height: var(--row);
+  flex: none;
+  border-radius: var(--r-control);
+  color: var(--kind);
+  background: color-mix(in srgb, var(--kind) 15%, transparent);
+}
+
+:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: -1px;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--gold);
+  margin: 0;
+}
+
+input[type="range"] {
+  accent-color: var(--gold);
+  width: 200px;
+}
+
+label.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.weak {
+  color: var(--weak);
+}
+
+.error {
+  color: var(--error);
+}
+
+.warn {
+  color: var(--warn);
+}
+
+.ok {
+  color: var(--ok);
+}
+
+h2 {
+  font-size: var(--t-l);
+  font-weight: 600;
+  margin: 0;
+}
+
+h3 {
+  font-size: var(--t);
+  font-weight: 600;
+  margin: 5px 0 0;
+}
+
+/* label | field grid used by forms. Labels take what the longest needs, up to 233px; fields
+   the rest, and no more: a long option in a list can't push the dialog wider than it is. */
+.form {
+  display: grid;
+  grid-template-columns: fit-content(233px) minmax(0, 1fr);
+  gap: 8px 13px;
+  align-items: center;
+}
+.form > * {
+  min-width: 0;
+}
+
+/* labels: every other child, not counting a field's (invisible) list of suggestions; a long one
+   ends in … */
+.form > span:nth-child(odd of :not(datalist)) {
+  color: var(--weak);
+  min-width: 120px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* a label beside a column of things (or a box of text) reads with its first line, not its middle */
+.form > :is(.col, .picture, textarea, .wrap),
+.form > span:has(+ :is(.col, .picture, textarea, .wrap)) {
+  align-self: first baseline;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--raised);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--hover);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.menu {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 3px;
+  gap: 0;
+  min-width: 190px;
+  background: rgba(var(--panel-rgb), 0.98);
+  border: 1px solid var(--line);
+  border-radius: var(--r-menu);
+  box-shadow: var(--shadow-menu);
+}
+
+/* Code, keys and ASCII art run left to right in any interface language. */
+pre,
+code,
+kbd {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* right to left, menus open leftwards from the pointer */
+[dir="rtl"] .menu {
+  translate: -100% 0;
+}
+
+.menu button {
+  min-height: var(--control);
+  padding: 3px 8px;
+  /* the menu's curve, less its padding */
+  border-radius: calc(var(--r-menu) - 3px);
+  background: transparent;
+  justify-content: flex-start;
+}
+
+.menu button:hover {
+  background: var(--raised);
+}
+
+/* A line before a group of a menu's items (`.sep`), or its destructive one, which comes last and
+   turns red when pointed at (`.danger`). */
+.menu > :is(.sep, .danger):not(:first-child) {
+  position: relative;
+  margin-top: 5px;
+}
+.menu > :is(.sep, .danger):not(:first-child)::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  inset-inline: 8px;
+  border-top: 1px solid var(--line);
+}
+.menu > .danger:hover:not(:disabled) {
+  color: var(--error);
+  background: color-mix(in srgb, var(--error) 14%, transparent);
+}
+
+/* In a menu with icons, an item without one lines its text up with the others (icon + gap). */
+.menu:has(> button > .icon) > button:not(:has(.icon)) {
+  padding-inline-start: calc(8px + 18px + 5px);
+}
+
+/* An item's shortcut, at its end. */
+.menu button > .keys {
+  margin-inline-start: auto;
+  padding-inline-start: 21px;
+  color: var(--weak);
+}
+
+/* A tooltip (ui/lib/tooltip.ts): an element's title in the app's own panel, its shortcut in key
+   caps. It hangs under what it explains, above when there's no room, and takes no pointer. */
+.tooltip {
+  position: fixed;
+  z-index: 100;
+  max-width: 377px;
+  padding: 3px 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  background: rgba(var(--panel-rgb), 0.98);
+  border: 1px solid var(--line);
+  border-radius: var(--r-menu);
+  box-shadow: var(--shadow-menu);
+  font-size: var(--t-s);
+  line-height: var(--phi);
+  white-space: pre-line;
+  pointer-events: none;
+}
+.tooltip kbd {
+  flex: none;
+  color: var(--weak);
+}
+
+/* colour picks: a round swatch per colour, then the system picker */
+.swatch {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--c);
+  border: 2px solid transparent;
+}
+
+.swatch:hover:not(:disabled) {
+  background: var(--c);
+  filter: brightness(1.15);
+}
+
+/* the picked one keeps its colour (not the gold wash of other picked buttons), ringed */
+.swatch.selected {
+  background: var(--c);
+  border-color: var(--fg);
+}
+
+input[type="color"] {
+  width: 26px;
+  height: 21px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+progress {
+  accent-color: var(--gold);
+  height: 4px;
+}
+
+/* What floats over the work arrives: it fades in from a few pixels short of where it hangs
+   (`--from`: below by default, negative for things hanging from the top). Menus don't; they
+   follow the pointer and the keyboard, and any delay there reads as lag. */
+@keyframes float-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--from, 5px);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Broadcast: the outline on every terminal that gets the keys. `data-outline` is the style
+   (src/settings.rs OUTLINES), `--oc` its colour. */
+.outline {
+  position: relative;
+}
+.outline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: var(--r-control);
+  box-shadow: inset 0 0 0 2px var(--oc);
+}
+.outline[data-outline="breathe"]::after {
+  animation: outline-breathe 2.6s ease-in-out infinite;
+}
+.outline[data-outline="fade"]::after {
+  animation: outline-fade 2.2s ease-in-out infinite;
+}
+/* ring, march and rainbow paint a 2px border through a mask */
+.outline:is([data-outline="ring"], [data-outline="march"], [data-outline="rainbow"])::after {
+  box-shadow: none;
+  padding: 2px;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+.outline[data-outline="ring"]::after {
+  background: conic-gradient(from var(--outline-turn), color-mix(in srgb, var(--oc) 30%, transparent) 0 55%, var(--oc) 85%, #fff 92%, color-mix(in srgb, var(--oc) 30%, transparent) 100%);
+  animation: outline-turn 3s linear infinite;
+}
+.outline[data-outline="rainbow"]::after {
+  background: conic-gradient(from var(--outline-turn), #ff4d6d, #ffb000, #3dff8a, #22d3ee, #a78bfa, #ff4d6d);
+  filter: saturate(1.5) drop-shadow(0 0 4px rgb(255 255 255 / 0.45));
+  animation: outline-turn 3s linear infinite;
+}
+.outline[data-outline="march"]::after {
+  background: repeating-linear-gradient(45deg, var(--oc) 0 6px, transparent 6px 12px);
+  background-size: 16.97px 16.97px;
+  animation: outline-march 0.8s linear infinite;
+}
+@property --outline-turn {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes outline-turn {
+  to {
+    --outline-turn: 360deg;
+  }
+}
+@keyframes outline-breathe {
+  50% {
+    box-shadow:
+      inset 0 0 0 2px var(--oc),
+      inset 0 0 16px color-mix(in srgb, var(--oc) 70%, transparent);
+  }
+}
+@keyframes outline-fade {
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes outline-march {
+  to {
+    background-position: 16.97px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .outline::after {
+    animation: none !important;
+  }
+}
+.outline[data-outline="off"]::after {
+  display: none;
+}
+
+/* Built-in icons' moving parts (assets/icons, classes a-*): they play while the pointer is over
+   a session's or folder's row or tab (SessionIcon.svelte), never on the interface's own buttons,
+   and not when the system asks for less motion. */
+.icon [class^="a-"] {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.icon .a-flicker {
+  transform-origin: 50% 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :hover > .session-icon:not(.still) .a-blink {
+    animation: a-blink 1s steps(1) infinite;
+  }
+  :hover > .session-icon:not(.still) .a-wave {
+    animation: a-wave 1.2s ease-in-out infinite;
+  }
+  :hover > .session-icon:not(.still) .a-flow {
+    stroke-dasharray: 2.5 1.5;
+    animation: a-flow 0.6s linear infinite;
+  }
+  :hover > .session-icon:not(.still) .a-trace {
+    stroke-dasharray: 32;
+    animation: a-trace 1.4s ease-out infinite;
+  }
+  :hover > .session-icon:not(.still) .a-spin {
+    animation: a-spin 2.4s linear infinite;
+  }
+  :hover > .session-icon:not(.still) .a-flicker {
+    animation: a-flicker 0.5s ease-in-out infinite;
+  }
+  :hover > .session-icon:not(.still) .a-pulse {
+    animation: a-pulse 1s ease-in-out infinite;
+  }
+  :hover > .session-icon:not(.still) .a-turn {
+    animation: a-turn 1.2s ease-in-out infinite;
+  }
+  :hover > .session-icon:not(.still) .a-bob {
+    animation: a-bob 0.9s ease-in-out infinite;
+  }
+  :hover > .session-icon:not(.still) .a-drift {
+    animation: a-drift 2s ease-in-out infinite;
+  }
+  :hover > .session-icon:not(.still) .a-shift {
+    animation: a-shift 0.8s ease-in-out infinite;
+  }
+}
+@keyframes a-blink {
+  50% {
+    opacity: 0.15;
+  }
+}
+@keyframes a-wave {
+  50% {
+    opacity: 0.2;
+  }
+}
+@keyframes a-flow {
+  to {
+    stroke-dashoffset: -8;
+  }
+}
+@keyframes a-trace {
+  from {
+    stroke-dashoffset: 32;
+  }
+}
+@keyframes a-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes a-flicker {
+  25% {
+    transform: scale(0.9, 1.12);
+  }
+  50% {
+    transform: scale(1.08, 0.94);
+  }
+  75% {
+    transform: scale(0.95, 1.06);
+  }
+}
+@keyframes a-pulse {
+  50% {
+    transform: scale(0.82);
+  }
+}
+@keyframes a-turn {
+  50% {
+    transform: rotate(-35deg);
+  }
+}
+@keyframes a-bob {
+  50% {
+    transform: translateY(-1.5px);
+  }
+}
+@keyframes a-drift {
+  50% {
+    transform: translateX(1.5px);
+  }
+}
+@keyframes a-shift {
+  50% {
+    transform: translateX(2px);
+  }
+}

@@ -1,0 +1,11 @@
+# Advisories reviewed and accepted; `cargo audit` fails on anything new.
+[advisories]
+ignore = [
+    # rsa "Marvin" timing side channel. No fixed release exists. Reached through russh
+    # (and IronRDP in rdp/); xtermium only signs once per SSH login with the user's own key,
+    # far from the volume of timed private-key operations the attack needs.
+    "RUSTSEC-2023-0071",
+    # lru: LruCache::pop() is unsound only if a key's Drop panics. wezterm-term's only cache
+    # is keyed by [u8; 32] image hashes, which cannot panic on drop. wezterm pins lru 0.16.
+    "RUSTSEC-2026-0253",
+]

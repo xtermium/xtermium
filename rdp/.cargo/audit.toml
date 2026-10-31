@@ -1,0 +1,7 @@
+# Advisories reviewed and accepted; `cargo audit` fails on anything new.
+[advisories]
+ignore = [
+    # rsa "Marvin" timing side channel, via IronRDP's CredSSP/picky. No fixed release exists;
+    # the helper performs a handful of RSA operations per login.
+    "RUSTSEC-2023-0071",
+]

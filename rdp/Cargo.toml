@@ -1,0 +1,33 @@
+[package]
+name = "xtermium-rdp"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+authors = ["Sotirios Roussis"]
+license = "Apache-2.0"
+homepage = "https://xtermium.com"
+repository = "https://github.com/xtermium/xtermium"
+description = "RDP helper process for xtermium (separate lockfile: its crypto stack conflicts with russh)"
+
+# Own workspace root so it keeps its own Cargo.lock.
+[workspace]
+
+[dependencies]
+anyhow = "1"
+ironrdp = { version = "0.17", features = ["connector", "session", "graphics", "input", "pdu", "dvc", "displaycontrol"] }
+ironrdp-tokio = "0.10"
+ironrdp-tls = { version = "0.2", features = ["rustls-ring"] }
+tokio = { version = "1", features = ["rt", "net", "io-util", "io-std", "sync", "macros", "time"] }
+# TCP keepalive, so a connection that died silently is noticed (tokio's sockets don't set it).
+socket2 = "0.6"
+
+# Dependencies do the heavy lifting (zlib, base64, image and RDP decoding, the VT parser,
+# crypto): keep them optimized in dev builds too, or graphics-heavy sessions crawl.
+[profile.dev.package."*"]
+opt-level = 3
+
+# ironrdp-session 0.11 shears xrdp's picture (bitmaps padded wider than their rectangle, IronRDP
+# #1251); patches/ironrdp-session is 0.11.0 with the one fix (fast_path.rs `fit_rows`).
+# ponytail: drop it once the ironrdp crate takes ironrdp-session 0.12 or later.
+[patch.crates-io]
+ironrdp-session = { path = "patches/ironrdp-session" }
