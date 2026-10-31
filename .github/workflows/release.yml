@@ -111,13 +111,14 @@ jobs:
           args: ${{ matrix.args }}
 
       # The portable build, a download beside the installers (Scoop unpacks the MSI instead): the
-      # files the MSI puts in its folder, without an installer. A missing one fails the step.
+      # files the MSI puts in its folder, without an installer. A missing one fails the step. The
+      # MSVC build links the WebView2 loader into xtermium.exe, so there is no WebView2Loader.dll.
       - if: runner.os == 'Windows'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.tauri.outputs.appVersion }}
         run: |
           $zip = "xtermium_${env:VERSION}_x64-portable.zip"
-          $files = 'xtermium.exe', 'xtermium-rdp.exe', 'WebView2Loader.dll', 'LICENSE', 'NOTICE', 'THIRD-PARTY-NOTICES.txt'
+          $files = 'xtermium.exe', 'xtermium-rdp.exe', 'LICENSE', 'NOTICE', 'THIRD-PARTY-NOTICES.txt'
           Compress-Archive -LiteralPath ($files | ForEach-Object { "target/release/$_" }) -DestinationPath $zip
           gh release upload "v$env:VERSION" $zip
