@@ -1284,22 +1284,35 @@ impl Store {
         }
     }
 
-    /// Gives this workspace, its sessions and its folders ids of their own (16 random bytes in
-    /// hex): one without, or with one already `seen` (a copy's), gets a new one. True if one
-    /// changed. A session new in the UI comes with its id (api.ts `newSession`), and keeps it.
-    pub fn ids(&mut self, seen: &mut std::collections::HashSet<String>) -> bool {
+    /// Gives this workspace, its sessions and its folders ids of their own (32 hex digits): one
+    /// without, or with one already `seen` (a copy's), gets a new one. True if one changed. A
+    /// session new in the UI comes with its id (api.ts `newSession`), and keeps it.
+    ///
+    /// `named`: the workspace's name, when the whole store is given its ids (`own_ids`). A new id
+    /// is then worked out from what the thing is (the workspace, its folder and name, which of
+    /// several alike), not drawn: two computers that sync, each giving ids to the same store from
+    /// before there were any, give the same ones, so neither sees a change the other didn't make
+    /// (sync.rs would call that a conflict and ask which copy to keep). Without it, or when that
+    /// id is taken, the id is random.
+    pub fn ids(&mut self, seen: &mut std::collections::HashSet<String>, named: Option<&str>) -> bool {
+        use sha2::{Digest, Sha256};
         let mut changed = false;
-        let mut own = |id: &mut String| {
+        let mut nth = std::collections::HashMap::<String, u32>::new();
+        let mut own = |id: &mut String, what: String| {
             let ok = !id.is_empty() && id.len() <= 64 && id.chars().all(|c| c.is_ascii_alphanumeric());
-            if !ok || !seen.insert(id.clone()) {
-                *id = crate::vault::hex(&crate::vault::random::<16>());
-                seen.insert(id.clone());
-                changed = true;
+            if ok && seen.insert(id.clone()) {
+                return;
             }
+            let n = nth.entry(what.clone()).or_default();
+            *n += 1;
+            let worked = named.map(|ws| vault::hex(&Sha256::digest(format!("xtermium id\0{ws}\0{what}\0{n}").as_bytes())[..16]));
+            *id = worked.filter(|w| !seen.contains(w)).unwrap_or_else(|| vault::hex(&vault::random::<16>()));
+            seen.insert(id.clone());
+            changed = true;
         };
-        own(&mut self.id);
-        self.sessions.iter_mut().for_each(|s| own(&mut s.id));
-        self.folders.iter_mut().for_each(|f| own(&mut f.id));
+        own(&mut self.id, "workspace".into());
+        self.sessions.iter_mut().for_each(|s| own(&mut s.id, format!("session\0{}\0{}", s.folder, s.name)));
+        self.folders.iter_mut().for_each(|f| own(&mut f.id, format!("folder\0{}", f.path)));
         changed
     }
 
@@ -1307,9 +1320,9 @@ impl Store {
     /// cloned or synced workspace's) get new ones. Returns whether one changed.
     pub fn own_ids(&mut self) -> bool {
         let mut seen = Default::default();
-        let mut changed = self.ids(&mut seen);
+        let mut changed = self.ids(&mut seen, Some(""));
         for w in &mut self.workspaces {
-            changed |= w.data.ids(&mut seen);
+            changed |= w.data.ids(&mut seen, Some(&w.name));
         }
         changed
     }
@@ -1731,7 +1744,12 @@ mod tests {
         let s = |name: &str| Session::new(name, "Prod", Kind::Shell { program: Default::default(), dir: Default::default() });
         let mut all = Store { sessions: vec![s("a"), s("a")], folders: vec![Folder { path: "Prod".into(), ..Default::default() }], ..Default::default() };
         all.workspaces.push(Workspace { name: "Work".into(), data: Store { sessions: vec![s("a")], ..Default::default() } });
+        // Two computers holding the same store from before there were ids give the same ones, so
+        // sync sees no change on either that the other didn't make.
+        let mut other = all.clone();
         assert!(all.own_ids());
+        other.own_ids();
+        assert_eq!(toml::to_string(&all).unwrap(), toml::to_string(&other).unwrap());
         let ids = |st: &Store| -> Vec<String> {
             let of = |d: &Store| [d.id.clone()].into_iter().chain(d.sessions.iter().map(|s| s.id.clone())).chain(d.folders.iter().map(|f| f.id.clone())).collect::<Vec<_>>();
             of(st).into_iter().chain(st.workspaces.iter().flat_map(|w| of(&w.data))).collect()

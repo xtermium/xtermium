@@ -169,6 +169,10 @@ export function glRenderer(canvas: HTMLCanvasElement, restored: () => void): Ren
   canvas.addEventListener("webglcontextlost", (e) => {
     e.preventDefault();
     lost = true;
+    // Put to sleep and woken again before this loss arrived (a tab out of the panes for a
+    // moment): `wake` saw nothing to bring back then, so it's brought back now. A loss the
+    // browser made itself can't be undone this way, and comes back by itself.
+    if (!asleep) setTimeout(() => lost && !asleep && lose?.restoreContext());
   });
   canvas.addEventListener("webglcontextrestored", () => {
     lost = false;

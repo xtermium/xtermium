@@ -2100,7 +2100,9 @@ fn run_argv(
     if let Some(p) = argv.first_mut().filter(|p| p.starts_with('~')) {
         *p = crate::paths::expand(p).display().to_string();
     }
-    let argv = through_cmd(argv, &std::env::var("PATH").unwrap_or_default());
+    // The PATH the program will run with: the session's own if it sets one, else the app's.
+    let path = env.iter().find(|(k, _)| k.eq_ignore_ascii_case("PATH")).map(|(_, v)| v.into()).or_else(|| std::env::var_os("PATH")).unwrap_or_default();
+    let (argv, beside) = through_cmd(argv, &path);
     let mut parts = argv.iter();
     let name = parts.next();
     let mut cmd = match name {
@@ -2115,6 +2117,14 @@ fn run_argv(
     }
     for (k, v) in env {
         cmd.env(k, v);
+    }
+    // cmd looks the `.cmd` up again by its name: its folder goes first on the PATH, plainly, so
+    // cmd finds the very file found here, also when the PATH names that folder in quotes (cmd
+    // doesn't read such an entry).
+    if let Some(dir) = beside
+        && let Ok(joined) = std::env::join_paths(std::iter::once(dir).chain(std::env::split_paths(&path)))
+    {
+        cmd.env("PATH", joined);
     }
     if !dir.is_empty() {
         cmd.cwd(folder);
@@ -2137,28 +2147,30 @@ fn run_argv(
     })
 }
 
-/// On Windows a program npm installs is a `.cmd` file (`claude.cmd`, `codex.cmd`), which only
-/// cmd.exe runs: Windows itself looks for an `.exe` of that name and finds none. A command whose
-/// program is such a file on `path`, and no `.exe` or `.com` earlier on it, goes through
-/// `cmd /c`. Anything else, and every other system, runs as it is.
-fn through_cmd(argv: Vec<String>, path: &str) -> Vec<String> {
+/// On Windows, finds a program named without a path on `path` the way the system does, so the
+/// pty library doesn't: that one takes a file of the exact name first, and npm puts a script
+/// for sh named `claude` beside `claude.cmd` ("not a valid Win32 application"). The first folder
+/// with an `.exe` or `.com` of the name gives that file's full path. The first with a `.cmd` or
+/// `.bat` (what npm installs, which only cmd.exe runs) gives the command through `cmd /c` and
+/// that folder, to go first on the program's PATH (`run_argv`). Folders are read as
+/// `split_paths` reads them, one in quotes too. Anything else, and every other system, runs as
+/// it is.
+fn through_cmd(mut argv: Vec<String>, path: &std::ffi::OsStr) -> (Vec<String>, Option<std::path::PathBuf>) {
     if !cfg!(windows) {
-        return argv;
+        return (argv, None);
     }
-    let Some(name) = argv.first().filter(|n| !n.contains(['\\', '/', '.'])) else { return argv };
-    // The entries as Windows reads them (one may be in quotes), not split on `;` by hand: a
-    // quoted npm folder was missed here, and the pty library, which does read it, then started
-    // the script for sh that npm puts beside the `.cmd` ("not a valid Win32 application").
+    let Some(name) = argv.first().filter(|n| !n.contains(['\\', '/', '.'])).cloned() else { return (argv, None) };
     for dir in std::env::split_paths(path).filter(|d| !d.as_os_str().is_empty()) {
-        let found = |ext: &str| dir.join(format!("{name}{ext}")).is_file();
-        if found(".exe") || found(".com") {
-            return argv;
+        let found = |ext: &str| Some(dir.join(format!("{name}{ext}"))).filter(|f| f.is_file());
+        if let Some(exe) = found(".exe").or_else(|| found(".com")) {
+            argv[0] = exe.display().to_string();
+            return (argv, None);
         }
-        if found(".cmd") || found(".bat") {
-            return ["cmd".to_string(), "/c".into()].into_iter().chain(argv).collect();
+        if found(".cmd").or_else(|| found(".bat")).is_some() {
+            return (["cmd".to_string(), "/c".into()].into_iter().chain(argv).collect(), Some(dir));
         }
     }
-    argv
+    (argv, None)
 }
 
 /// Console programs started from the GUI must not flash a console window.
@@ -2396,23 +2408,22 @@ mod tests {
         std::fs::write(dir.join("codex.cmd"), "@echo off
 ").unwrap();
         std::fs::write(dir.join("codex.exe"), "").unwrap();
+        // npm's script for sh sits beside the `.cmd`: the pty library would start that one.
+        std::fs::write(dir.join("claude"), "#!/bin/sh").unwrap();
         let path = dir.to_string_lossy().into_owned();
         let argv = |p: &str| vec![p.to_string(), "--model".into(), "x".into()];
-        let shim = through_cmd(argv("claude"), &path);
+        let on = |p: &str, path: &str| through_cmd(argv(p), std::ffi::OsStr::new(path));
         if cfg!(windows) {
-            assert_eq!(shim, ["cmd", "/c", "claude", "--model", "x"]);
+            let through = (vec!["cmd".to_string(), "/c".into(), "claude".into(), "--model".into(), "x".into()], Some(dir.clone()));
+            assert_eq!(on("claude", &path), through, "through cmd, with the folder for its PATH");
+            assert_eq!(on("claude", &format!("C:/nowhere;\"{path}\"")), through, "a folder the PATH names in quotes too");
+            let exe = dir.join("codex.exe").display().to_string();
+            assert_eq!(on("codex", &path), (vec![exe, "--model".into(), "x".into()], None), "an exe of that name, by its full path");
         } else {
-            assert_eq!(shim, argv("claude"));
+            assert_eq!(on("claude", &path), (argv("claude"), None));
         }
-        assert_eq!(through_cmd(argv("codex"), &path), argv("codex"), "an exe of that name: Windows finds it itself");
-        assert_eq!(through_cmd(argv("aider"), &path), argv("aider"), "not there at all: left for the error message");
-        assert_eq!(through_cmd(argv("C:/tools/claude.cmd"), &path), argv("C:/tools/claude.cmd"), "a path is run as it is");
-        // npm's script for sh sits beside the `.cmd`, and a PATH entry may be in quotes.
-        std::fs::write(dir.join("claude"), "#!/bin/sh").unwrap();
-        if cfg!(windows) {
-            let quoted = format!("C:\nowhere;\"{path}\"");
-            assert_eq!(through_cmd(argv("claude"), &quoted), ["cmd", "/c", "claude", "--model", "x"], "a quoted folder is read as Windows reads it");
-        }
+        assert_eq!(on("aider", &path), (argv("aider"), None), "not there at all: left for the error message");
+        assert_eq!(on("C:/tools/claude.cmd", &path), (argv("C:/tools/claude.cmd"), None), "a path is run as it is");
         let _ = std::fs::remove_dir_all(&dir);
     }
 
