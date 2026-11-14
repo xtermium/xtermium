@@ -1146,5 +1146,21 @@
   "Create workspace “{name}”": "创建工作区“{name}”",
   "current": "当前",
   "{from}–{to} of {total}": "第 {from}–{to} 项，共 {total} 项",
-  "Manage workspaces…": "管理工作区…"
+  "Manage workspaces…": "管理工作区…",
+  "Earlier tabs": "前面的标签页",
+  "Later tabs": "后面的标签页",
+  "All tabs ({n})": "所有标签页 ({n})",
+  "All tabs": "所有标签页",
+  "Nothing crosses the clipboard": "剪贴板不互通",
+  "To the desktop": "到桌面",
+  "What you copy here can be pasted on the remote desktop": "在本机复制的内容可以粘贴到远程桌面",
+  "From the desktop": "从桌面",
+  "What you copy on the remote desktop can be pasted here": "在远程桌面复制的内容可以粘贴到本机",
+  "Both ways": "双向",
+  "What you copy on either side can be pasted on the other": "在任一侧复制的内容都可以粘贴到另一侧",
+  "Shared clipboard": "共享剪贴板",
+  "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "远程桌面拥有键盘时，Windows 键和系统快捷键（Win+E、Alt+Tab）发送到远程桌面",
+  "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "复制的内容在本机和 RDP 桌面之间互通：文本、图片和文件。",
+  "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "复制的内容在本机和 RDP 桌面之间互通：文本和图片双向，文件只到桌面。",
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "关闭：它们作用于本机。Ctrl+Alt+Del 和 Win+L 始终作用于本机。"
 }

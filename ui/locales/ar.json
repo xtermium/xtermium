@@ -1146,5 +1146,21 @@
   "Create workspace “{name}”": "إنشاء مساحة العمل «{name}»",
   "current": "الحالية",
   "{from}–{to} of {total}": "{from}–{to} من {total}",
-  "Manage workspaces…": "إدارة مساحات العمل…"
+  "Manage workspaces…": "إدارة مساحات العمل…",
+  "Earlier tabs": "علامات التبويب السابقة",
+  "Later tabs": "علامات التبويب التالية",
+  "All tabs ({n})": "كل علامات التبويب ({n})",
+  "All tabs": "كل علامات التبويب",
+  "Nothing crosses the clipboard": "لا شيء يعبر الحافظة",
+  "To the desktop": "إلى سطح المكتب",
+  "What you copy here can be pasted on the remote desktop": "ما تنسخه هنا يمكن لصقه في سطح المكتب البعيد",
+  "From the desktop": "من سطح المكتب",
+  "What you copy on the remote desktop can be pasted here": "ما تنسخه في سطح المكتب البعيد يمكن لصقه هنا",
+  "Both ways": "في الاتجاهين",
+  "What you copy on either side can be pasted on the other": "ما تنسخه في أي جهة يمكن لصقه في الأخرى",
+  "Shared clipboard": "الحافظة المشتركة",
+  "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "مفتاح Windows واختصارات النظام (Win+E، Alt+Tab) تذهب إلى سطح المكتب البعيد ما دامت لوحة المفاتيح عنده",
+  "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "ما تنسخه يعبر بين هذا الحاسوب وأسطح مكتب RDP: النصوص والصور والملفات.",
+  "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "ما تنسخه يعبر بين هذا الحاسوب وأسطح مكتب RDP: النصوص والصور في الاتجاهين، والملفات إلى سطح المكتب.",
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "عند الإيقاف: تعمل على هذا الحاسوب. Ctrl+Alt+Del و Win+L يعملان عليه دائمًا."
 }

@@ -1146,5 +1146,21 @@
   "Create workspace “{name}”": "Skapa arbetsytan ”{name}”",
   "current": "nuvarande",
   "{from}–{to} of {total}": "{from}–{to} av {total}",
-  "Manage workspaces…": "Hantera arbetsytor…"
+  "Manage workspaces…": "Hantera arbetsytor…",
+  "Earlier tabs": "Tidigare flikar",
+  "Later tabs": "Senare flikar",
+  "All tabs ({n})": "Alla flikar ({n})",
+  "All tabs": "Alla flikar",
+  "Nothing crosses the clipboard": "Inget går över urklipp",
+  "To the desktop": "Till skrivbordet",
+  "What you copy here can be pasted on the remote desktop": "Det du kopierar här kan klistras in på fjärrskrivbordet",
+  "From the desktop": "Från skrivbordet",
+  "What you copy on the remote desktop can be pasted here": "Det du kopierar på fjärrskrivbordet kan klistras in här",
+  "Both ways": "Åt båda håll",
+  "What you copy on either side can be pasted on the other": "Det du kopierar på ena sidan kan klistras in på den andra",
+  "Shared clipboard": "Delat urklipp",
+  "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "Windows-tangenten och systemets kortkommandon (Win+E, Alt+Tab) går till fjärrskrivbordet medan det har tangentbordet",
+  "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "Det du kopierar går mellan den här datorn och RDP-skrivbord: text, bilder och filer.",
+  "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "Det du kopierar går mellan den här datorn och RDP-skrivbord: text och bilder åt båda håll, filer till skrivbordet.",
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Av: de verkar på den här datorn. Ctrl+Alt+Del och Win+L gör alltid det."
 }

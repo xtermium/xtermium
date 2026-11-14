@@ -1146,5 +1146,21 @@
   "Search workspaces": "Søk i arbeidsområder",
   "Create workspace “{name}”": "Opprett arbeidsområdet «{name}»",
   "current": "gjeldende",
-  "{from}–{to} of {total}": "{from}–{to} av {total}"
+  "{from}–{to} of {total}": "{from}–{to} av {total}",
+  "Earlier tabs": "Tidligere faner",
+  "Later tabs": "Senere faner",
+  "All tabs ({n})": "Alle faner ({n})",
+  "All tabs": "Alle faner",
+  "Nothing crosses the clipboard": "Ingenting går over utklippstavlen",
+  "To the desktop": "Til skrivebordet",
+  "What you copy here can be pasted on the remote desktop": "Det du kopierer her, kan limes inn på det eksterne skrivebordet",
+  "From the desktop": "Fra skrivebordet",
+  "What you copy on the remote desktop can be pasted here": "Det du kopierer på det eksterne skrivebordet, kan limes inn her",
+  "Both ways": "Begge veier",
+  "What you copy on either side can be pasted on the other": "Det du kopierer på den ene siden, kan limes inn på den andre",
+  "Shared clipboard": "Delt utklippstavle",
+  "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "Windows-tasten og systemsnarveier (Win+E, Alt+Tab) går til det eksterne skrivebordet mens det har tastaturet",
+  "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "Det du kopierer, går mellom denne datamaskinen og RDP-skrivebord: tekst, bilder og filer.",
+  "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "Det du kopierer, går mellom denne datamaskinen og RDP-skrivebord: tekst og bilder begge veier, filer til skrivebordet.",
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Av: De virker på denne datamaskinen. Ctrl+Alt+Del og Win+L gjør alltid det."
 }

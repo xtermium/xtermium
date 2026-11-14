@@ -1146,5 +1146,21 @@
   "Create workspace “{name}”": "ワークスペース「{name}」を作成",
   "current": "現在",
   "{from}–{to} of {total}": "{total} 件中 {from}–{to}",
-  "Manage workspaces…": "ワークスペースを管理…"
+  "Manage workspaces…": "ワークスペースを管理…",
+  "Earlier tabs": "前のタブ",
+  "Later tabs": "後のタブ",
+  "All tabs ({n})": "すべてのタブ ({n})",
+  "All tabs": "すべてのタブ",
+  "Nothing crosses the clipboard": "クリップボードは共有されません",
+  "To the desktop": "デスクトップへ",
+  "What you copy here can be pasted on the remote desktop": "ここでコピーしたものをリモートデスクトップに貼り付けられます",
+  "From the desktop": "デスクトップから",
+  "What you copy on the remote desktop can be pasted here": "リモートデスクトップでコピーしたものをここに貼り付けられます",
+  "Both ways": "双方向",
+  "What you copy on either side can be pasted on the other": "どちらでコピーしたものも、もう一方に貼り付けられます",
+  "Shared clipboard": "共有クリップボード",
+  "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "リモートデスクトップがキーボードを持っている間、Windows キーとシステムのショートカット (Win+E、Alt+Tab) はリモートデスクトップに送られます",
+  "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "コピーしたものは、このコンピューターと RDP デスクトップの間を行き来します: テキスト、画像、ファイル。",
+  "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "コピーしたものは、このコンピューターと RDP デスクトップの間を行き来します: テキストと画像は双方向、ファイルはデスクトップへ。",
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "オフ: このコンピューターで動作します。Ctrl+Alt+Del と Win+L は常にこのコンピューターで動作します。"
 }

@@ -1146,5 +1146,21 @@
   "Search workspaces": "Hae työtiloja",
   "Create workspace “{name}”": "Luo työtila “{name}”",
   "current": "nykyinen",
-  "{from}–{to} of {total}": "{from}–{to} / {total}"
+  "{from}–{to} of {total}": "{from}–{to} / {total}",
+  "Earlier tabs": "Aiemmat välilehdet",
+  "Later tabs": "Myöhemmät välilehdet",
+  "All tabs ({n})": "Kaikki välilehdet ({n})",
+  "All tabs": "Kaikki välilehdet",
+  "Nothing crosses the clipboard": "Mikään ei kulje leikepöydän kautta",
+  "To the desktop": "Työpöydälle",
+  "What you copy here can be pasted on the remote desktop": "Täällä kopioimasi voi liittää etätyöpöydällä",
+  "From the desktop": "Työpöydältä",
+  "What you copy on the remote desktop can be pasted here": "Etätyöpöydällä kopioimasi voi liittää täällä",
+  "Both ways": "Molempiin suuntiin",
+  "What you copy on either side can be pasted on the other": "Kummalla tahansa puolella kopioimasi voi liittää toisella",
+  "Shared clipboard": "Jaettu leikepöytä",
+  "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "Windows-näppäin ja järjestelmän pikanäppäimet (Win+E, Alt+Tab) menevät etätyöpöydälle, kun näppäimistö on sillä",
+  "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "Kopioimasi kulkee tämän tietokoneen ja RDP-työpöytien välillä: teksti, kuvat ja tiedostot.",
+  "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "Kopioimasi kulkee tämän tietokoneen ja RDP-työpöytien välillä: teksti ja kuvat molempiin suuntiin, tiedostot työpöydälle.",
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Pois: ne toimivat tällä tietokoneella. Ctrl+Alt+Del ja Win+L toimivat aina."
 }
