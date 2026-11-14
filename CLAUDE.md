@@ -21,7 +21,12 @@ wiki, https://github.com/xtermium/xtermium/wiki. This file is how it's built and
   stdin/stdout (`src/rdp_proto.rs`); `src/rdp.rs` relays frames to the UI and keeps the picture.
   The helper reconnects by itself after a network loss (same trusted key, no prompt) and keeps
   input in one ordered queue, typed text paced (`PACE`); the UI sends `release` when the view
-  loses the keyboard and lock-key states as `sync`.
+  loses the keyboard and lock-key states as `sync`. The picture comes over the graphics pipeline
+  (egfx), held to two frames in flight until the view acks `rdp_drawn`; the clipboard is
+  `rdp/src/clip.rs` (files from the desktop via `rdp/src/ole.rs`, Windows). While a view has the
+  keyboard, a low-level hook (rdp.rs `grab`) takes Win+…, Alt+Tab and Ctrl+Esc for it; Windows
+  calls that hook while our own window is in front only because main.rs sets
+  `device_event_filter(Always)` (tao's raw input otherwise silences it): keep that line.
   VNC is in-process (`src/vnc.rs`), and so is telnet (`src/telnet.rs`, with RFC 854 option
   negotiation). Websites and BMC consoles are native child webviews laid over
   the tab (`src/web.rs`, `src/kvm/`), hidden while a dialog/menu overlaps them; for iDRAC

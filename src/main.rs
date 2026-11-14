@@ -263,6 +263,7 @@ fn apply_defaults(s: &Settings) {
         keepalive: s.ssh_keepalive,
         compression: s.ssh_compression,
     });
+    rdp::set_clipboard(s.rdp_clipboard);
 }
 
 #[derive(Serialize)]
@@ -1577,6 +1578,8 @@ fn close_tab(app: State<App>, handle: AppHandle, id: u32) {
     let tab = app.tabs.lock().unwrap().remove(&id);
     // A tab shared with a Terminal Co-op ring stops being shared.
     coop::forget(id);
+    // Nor does it keep the keyboard (an RDP tab's Windows keys).
+    rdp::let_go(id);
     // A detached tab's window goes with it.
     if let Some(w) = handle.get_webview_window(&detached_label(id)) {
         let _ = w.destroy();
@@ -1634,7 +1637,11 @@ async fn detach_tab(handle: AppHandle, id: u32, title: String, state: serde_json
 fn tab_attach(app: State<App>, window: tauri::Window, id: u32, out: Channel) -> bool {
     match app.tabs.lock().unwrap().get(&id) {
         Some(Tab::Term(t)) => t.attach(out),
-        Some(Tab::Rdp(t)) => t.attach(out),
+        Some(Tab::Rdp(t)) => {
+            // The view it leaves may be gone without letting go of the keyboard.
+            rdp::let_go(id);
+            t.attach(out)
+        }
         _ => return false,
     }
     if window.label() == "main"
@@ -1728,15 +1735,35 @@ fn set_tab_broadcast(app: State<App>, id: u32, on: bool) {
     if on { off.remove(&id) } else { off.insert(id) };
 }
 
+/// Async: the shared clipboard and paste read the clipboard, which on X11 can wait for its owner,
+/// and that may be our own page needing the main loop (as `term_key`).
 #[tauri::command]
-fn rdp_input(app: State<App>, handle: AppHandle, id: u32, ev: rdp::Input) {
+async fn rdp_input(handle: AppHandle, id: u32, ev: rdp::Input) -> Res<()> {
+    desktop_input(&handle, id, ev);
+    Ok(())
+}
+
+/// Keyboard and pointer for remote desktop tab `id`: from its view (`rdp_input`) or from the
+/// keyboard hook that takes the system's shortcuts for it (rdp.rs `grab`).
+pub(crate) fn desktop_input(handle: &AppHandle, id: u32, ev: rdp::Input) {
+    let app = handle.state::<App>();
     let tabs = app.tabs.lock().unwrap();
-    broadcast::share(&app, &handle, &tabs, id, broadcast::Typing::Desktop(&ev));
+    broadcast::share(&app, handle, &tabs, id, broadcast::Typing::Desktop(&ev));
     match tabs.get(&id) {
         Some(Tab::Rdp(t)) => t.input(ev),
         Some(Tab::Vnc(t)) => t.input(ev),
         _ => {}
     }
+}
+
+/// The window took a frame of RDP tab `id`: the next may come (rdp_proto.rs `ToHelper::Drawn`).
+/// Async so the acknowledgement doesn't wait behind the main thread.
+#[tauri::command]
+async fn rdp_drawn(app: State<'_, App>, id: u32) -> Res<()> {
+    if let Some(Tab::Rdp(t)) = app.tabs.lock().unwrap().get(&id) {
+        t.drawn();
+    }
+    Ok(())
 }
 
 /// Opens a tab's file panel and publishes its state. SSH tabs get SFTP on first use; an RDP
@@ -1933,6 +1960,11 @@ fn main() {
     let replies = app.replies.clone();
 
     tauri::Builder::default()
+        // No raw device events (xtermium uses none). On Windows, tao's raw-input registration
+        // keeps Windows from calling our low-level keyboard hook while our window is in front,
+        // and that hook is what hands Win+…, Alt+Tab and Ctrl+Esc to a remote desktop
+        // (rdp.rs `grab`; tauri-apps/wry#1761).
+        .device_event_filter(tauri::DeviceEventFilter::Always)
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
@@ -2083,6 +2115,7 @@ fn main() {
             set_broadcast,
             set_tab_broadcast,
             rdp_input,
+            rdp_drawn,
             rdp::desktop_keys,
             automation_opened,
             automation_status,

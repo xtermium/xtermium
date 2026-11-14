@@ -49,6 +49,20 @@ pub enum ToHelper {
         num: bool,
         scroll: bool,
     },
+    /// The clipboard here holds this text: the desktop may paste it.
+    ClipText(String),
+    /// The clipboard here holds these files and folders (full paths): the desktop may paste them.
+    ClipFiles(Vec<String>),
+    /// The clipboard here holds a picture, as a device-independent bitmap (CF_DIB: a
+    /// BITMAPINFOHEADER, then the pixels): the desktop may paste it.
+    ClipImage(Vec<u8>),
+    /// Bring the desktop's latest copy here: its text and pictures come back as
+    /// `FromHelper::ClipText` / `ClipImage`; its files go on the clipboard here by the helper
+    /// itself (Windows).
+    ClipFetch,
+    /// The window took a frame: another may go (the helper keeps a couple in flight, and merges
+    /// the changes in between instead of queueing them).
+    Drawn,
 }
 
 #[derive(Debug, PartialEq)]
@@ -67,6 +81,27 @@ pub enum FromHelper {
     Ended,
     /// What the session is doing while it isn't showing the desktop (reconnecting, say).
     Status(String),
+    /// Something was copied on the desktop: what it holds. Nothing comes over until `ToHelper::ClipFetch`.
+    ClipOffer {
+        text: bool,
+        files: bool,
+        image: bool,
+    },
+    /// The desktop's copied text, after `ToHelper::ClipFetch`.
+    ClipText(String),
+    /// The desktop's copied picture (CF_DIB, as `ToHelper::ClipImage`), after `ToHelper::ClipFetch`.
+    ClipImage(Vec<u8>),
+    /// The desktop's pointer: the system arrow, none, or a picture (RGBA, not premultiplied)
+    /// with the point that clicks at (`hot_x`, `hot_y`).
+    PointerDefault,
+    PointerHidden,
+    PointerBitmap {
+        width: u16,
+        height: u16,
+        hot_x: u16,
+        hot_y: u16,
+        rgba: Vec<u8>,
+    },
 }
 
 fn put_bytes(out: &mut Vec<u8>, b: &[u8]) {
@@ -148,6 +183,23 @@ impl ToHelper {
             }
             Self::ReleaseAll => o.push(10),
             Self::Sync { caps, num, scroll } => o.extend_from_slice(&[11, *caps as u8 | (*num as u8) << 1 | (*scroll as u8) << 2]),
+            Self::ClipText(t) => {
+                o.push(12);
+                put_bytes(&mut o, t.as_bytes());
+            }
+            Self::ClipFiles(paths) => {
+                o.push(13);
+                o.extend_from_slice(&(paths.len() as u32).to_le_bytes());
+                for p in paths {
+                    put_bytes(&mut o, p.as_bytes());
+                }
+            }
+            Self::ClipFetch => o.push(14),
+            Self::Drawn => o.push(15),
+            Self::ClipImage(dib) => {
+                o.push(16);
+                put_bytes(&mut o, dib);
+            }
         }
         w.write_all(&o)?;
         w.flush()
@@ -173,6 +225,18 @@ impl ToHelper {
                 let b = u8_(r)?;
                 Self::Sync { caps: b & 1 != 0, num: b & 2 != 0, scroll: b & 4 != 0 }
             }
+            12 => Self::ClipText(string(r)?),
+            13 => {
+                let n = u32_(r)?;
+                // A clipboard of more files than this is a corrupt stream.
+                if n > 100_000 {
+                    return Err(bad());
+                }
+                Self::ClipFiles((0..n).map(|_| string(r)).collect::<io::Result<_>>()?)
+            }
+            14 => Self::ClipFetch,
+            15 => Self::Drawn,
+            16 => Self::ClipImage(bytes(r)?),
             _ => return Err(bad()),
         })
     }
@@ -204,6 +268,24 @@ impl FromHelper {
                 o.push(6);
                 put_bytes(&mut o, msg.as_bytes());
             }
+            Self::ClipOffer { text, files, image } => o.extend_from_slice(&[7, *text as u8 | (*files as u8) << 1 | (*image as u8) << 2]),
+            Self::ClipText(t) => {
+                o.push(8);
+                put_bytes(&mut o, t.as_bytes());
+            }
+            Self::PointerDefault => o.push(9),
+            Self::PointerHidden => o.push(10),
+            Self::PointerBitmap { width, height, hot_x, hot_y, rgba } => {
+                o.push(11);
+                for n in [width, height, hot_x, hot_y] {
+                    o.extend_from_slice(&n.to_le_bytes());
+                }
+                put_bytes(&mut o, rgba);
+            }
+            Self::ClipImage(dib) => {
+                o.push(12);
+                put_bytes(&mut o, dib);
+            }
         }
         w.write_all(&o)?;
         w.flush()
@@ -217,6 +299,18 @@ impl FromHelper {
             4 => Self::Closed(string(r)?),
             5 => Self::Ended,
             6 => Self::Status(string(r)?),
+            7 => {
+                let b = u8_(r)?;
+                Self::ClipOffer { text: b & 1 != 0, files: b & 2 != 0, image: b & 4 != 0 }
+            }
+            8 => Self::ClipText(string(r)?),
+            9 => Self::PointerDefault,
+            10 => Self::PointerHidden,
+            11 => {
+                let (width, height, hot_x, hot_y) = (u16_(r)?, u16_(r)?, u16_(r)?, u16_(r)?);
+                Self::PointerBitmap { width, height, hot_x, hot_y, rgba: bytes(r)? }
+            }
+            12 => Self::ClipImage(bytes(r)?),
             _ => return Err(bad()),
         })
     }
@@ -250,6 +344,12 @@ mod tests {
             ToHelper::ReleaseAll,
             ToHelper::Sync { caps: true, num: false, scroll: true },
             ToHelper::Sync { caps: false, num: true, scroll: false },
+            ToHelper::ClipText("a\r\nb".into()),
+            ToHelper::ClipFiles(vec!["C:\\a b\\c.txt".into(), "/srv/x/é".into()]),
+            ToHelper::ClipFiles(vec![]),
+            ToHelper::ClipFetch,
+            ToHelper::Drawn,
+            ToHelper::ClipImage(vec![40, 0, 0, 0, 7]),
         ];
         let mut buf = vec![];
         for m in &to {
@@ -267,6 +367,13 @@ mod tests {
             FromHelper::Closed("bye".into()),
             FromHelper::Ended,
             FromHelper::Status("reconnecting…".into()),
+            FromHelper::ClipOffer { text: true, files: false, image: false },
+            FromHelper::ClipOffer { text: false, files: true, image: true },
+            FromHelper::ClipText("x\ty".into()),
+            FromHelper::PointerDefault,
+            FromHelper::PointerHidden,
+            FromHelper::PointerBitmap { width: 1, height: 2, hot_x: 0, hot_y: 1, rgba: vec![1, 2, 3, 4, 5, 6, 7, 8] },
+            FromHelper::ClipImage(vec![9, 8, 7]),
         ];
         let mut buf = vec![];
         for m in &from {

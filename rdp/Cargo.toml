@@ -2,7 +2,7 @@
 name = "xtermium-rdp"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.88"
+rust-version = "1.89"
 authors = ["Sotirios Roussis"]
 license = "Apache-2.0"
 homepage = "https://xtermium.com"
@@ -14,25 +14,44 @@ description = "RDP helper process for xtermium (separate lockfile: its crypto st
 
 [dependencies]
 anyhow = "1"
-ironrdp = { version = "0.17", features = ["connector", "session", "graphics", "input", "pdu", "dvc", "displaycontrol"] }
-ironrdp-tokio = "0.10"
-ironrdp-tls = { version = "0.2", features = ["rustls-ring"] }
+# IronRDP's crates one by one: the `ironrdp` crate that bundles them is a generation behind, and
+# the graphics pipeline (egfx: 32-bit colour on any Windows server, far less data) needs these.
+ironrdp-connector = "0.12"
+ironrdp-session = "0.13"
+ironrdp-pdu = "0.11"
+ironrdp-core = "0.3"
+ironrdp-dvc = "0.10"
+ironrdp-svc = "0.10"
+ironrdp-graphics = "0.11"
+ironrdp-input = "0.9"
+ironrdp-cliprdr = "0.9"
+ironrdp-displaycontrol = "0.10"
+ironrdp-egfx = "0.5"
+ironrdp-tokio = "0.12"
+ironrdp-tls = { version = "0.3", features = ["rustls-ring"] }
 tokio = { version = "1", features = ["rt", "net", "io-util", "io-std", "sync", "macros", "time"] }
 # TCP keepalive, so a connection that died silently is noticed (tokio's sockets don't set it).
 socket2 = "0.6"
+
+# Files copied on the desktop go on this computer's clipboard as an OLE data object whose file
+# contents stream from the desktop as Explorer reads them (ole.rs).
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Gdi",
+  "Win32_System_Com",
+  "Win32_System_Com_StructuredStorage",
+  "Win32_System_DataExchange",
+  "Win32_System_Memory",
+  "Win32_System_Ole",
+  "Win32_System_Threading",
+  "Win32_UI_Shell",
+  "Win32_UI_WindowsAndMessaging",
+] }
+# `#[implement]` (COM objects) names this crate directly.
+windows-core = "0.62"
 
 # Dependencies do the heavy lifting (zlib, base64, image and RDP decoding, the VT parser,
 # crypto): keep them optimized in dev builds too, or graphics-heavy sessions crawl.
 [profile.dev.package."*"]
 opt-level = 3
-
-# ironrdp-session 0.11 shears xrdp's picture (bitmaps padded wider than their rectangle, IronRDP
-# #1251); patches/ironrdp-session is 0.11.0 with the one fix (fast_path.rs `fit_rows`).
-# ponytail: drop it once the ironrdp crate takes ironrdp-session 0.12 or later.
-# ironrdp-pdu 0.9 refuses the 6-byte Deactivate All that xrdp up to 0.10.4 sends when the desktop
-# is resized, ending the session; patches/ironrdp-pdu is 0.9.0 with IronRDP #1719
-# (headers.rs `ShareControlHeader::decode` reads shareId only when it's there).
-# ponytail: drop it once the ironrdp crate takes ironrdp-pdu 0.10 or later.
-[patch.crates-io]
-ironrdp-session = { path = "patches/ironrdp-session" }
-ironrdp-pdu = { path = "patches/ironrdp-pdu" }

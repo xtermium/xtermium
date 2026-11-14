@@ -119,6 +119,12 @@ pub struct Settings {
     pub ssh_compression: bool,
     /// RDP picture quality against speed: 0 quality, 1 balanced, 2 speed. Sessions can have their own.
     pub rdp_quality: u8,
+    /// What crosses the shared clipboard of RDP tabs: 1 this computer's to the desktop, 2 the
+    /// desktop's to here, 3 both, 0 nothing (rdp.rs `TO_DESKTOP`, `FROM_DESKTOP`).
+    pub rdp_clipboard: u8,
+    /// A remote desktop with the keyboard takes the Windows keys and the system's shortcuts
+    /// (Alt+Tab, Win+E…) from this computer (Windows).
+    pub rdp_keyboard: bool,
     /// An RDP tab's file panel logs in to the host's shares as the desktop's login (sessions
     /// can say otherwise).
     pub smb_auto_login: bool,
@@ -427,6 +433,8 @@ impl Default for Settings {
             ssh_keepalive: 30,
             ssh_compression: false,
             rdp_quality: 0,
+            rdp_clipboard: 3,
+            rdp_keyboard: true,
             smb_auto_login: true,
             automation: false,
             automation_port: 8721,

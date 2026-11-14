@@ -5,7 +5,6 @@
   import { _ } from "./i18n.svelte";
   import { onDestroy, onMount } from "svelte";
   import { Channel, invoke } from "@tauri-apps/api/core";
-  import { listen } from "@tauri-apps/api/event";
   import { bytes, COOP_MSG_JPEG, type Meta, type Session } from "./api";
   import { throttle } from "./coop";
   import CoopCursors from "./CoopCursors.svelte";
@@ -87,30 +86,38 @@
     return [fit(r.width), fit(r.height)];
   };
 
+  /** Messages are handled one after another: a packed frame inflates asynchronously, and a size
+   *  or a pointer that comes after it must not overtake it. */
+  let inbox: Promise<void> = Promise.resolve();
   function message(m: unknown) {
     const b = bytes(m);
+    // A frame drawn: the helper may send the next (it holds them back while we're behind), so
+    // frames never pile up here waiting to be inflated and drawn.
+    const frame = (b[0] === 3 || b[0] === 8) && id && !peer && session.kind.type === "rdp";
+    inbox = inbox
+      .then(() => handle(b))
+      .catch(() => {})
+      .then(() => void (frame && !gone && invoke("rdp_drawn", { id }).catch(() => {})));
+  }
+
+  async function handle(b: Uint8Array) {
+    if (gone) return;
     const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
     const u16 = (at: number) => dv.getUint16(at, true);
     if (b[0] === 2) {
       size = [u16(1), u16(3)];
       locks = ""; // a new connection: its lock keys are whatever the desktop had
       screen.size(...size);
+      showPointer();
       // A viewer who joins mid-stream may never get the status that says the desktop is up.
       if (peer) status = "";
       onconnected(true);
-    } else if (b[0] === 3) {
-      // Changed areas back to back: [x][y][w][h: u16][w*h RGBA pixels].
-      for (let at = 1; at + 8 <= b.length; ) {
-        const [x, y, w, h] = [u16(at), u16(at + 2), u16(at + 4), u16(at + 6)];
-        const end = at + 8 + w * h * 4;
-        if (end > b.length) break;
-        screen.put(x, y, w, h, b.subarray(at + 8, end));
-        at = end;
-      }
-      if (!queued) {
-        queued = true;
-        requestAnimationFrame(() => ((queued = false), screen.show()));
-      }
+    } else if (b[0] === 3) paint(b.subarray(1));
+    else if (b[0] === 8) {
+      // Deflated on the way (src/rdp.rs `frame_msg`): inflated natively.
+      const inflated = new Blob([b.subarray(1) as BlobPart]).stream().pipeThrough(new DecompressionStream("deflate"));
+      const areas = new Uint8Array(await new Response(inflated).arrayBuffer());
+      if (!gone) paint(areas);
     } else if (b[0] === 4) {
       closed = b[1] === 1;
       status = new TextDecoder().decode(b.subarray(2));
@@ -118,7 +125,51 @@
       if (closed || status) onconnected(false);
       onmeta({ cursor: null, title: "", alive: !closed, ended: false, lost: false, link: false, scrolled: false, images: [] });
     } else if (b[0] === 5) onexit();
-    else if (b[0] === COOP_MSG_JPEG && peer) jpeg(b.subarray(1));
+    else if (b[0] === 7) {
+      pointer = b.slice();
+      showPointer();
+    } else if (b[0] === COOP_MSG_JPEG && peer) jpeg(b.subarray(1));
+  }
+
+  /** Changed areas back to back, `[x][y][w][h: u16][w*h RGBA pixels]`, into the picture; it's
+   *  shown at the next display refresh. */
+  function paint(areas: Uint8Array) {
+    const dv = new DataView(areas.buffer, areas.byteOffset, areas.byteLength);
+    const u16 = (at: number) => dv.getUint16(at, true);
+    for (let at = 0; at + 8 <= areas.length; ) {
+      const [x, y, w, h] = [u16(at), u16(at + 2), u16(at + 4), u16(at + 6)];
+      const end = at + 8 + w * h * 4;
+      if (end > areas.length) break;
+      screen.put(x, y, w, h, areas.subarray(at + 8, end));
+      at = end;
+    }
+    if (!queued) {
+      queued = true;
+      requestAnimationFrame(() => ((queued = false), screen.show()));
+    }
+  }
+
+  /** The desktop's pointer as it last came (`[7]…`, src/rdp.rs `MSG_POINTER`). It becomes this
+   *  computer's pointer over the picture, as in mstsc: one pointer, moving without delay. */
+  let pointer: Uint8Array | null = null;
+  function showPointer() {
+    if (!pointer || !canvas) return;
+    if (pointer[1] !== 2) return void (canvas.style.cursor = pointer[1] === 1 ? "none" : "");
+    const dv = new DataView(pointer.buffer, pointer.byteOffset, pointer.byteLength);
+    const [w, h, hx, hy] = [2, 4, 6, 8].map((at) => dv.getUint16(at, true));
+    if (!w || !h || pointer.length < 10 + w * h * 4) return void (canvas.style.cursor = "none");
+    const c = document.createElement("canvas");
+    [c.width, c.height] = [w, h];
+    c.getContext("2d")!.putImageData(new ImageData(new Uint8ClampedArray(pointer.slice(10, 10 + w * h * 4).buffer), w, h), 0, 0);
+    const url = c.toDataURL();
+    // The picture is scaled to fit: the pointer is drawn at the same scale (image-set's resolution),
+    // its hot spot with it. Where image-set isn't taken, the plain picture stays.
+    const r = canvas.getBoundingClientRect();
+    const [dw, dh] = size ?? [w, h];
+    const scale = Math.min(r.width / dw, r.height / dh) || 1;
+    const hot = (v: number, max: number) => Math.min(Math.round(v * scale), Math.max(0, Math.round(max * scale) - 1));
+    canvas.style.cursor = `url(${url}) ${Math.min(hx, w - 1)} ${Math.min(hy, h - 1)}, default`;
+    canvas.style.cursor = `image-set(url(${url}) ${1 / scale}x) ${hot(hx, w)} ${hot(hy, h)}, default`;
   }
 
   /** A website shared with you arrives as the whole page in a JPEG, with no size message first (src/coop.rs
@@ -187,6 +238,8 @@
     // Closed while starting: end it now (onDestroy found no id yet).
     if (gone) return void (!peer && invoke("close_tab", { id }));
     if (!peer) onid(id);
+    // The keyboard was taken before the tab had its number: now the hook knows where keys go.
+    if (focused) keys();
   }
 
   /** Pointer position in remote desktop pixels. */
@@ -258,6 +311,10 @@
     // `desktop_ok`): a viewer's paste chord only says so.
     if (paste && peer) return void (down && (app.status = _("Copy and paste aren't available in shared desktops.")));
     if (paste) return down && send({ t: "paste" });
+    // Ctrl+V pastes on the desktop: it gets what the clipboard here holds first, if that changed.
+    if (down && !e.repeat && e.ctrlKey && e.code === "KeyV") clip();
+    // The Windows keys stay this computer's unless the desktop may take them (Settings › Terminal › RDP).
+    if (!grabs && (e.code === "MetaLeft" || e.code === "MetaRight")) return;
     // The lock keys go over as their states here, not as presses that would toggle whatever the
     // desktop had (Num Lock on there would turn the arrows of a numpad here into digits).
     sync(e);
@@ -267,23 +324,30 @@
     // An accent waiting for its letter: the next key's character comes with it (as "é").
     if (e.key === "Dead") return;
     // Plain characters go as Unicode (any layout); everything else as scancodes.
-    const chord = (e.ctrlKey || e.altKey || e.metaKey || win) && !e.getModifierState("AltGraph");
+    const chord = (e.ctrlKey || e.altKey || e.metaKey) && !e.getModifierState("AltGraph");
     if (down && [...e.key].length === 1 && !chord) send({ t: "text", text: e.key });
     else send({ t: "key", code: e.code, down });
   }
 
-  // The Windows keys reach the desktop with the keyboard, not the Start menu here: the backend
-  // takes them from the system while we have it (src/rdp.rs `desktop_keys`).
-  /** The Windows key held on the desktop, if one is. */
-  let win: "MetaLeft" | "MetaRight" | null = null;
-  const keys = (on: boolean) => invoke("desktop_keys", { on });
-  const unwin = listen<[boolean, boolean]>("win-key", ({ payload: [right, down] }) => {
-    const code = right ? "MetaRight" : "MetaLeft";
-    // A release still goes to the desktop that got the press.
-    if (document.activeElement !== box && !(win === code && !down)) return;
-    win = down ? code : null;
-    send({ t: "key", code, down });
+  // The Windows keys and the system's shortcuts (Win+E, Alt+Tab, Ctrl+Esc…) reach the desktop,
+  // not this computer, while this view has the keyboard, if Settings › Terminal › RDP says so:
+  // the backend takes them from the system and sends them to the tab itself (src/rdp.rs `grab`).
+  // Anywhere else in xtermium (settings, the sidebar, another pane) they're this computer's.
+  // Not for a viewer's: its keys go to the owner (as they come here).
+  /** The desktop may take them (on until the settings say otherwise). */
+  const grabs = $derived(app.settings?.rdp_keyboard ?? true);
+  /** The view has the keyboard. */
+  let focused = false;
+  const keys = () => invoke("desktop_keys", { id, on: focused && grabs && !!id && !peer });
+  // The setting changed while this desktop has the keyboard.
+  $effect(() => {
+    void grabs;
+    if (focused) keys();
   });
+
+  /** The desktop gets to paste what the clipboard here holds (only what changed crosses, and
+   *  only if Settings › Terminal › RDP lets it). RDP only; a viewer's would be the owner's. */
+  const clip = () => void (session.kind.type === "rdp" && !peer && send({ t: "clip" }));
 
   function wheel(e: WheelEvent) {
     e.preventDefault();
@@ -330,8 +394,8 @@
     gone = true;
     // Leaving for another window: nothing stays held (a focused view taken away gets no blur).
     send({ t: "release" });
-    if (document.activeElement === box) keys(false);
-    unwin.then((f) => f());
+    focused = false;
+    keys();
     observer.disconnect();
     clearTimeout(resizeTimer);
     screen?.drop();
@@ -349,8 +413,8 @@
   aria-label={_("remote desktop")}
   onkeydown={(e) => key(e, true)}
   onkeyup={(e) => key(e, false)}
-  onfocus={() => !dialogTakesKeys() && (keys(true), onfocus())}
-  onblur={() => (send({ t: "release" }), (win = null), keys(false))}
+  onfocus={() => !dialogTakesKeys() && ((focused = true), keys(), clip(), onfocus())}
+  onblur={() => (send({ t: "release" }), (focused = false), keys())}
 >
   <canvas
     bind:this={canvas}

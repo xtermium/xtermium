@@ -379,6 +379,7 @@ impl Settings {
         if !crate::settings::COOP_IDLE.contains(&self.coop_idle) {
             self.coop_idle = d.coop_idle;
         }
+        self.rdp_clipboard = self.rdp_clipboard.min(3);
         if self.automation_port < 1024 {
             self.automation_port = d.automation_port;
         }

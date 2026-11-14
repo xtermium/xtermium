@@ -5,23 +5,27 @@
 #[allow(dead_code)] // each binary uses one direction
 #[path = "../../src/rdp_proto.rs"]
 mod proto;
+mod clip;
+#[cfg(windows)]
+mod ole;
 
 use anyhow::{Context, Result, bail};
-use ironrdp::connector::connection_activation::ConnectionActivationState;
-use ironrdp::connector::{self, BitmapConfig, ClientConnector, Credentials, DesktopSize, ServerName};
-use ironrdp::core::WriteBuf;
-use ironrdp::displaycontrol::client::DisplayControlClient;
-use ironrdp::displaycontrol::pdu::MonitorLayoutEntry;
-use ironrdp::dvc::DrdynvcClient;
-use ironrdp::graphics::image_processing::PixelFormat;
-use ironrdp::input::{Database, MouseButton, MousePosition, Operation, Scancode, WheelRotations};
-use ironrdp::pdu::gcc::KeyboardType;
-use ironrdp::pdu::geometry::InclusiveRectangle;
-use ironrdp::pdu::input::fast_path::{FastPathInputEvent, KeyboardFlags};
-use ironrdp::pdu::rdp::capability_sets::{MajorPlatformType, client_codecs_capabilities};
-use ironrdp::pdu::rdp::client_info::{PerformanceFlags, TimezoneInfo};
-use ironrdp::session::image::DecodedImage;
-use ironrdp::session::{ActiveStage, ActiveStageBuilder, ActiveStageOutput, GracefulDisconnectReason, fast_path};
+use ironrdp_connector::connection_activation::ConnectionActivationState;
+use ironrdp_connector::{self as connector, BitmapConfig, ClientConnector, Credentials, DesktopSize, ServerName};
+use ironrdp_core::WriteBuf;
+use ironrdp_displaycontrol::client::DisplayControlClient;
+use ironrdp_displaycontrol::pdu::MonitorLayoutEntry;
+use ironrdp_dvc::DrdynvcClient;
+use ironrdp_egfx::client::{GraphicsPipelineClient, GraphicsPipelineHandler};
+use ironrdp_graphics::image_processing::PixelFormat;
+use ironrdp_input::{Database, MouseButton, MousePosition, Operation, Scancode, WheelRotations};
+use ironrdp_pdu::gcc::KeyboardType;
+use ironrdp_pdu::geometry::InclusiveRectangle;
+use ironrdp_pdu::input::fast_path::{FastPathInputEvent, KeyboardFlags};
+use ironrdp_pdu::rdp::capability_sets::{MajorPlatformType, client_codecs_capabilities};
+use ironrdp_pdu::rdp::client_info::{PerformanceFlags, TimezoneInfo};
+use ironrdp_session::image::DecodedImage;
+use ironrdp_session::{ActiveStage, ActiveStageBuilder, ActiveStageOutput, GracefulDisconnectReason};
 use ironrdp_tokio::{FramedWrite, TokioFramed};
 use proto::{FromHelper, ToHelper};
 use std::collections::VecDeque;
@@ -37,6 +41,14 @@ const BATCH: Duration = Duration::from_millis(5);
 
 /// A frame bigger than this is sent in parts (the protocol caps a message at 64 MiB).
 const MAX_FRAME: usize = 32 << 20;
+
+/// Frames on their way to the window at most: the next one waits for `ToHelper::Drawn`, and the
+/// changes meanwhile merge into it. Without this a window that draws slower than the desktop
+/// changes (dragging a window, video) gets a growing backlog, and the picture falls behind.
+const IN_FLIGHT: u8 = 2;
+/// A frame still goes this long after the last one when no `Drawn` came: a window that's gone
+/// (the tab moving to another) or never answers mustn't stop the picture.
+const STALL: Duration = Duration::from_millis(250);
 
 /// Typed text goes one character per this on average, a few at a time at most. A desktop fed a
 /// paste's worth of characters at once garbles them: Windows Terminal reorders and drops some.
@@ -77,7 +89,7 @@ fn main() {
 /// Signed out, or chose Disconnect, from inside the session. IronRDP passes the server's
 /// reason on as text only, so compare with its own text for those codes.
 fn signed_out(reason: &GracefulDisconnectReason) -> bool {
-    use ironrdp::pdu::rdp::server_error_info::{ErrorInfo, ProtocolIndependentCode as Code};
+    use ironrdp_pdu::rdp::server_error_info::{ErrorInfo, ProtocolIndependentCode as Code};
     let GracefulDisconnectReason::Other(text) = reason else { return false };
     [Code::LogoffByUser, Code::RpcInitiatedDisconnectByuser]
         .into_iter()
@@ -92,11 +104,17 @@ struct NoKerberos;
 impl ironrdp_tokio::NetworkClient for NoKerberos {
     async fn send(
         &mut self,
-        _: &ironrdp::connector::sspi::generator::NetworkRequest,
+        _: &ironrdp_connector::sspi::generator::NetworkRequest,
     ) -> connector::ConnectorResult<Vec<u8>> {
         Err(connector::general_err!("Kerberos KDC access is not supported; use NTLM"))
     }
 }
+
+/// The graphics pipeline's events: none are needed, the session takes its picture.
+/// ponytail: no H.264 decoder, so the server sends planar, ClearCodec and RemoteFX instead;
+/// AVC would need Cisco's OpenH264 library and its licence terms.
+struct Gfx;
+impl GraphicsPipelineHandler for Gfx {}
 
 /// What to sign in with, from `ToHelper::Connect`.
 struct Login {
@@ -117,10 +135,12 @@ async fn run(mut rx: mpsc::UnboundedReceiver<ToHelper>) -> Result<String> {
     let mut size = (width, height);
     // The server's key once the user trusted it: a reconnection must find the same one.
     let mut trusted = None;
+    // The shared clipboard: what this side offers outlives a connection.
+    let mut kit = clip::Kit::new();
     let mut tries = 0;
     loop {
         let mut up = false;
-        let err = match session(&login, &mut size, &mut rx, &mut trusted, &mut up).await {
+        let err = match session(&login, &mut size, &mut rx, &mut trusted, &mut up, &mut kit).await {
             Ok(reason) => return Ok(reason),
             Err(e) => e,
         };
@@ -141,10 +161,25 @@ async fn run(mut rx: mpsc::UnboundedReceiver<ToHelper>) -> Result<String> {
                 msg = rx.recv() => match msg {
                     None | Some(ToHelper::Close) => return Ok("disconnected".into()),
                     Some(ToHelper::Resize { width, height }) => size = (width, height),
+                    Some(m @ (ToHelper::ClipText(_) | ToHelper::ClipFiles(_) | ToHelper::ClipImage(_))) => kit.offer = offered(m),
                     _ => {} // input for a desktop that isn't there
                 },
+                // A paste here of the lost connection's files: it can't be read any more.
+                Some(r) = kit.reads.recv() => {
+                    let _ = r.reply.send(None);
+                }
             }
         }
+    }
+}
+
+/// What this side's clipboard offers, from `ToHelper::ClipText`, `ClipFiles` or `ClipImage`.
+fn offered(m: ToHelper) -> clip::Offer {
+    match m {
+        ToHelper::ClipText(t) if t.len() <= clip::MAX_TEXT => clip::Offer::Text(t),
+        ToHelper::ClipFiles(f) => clip::Offer::Files(f.into_iter().map(Into::into).collect()),
+        ToHelper::ClipImage(dib) if dib.len() <= clip::MAX_IMAGE => clip::Offer::Image(dib),
+        _ => clip::Offer::Nothing,
     }
 }
 
@@ -168,6 +203,7 @@ async fn session(
     rx: &mut mpsc::UnboundedReceiver<ToHelper>,
     trusted: &mut Option<Vec<u8>>,
     up: &mut bool,
+    kit: &mut clip::Kit,
 ) -> Result<String> {
     let Login { host, port, user, domain, password, quality } = login;
     let tcp = within(TcpStream::connect((host.as_str(), *port)))
@@ -180,10 +216,15 @@ async fn session(
     let _ = socket2::SockRef::from(&tcp).set_tcp_keepalive(&keepalive);
     let client_addr = tcp.local_addr()?;
     let mut framed = TokioFramed::new(tcp);
-    // Display Control (a dynamic channel) lets us resize the remote desktop with the pane.
+    // Dynamic channels: Display Control resizes the remote desktop with the pane; the graphics
+    // pipeline (MS-RDPEGFX) carries the picture as Windows' own clients get it, 32-bit and well
+    // compressed whatever colour depth the server allows old bitmap updates. The session
+    // composites its output into `image` (ActiveStage::process).
     let cfg = config(user.clone(), password.clone(), domain.clone(), size.0, size.1, *quality);
-    let mut connector = ClientConnector::new(cfg, client_addr)
-        .with_static_channel(DrdynvcClient::new().with_dynamic_channel(DisplayControlClient::new(|_| Ok(Vec::new()))));
+    let dynamic = DrdynvcClient::new()
+        .with_dynamic_channel(DisplayControlClient::new(|_| Ok(Vec::new())))
+        .with_dynamic_channel(GraphicsPipelineClient::new(Box::new(Gfx), None));
+    let mut connector = ClientConnector::new(cfg, client_addr).with_static_channel(dynamic).with_static_channel(kit.channel());
     let should_upgrade = within(ironrdp_tokio::connect_begin(&mut framed, &mut connector)).await??;
 
     let (tls, cert) = within(ironrdp_tls::upgrade(framed.into_inner_no_leftover(), host)).await?.context("TLS")?;
@@ -197,6 +238,7 @@ async fn session(
                 match rx.recv().await {
                     Some(ToHelper::Trust(true)) => break,
                     Some(ToHelper::Trust(false)) | None | Some(ToHelper::Close) => return Ok("certificate rejected".into()),
+                    Some(m @ (ToHelper::ClipText(_) | ToHelper::ClipFiles(_) | ToHelper::ClipImage(_))) => kit.offer = offered(m),
                     _ => {}
                 }
             }
@@ -216,6 +258,7 @@ async fn session(
         None,
     ))
     .await?
+    .and_then(|outcome| outcome.into_connected())
     .map_err(|e| {
         // CredSSP rejections are the server saying no to the credentials.
         if format!("{e:?}").contains("CredSSP") {
@@ -229,6 +272,8 @@ async fn session(
     send(&FromHelper::Size { width: w, height: h })?;
     *up = true;
     let mut image = DecodedImage::new(PixelFormat::RgbA32, w, h);
+    // The size the window was last told.
+    let mut shown = (w, h);
     let (io_channel_id, user_channel_id) = (res.io_channel_id, res.user_channel_id);
     let activation = res.activation_factory;
     let mut stage: ActiveStage = ActiveStageBuilder {
@@ -250,15 +295,29 @@ async fn session(
     // Changed areas not sent yet, and when they go.
     let mut dirty: Vec<InclusiveRectangle> = vec![];
     let mut due = Instant::now();
+    // Frames the window may still take, and when the last one went (`IN_FLIGHT`, `STALL`).
+    let mut credits = IN_FLIGHT;
+    let mut sent = Instant::now();
+    // The clipboard lets go of the desktop's copies nobody reads any more (`clip::tick`).
+    let mut tick = tokio::time::interval(Duration::from_secs(5));
 
     loop {
         let outputs = tokio::select! {
             pdu = framed.read_pdu() => {
                 let (action, payload) = pdu.context("connection lost")?;
-                stage.process(&mut image, action, &payload)?
+                let out = stage.process(&mut image, action, &payload, framed.last_read_at())?;
+                // The graphics pipeline resets its output (a resize) without the deactivation
+                // step: the session resizes `image` itself, and the window follows.
+                if (image.width(), image.height()) != shown {
+                    shown = (image.width(), image.height());
+                    send(&FromHelper::Size { width: shown.0, height: shown.1 })?;
+                }
+                out
             }
-            _ = sleep_until(due), if !dirty.is_empty() => {
+            _ = sleep_until(if credits > 0 { due } else { due.max(sent + STALL) }), if !dirty.is_empty() => {
                 send_frame(&image, &mut dirty)?;
+                credits = credits.saturating_sub(1);
+                sent = Instant::now();
                 continue;
             }
             _ = sleep_until(next_char), if !queue.is_empty() => {
@@ -267,6 +326,18 @@ async fn session(
                     continue;
                 }
                 stage.process_fastpath_input(&mut image, &ev)?
+            }
+            Some(r) = kit.reads.recv() => {
+                for f in clip::read(&mut stage, r) {
+                    framed.write_all(&f).await?;
+                }
+                continue;
+            }
+            _ = tick.tick() => {
+                for f in clip::tick(&mut stage) {
+                    framed.write_all(&f).await?;
+                }
+                continue;
             }
             msg = rx.recv() => match msg {
                 None | Some(ToHelper::Close) => {
@@ -290,6 +361,23 @@ async fn session(
                     continue;
                 }
                 Some(ToHelper::Connect { .. } | ToHelper::Trust(_)) => continue,
+                Some(ToHelper::Drawn) => {
+                    credits = (credits + 1).min(IN_FLIGHT);
+                    continue;
+                }
+                Some(m @ (ToHelper::ClipText(_) | ToHelper::ClipFiles(_) | ToHelper::ClipImage(_))) => {
+                    kit.offer = offered(m);
+                    for f in clip::offer(&mut stage, kit.offer.clone()) {
+                        framed.write_all(&f).await?;
+                    }
+                    continue;
+                }
+                Some(ToHelper::ClipFetch) => {
+                    for f in clip::fetch(&mut stage) {
+                        framed.write_all(&f).await?;
+                    }
+                    continue;
+                }
                 Some(m) => {
                     queue.push_back(m);
                     let ev = drain(&mut queue, &mut input, &mut next_char, Instant::now());
@@ -301,6 +389,9 @@ async fn session(
                 }
             },
         };
+        // A pointer picture replaces the one before: the "hidden" that comes with a cached one
+        // would only make the pointer blink.
+        let picture = outputs.iter().any(|o| matches!(o, ActiveStageOutput::PointerBitmap(_)));
         for out in outputs {
             match out {
                 ActiveStageOutput::ResponseFrame(f) => framed.write_all(&f).await?,
@@ -320,29 +411,28 @@ async fn session(
                         if let ConnectionActivationState::Finalized {
                             desktop_size,
                             share_id,
+                            static_channel_chunk_size,
                             enable_server_pointer,
                             pointer_software_rendering,
+                            ..
                         } = seq.connection_activation_state()
                         {
-                            stage.set_fastpath_processor(
-                                fast_path::ProcessorBuilder {
-                                    io_channel_id,
-                                    user_channel_id,
-                                    share_id,
-                                    enable_server_pointer,
-                                    pointer_software_rendering,
-                                    // config() asks for no bulk compression.
-                                    bulk_decompressor: None,
-                                }
-                                .build(),
-                            );
-                            stage.set_share_id(share_id);
-                            stage.set_enable_server_pointer(enable_server_pointer);
+                            if !stage.reactivate(
+                                io_channel_id,
+                                user_channel_id,
+                                share_id,
+                                enable_server_pointer,
+                                pointer_software_rendering,
+                                static_channel_chunk_size,
+                            ) {
+                                bail!("the server reactivated the session with settings it can't take");
+                            }
                             break desktop_size;
                         }
                     };
                     image = DecodedImage::new(PixelFormat::RgbA32, size.width, size.height);
                     dirty.clear();
+                    shown = (size.width, size.height);
                     send(&FromHelper::Size { width: size.width, height: size.height })?;
                 }
                 ActiveStageOutput::Terminate(reason) => {
@@ -351,8 +441,21 @@ async fn session(
                     }
                     return Ok(format!("{reason:?}"));
                 }
+                ActiveStageOutput::PointerDefault => send(&FromHelper::PointerDefault)?,
+                ActiveStageOutput::PointerHidden if !picture => send(&FromHelper::PointerHidden)?,
+                ActiveStageOutput::PointerBitmap(p) => send(&FromHelper::PointerBitmap {
+                    width: p.width,
+                    height: p.height,
+                    hot_x: p.hotspot_x,
+                    hot_y: p.hotspot_y,
+                    rgba: p.bitmap_data.clone(),
+                })?,
                 _ => {}
             }
+        }
+        // What the clipboard's backend asked for while that was processed.
+        for f in clip::flush(&mut stage) {
+            framed.write_all(&f).await?;
         }
     }
 }
@@ -419,8 +522,16 @@ fn events(db: &mut Database, m: ToHelper) -> Vec<FastPathInputEvent> {
             return db.apply(ops).into_vec();
         }
         ToHelper::ReleaseAll => return db.release_all().into_vec(),
-        ToHelper::Sync { caps, num, scroll } => return vec![ironrdp::input::synchronize_event(scroll, num, caps, false)],
-        ToHelper::Connect { .. } | ToHelper::Trust(_) | ToHelper::Close | ToHelper::Resize { .. } => return vec![],
+        ToHelper::Sync { caps, num, scroll } => return vec![ironrdp_input::synchronize_event(scroll, num, caps, false)],
+        ToHelper::Connect { .. }
+        | ToHelper::Trust(_)
+        | ToHelper::Close
+        | ToHelper::Resize { .. }
+        | ToHelper::ClipText(_)
+        | ToHelper::ClipFiles(_)
+        | ToHelper::ClipImage(_)
+        | ToHelper::ClipFetch
+        | ToHelper::Drawn => return vec![],
     };
     db.apply([op]).into_vec()
 }
@@ -428,18 +539,16 @@ fn events(db: &mut Database, m: ToHelper) -> Vec<FastPathInputEvent> {
 /// Sends the changed areas' current pixels as one frame (or a few, if huge).
 fn send_frame(image: &DecodedImage, dirty: &mut Vec<InclusiveRectangle>) -> Result<()> {
     let (iw, ih) = (image.width(), image.height());
+    // A server that resized the desktop to nothing has nothing to show.
+    if iw == 0 || ih == 0 {
+        dirty.clear();
+        return Ok(());
+    }
     let rects = merge(dirty.drain(..).map(|r| (r.left, r.top, r.right.min(iw - 1), r.bottom.min(ih - 1))).collect());
     let stride = iw as usize * 4;
     let mut body = vec![];
-    for (left, top, right, bottom) in rects {
-        let (w, h) = (right - left + 1, bottom - top + 1);
-        for n in [left, top, w, h] {
-            body.extend_from_slice(&n.to_le_bytes());
-        }
-        for row in top..=bottom {
-            let start = row as usize * stride + left as usize * 4;
-            body.extend_from_slice(&image.data()[start..start + w as usize * 4]);
-        }
+    for r in rects {
+        copy_area(image.data(), stride, r, &mut body);
         if body.len() > MAX_FRAME {
             send(&FromHelper::Frame(std::mem::take(&mut body)))?;
         }
@@ -448,6 +557,23 @@ fn send_frame(image: &DecodedImage, dirty: &mut Vec<InclusiveRectangle>) -> Resu
         send(&FromHelper::Frame(body))?;
     }
     Ok(())
+}
+
+/// Appends one changed area, `[x][y][w][h: u16]` then its rows, to `out`. Every pixel goes
+/// opaque: a desktop is, but Windows leaves partial alpha where it drew shadows and none on some
+/// title bars, with the colours already right, and a canvas that took that alpha would darken
+/// them (or show black).
+fn copy_area(data: &[u8], stride: usize, (left, top, right, bottom): Rect, out: &mut Vec<u8>) {
+    let (w, h) = (right - left + 1, bottom - top + 1);
+    for n in [left, top, w, h] {
+        out.extend_from_slice(&n.to_le_bytes());
+    }
+    let from = out.len();
+    for row in top..=bottom {
+        let start = row as usize * stride + left as usize * 4;
+        out.extend_from_slice(&data[start..start + w as usize * 4]);
+    }
+    out[from..].as_chunks_mut::<4>().0.iter_mut().for_each(|px| px[3] = 0xFF);
 }
 
 /// Inclusive (left, top, right, bottom).
@@ -474,18 +600,21 @@ fn merge(mut rects: Vec<Rect>) -> Vec<Rect> {
     kept
 }
 
-/// `quality`: how the session trades picture for speed.
+/// `quality`: how the session trades picture for speed. With the graphics pipeline (Windows, and
+/// xrdp built with it) the server picks the codecs; the network profile and the desktop's look
+/// still say how hard to try. Without it:
 /// - 0, quality (the default): lossless 32-bit bitmaps and the full desktop look.
 /// - 1, balanced: RemoteFX (compressed, slightly lossy tiles), no wallpaper or animations.
 /// - 2, speed: RemoteFX, 16-bit colour for plain bitmaps, and the plainest desktop.
 fn config(user: String, password: String, domain: String, width: u16, height: u16, quality: u8) -> connector::Config {
     use PerformanceFlags as F;
+    use ironrdp_pdu::gcc::ConnectionType;
     let looks = F::ENABLE_FONT_SMOOTHING | F::ENABLE_DESKTOP_COMPOSITION;
     let lean = F::DISABLE_WALLPAPER | F::DISABLE_FULLWINDOWDRAG | F::DISABLE_MENUANIMATIONS;
-    let (remotefx, color_depth, performance_flags) = match quality {
-        0 => (false, 32, looks),
-        1 => (true, 32, looks | lean),
-        _ => (true, 16, lean | F::DISABLE_THEMING | F::DISABLE_CURSOR_SHADOW | F::DISABLE_CURSORSETTINGS),
+    let (remotefx, color_depth, performance_flags, connection_type) = match quality {
+        0 => (false, 32, looks, ConnectionType::Lan),
+        1 => (true, 32, looks | lean, ConnectionType::BroadbandHigh),
+        _ => (true, 16, lean | F::DISABLE_THEMING | F::DISABLE_CURSOR_SHADOW | F::DISABLE_CURSORSETTINGS, ConnectionType::BroadbandLow),
     };
     // xrdp has no NLA and reads the Client Info password only when INFO_AUTOLOGON is set, else it
     // shows its own login screen. Windows authenticates through CredSSP first and accepts it too
@@ -498,7 +627,20 @@ fn config(user: String, password: String, domain: String, width: u16, height: u1
         enable_credssp: true,
         desktop_size: DesktopSize { width, height },
         desktop_scale_factor: 0,
-        keyboard_type: KeyboardType::IbmEnhanced,
+        monitor_layout: None,
+        desktop_physical_size: None,
+        desktop_orientation: None,
+        device_scale_factor: None,
+        monitor_extended_layout: None,
+        relative_mouse_input: false,
+        enable_standard_rdp_security: false,
+        connection_type,
+        remote_application_mode: false,
+        rail_support_level: ironrdp_pdu::rdp::capability_sets::RailSupportLevel::empty(),
+        enable_audio_capture: false,
+        // The graphics pipeline: its channel is registered in `session`.
+        support_dyn_vc_gfx_protocol: true,
+        keyboard_type: KeyboardType::IBM_ENHANCED,
         keyboard_subtype: 0,
         keyboard_layout: 0,
         keyboard_functional_keys_count: 12,
@@ -531,8 +673,11 @@ fn config(user: String, password: String, domain: String, width: u16, height: u1
         license_cache: None,
         timezone_info: TimezoneInfo::default(),
         compression_type: None,
+        // The desktop's pointer becomes this computer's (`FromHelper::Pointer*`), as mstsc does:
+        // painted into the picture instead, it trails the real one by a round trip and shows
+        // beside it.
         enable_server_pointer: true,
-        pointer_software_rendering: true,
+        pointer_software_rendering: false,
         multitransport_flags: None,
     }
 }
@@ -544,12 +689,23 @@ mod tests {
     #[test]
     fn signing_out_ends_the_tab() {
         use super::{GracefulDisconnectReason as R, signed_out};
-        use ironrdp::pdu::rdp::server_error_info::{ErrorInfo, ProtocolIndependentCode as Code};
+        use ironrdp_pdu::rdp::server_error_info::{ErrorInfo, ProtocolIndependentCode as Code};
         let other = |c| R::Other(ErrorInfo::ProtocolIndependentCode(c).description());
         assert!(signed_out(&other(Code::LogoffByUser)));
         assert!(signed_out(&other(Code::RpcInitiatedDisconnectByuser)));
         assert!(!signed_out(&other(Code::IdleTimeout)));
         assert!(!signed_out(&R::ServerInitiated));
+    }
+
+    /// An area's rows come out in order, each pixel opaque whatever alpha the desktop left.
+    #[test]
+    fn areas_go_opaque() {
+        // A 3x2 image, alpha 0 / 128 / 255 in turn; the area is its right two columns.
+        let data: Vec<u8> = (0..6u8).flat_map(|i| [i, i, i, [0, 128, 255][usize::from(i % 3)]]).collect();
+        let mut out = vec![];
+        super::copy_area(&data, 12, (1, 0, 2, 1), &mut out);
+        assert_eq!(out[..8], [1, 0, 0, 0, 2, 0, 2, 0]);
+        assert_eq!(out[8..], [1, 1, 1, 255, 2, 2, 2, 255, 4, 4, 4, 255, 5, 5, 5, 255]);
     }
 
     /// xrdp uses the password only with autologon (else it shows its login screen); without a
@@ -572,11 +728,12 @@ mod tests {
     }
 
     /// xrdp up to 0.10.4 resizes the desktop with a Deactivate All that is only the 6-byte header
-    /// (no shareId): it must decode, or every resize ends the session (patches/ironrdp-pdu).
+    /// (no shareId): it must decode, or every resize ends the session (IronRDP #1719, in
+    /// ironrdp-pdu since 0.10).
     #[test]
     fn xrdp_short_deactivate_all_decodes() {
-        use ironrdp::core::decode;
-        use ironrdp::pdu::rdp::headers::{ShareControlHeader, ShareControlPdu};
+        use ironrdp_core::decode;
+        use ironrdp_pdu::rdp::headers::{ShareControlHeader, ShareControlPdu};
         // totalLength 6, Deactivate All with protocol version 1, pduSource 1001.
         let short: ShareControlHeader = decode(&[0x06, 0x00, 0x16, 0x00, 0xE9, 0x03]).expect("header-only PDU");
         assert!(matches!(short.share_control_pdu, ShareControlPdu::ServerDeactivateAll(_)));
@@ -617,7 +774,7 @@ mod tests {
     #[test]
     fn input_events() {
         use super::{Database, ToHelper, events};
-        use ironrdp::pdu::input::fast_path::{FastPathInputEvent as E, KeyboardFlags as F};
+        use ironrdp_pdu::input::fast_path::{FastPathInputEvent as E, KeyboardFlags as F};
         let mut db = Database::new();
         let ctrl = ToHelper::Key { scancode: 0x1D, pressed: true };
         assert!(matches!(events(&mut db, ctrl)[..], [E::KeyboardEvent(f, 0x1D)] if f.is_empty()));

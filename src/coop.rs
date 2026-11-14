@@ -82,7 +82,7 @@ const EMIT_EVERY: Duration = Duration::from_millis(50);
 const POINT_EVERY: Duration = Duration::from_millis(66);
 
 /// A picture message on a tab's channel that Co-op adds for websites: `[6][JPEG]`, the whole page.
-/// (The others are rdp.rs': 2 size, 3 changed areas, 4 status, 5 ended.)
+/// (The others are rdp.rs': 2 size, 3 changed areas, 4 status, 5 ended, 7 pointer.)
 pub const MSG_JPEG: u8 = 6;
 
 // Why a connection was closed, in the QUIC close code.
@@ -423,12 +423,12 @@ fn clip(mut s: String) -> (String, bool) {
 }
 
 /// What a viewer may do to a desktop: keys, a key's text, the pointer and the wheel. Nothing to
-/// or from a clipboard: not "paste" (the owner's clipboard), nor text longer than a key types (a
-/// paste typed out). Nor the owner's window size or lock keys. (Files have no way in at all: a
-/// desktop's input carries none.)
+/// or from a clipboard: not "paste" (the owner's clipboard), nor the shared clipboard, nor text
+/// longer than a key types (a paste typed out). Nor the owner's window size or lock keys. (Files
+/// have no way in at all: a desktop's input carries none.)
 fn desktop_ok(ev: &rdp::Input) -> bool {
     match ev {
-        rdp::Input::Paste | rdp::Input::Resize { .. } | rdp::Input::Sync { .. } => false,
+        rdp::Input::Paste | rdp::Input::Clip | rdp::Input::Resize { .. } | rdp::Input::Sync { .. } => false,
         rdp::Input::Text { text } => text.chars().count() <= KEY_TEXT,
         _ => true,
     }

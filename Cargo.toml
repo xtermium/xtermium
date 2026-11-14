@@ -18,6 +18,8 @@ chacha20poly1305 = "0.11"
 # The troubleshooting bundle (support.rs): its .zip's checksums, and the computer's name to take
 # out of it. Both are already in the build (flate2, wezterm).
 crc32fast = "1"
+# RDP frames deflated on their way into the page (rdp.rs `frame_msg`); already in the build.
+flate2 = "1"
 gethostname = "1"
 directories = "6"
 # Paths without the \\?\ prefix that canonicalizing adds on Windows (Tauri's resource folder).

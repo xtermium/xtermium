@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::io::{BufReader, BufWriter};
 use std::process::{Child, ChildStdin, Command, Stdio};
+use std::sync::atomic::{AtomicU8, Ordering::Relaxed};
 use std::sync::{Arc, Mutex};
 use tauri::ipc::{Channel, InvokeResponseBody};
 use tokio::sync::mpsc::UnboundedSender;
@@ -21,6 +22,13 @@ const MSG_FRAME: u8 = 3;
 const MSG_STATUS: u8 = 4;
 /// The session ended from inside (signed out): the UI closes the tab.
 const MSG_ENDED: u8 = 5;
+/// `[8]` then a `MSG_FRAME`'s changed areas, deflated (zlib).
+const MSG_FRAME_PACKED: u8 = 8;
+/// Frames smaller than this go as they are: packing them saves too little to be worth the time.
+const PACK_FROM: usize = 16 << 10;
+/// The desktop's pointer, which the view makes its own (6 is coop.rs' `MSG_JPEG`): `[7][0]` the
+/// system arrow, `[7][1]` none, `[7][2][w][h][hot x][hot y: u16][w*h RGBA]` a picture.
+const MSG_POINTER: u8 = 7;
 
 /// Input from the UI. Coordinates are remote desktop pixels.
 #[derive(Deserialize, Serialize, Clone)]
@@ -66,6 +74,115 @@ pub enum Input {
         num: bool,
         scroll: bool,
     },
+    /// The view took the keyboard, or a paste chord is on its way: the desktop gets to paste
+    /// what the clipboard here holds now (Settings › Terminal › RDP allowing).
+    Clip,
+}
+
+/// What may cross the shared clipboard (Settings › Terminal › RDP): this computer's to the
+/// desktop, the desktop's to here, both (the default) or neither.
+pub const TO_DESKTOP: u8 = 1;
+pub const FROM_DESKTOP: u8 = 2;
+static CLIPBOARD: AtomicU8 = AtomicU8::new(TO_DESKTOP | FROM_DESKTOP);
+
+/// Applies the clipboard setting to every RDP tab, open or to come.
+pub fn set_clipboard(mode: u8) {
+    CLIPBOARD.store(mode, Relaxed);
+}
+
+fn clipboard_allows(way: u8) -> bool {
+    CLIPBOARD.load(Relaxed) & way != 0
+}
+
+/// Text bigger than this doesn't cross the clipboard (the helper's limit, `clip::MAX_TEXT`).
+const MAX_TEXT: usize = 16 << 20;
+/// Nor a picture bigger than this (`clip::MAX_IMAGE`): 4K screenshots pass, 8K ones don't.
+const MAX_IMAGE: usize = 60 << 20;
+
+/// A clipboard's content as it crossed: the last one each way, so neither side gets back what
+/// it already has (the desktop's text put here isn't offered to it again).
+#[derive(PartialEq)]
+enum Clipped {
+    Text(String),
+    Files(Vec<String>),
+    /// A picture, by a hash of its pixels.
+    Image(u64),
+}
+
+/// What this computer's clipboard holds now: files (as Explorer copies them), else text, else a
+/// picture (a screenshot from Win+Shift+S, say); with the message that offers it to the desktop.
+fn clipboard_now() -> Option<(Clipped, ToHelper)> {
+    let files = crate::term::clipboard(|c| c.get().file_list()).filter(|f| !f.is_empty());
+    if let Some(f) = files {
+        let f: Vec<String> = f.iter().map(|p| p.to_string_lossy().into_owned()).collect();
+        return Some((Clipped::Files(f.clone()), ToHelper::ClipFiles(f)));
+    }
+    if let Some(t) = crate::term::clipboard(|c| c.get_text()).filter(|t| !t.is_empty() && t.len() <= MAX_TEXT) {
+        return Some((Clipped::Text(t.clone()), ToHelper::ClipText(t)));
+    }
+    let img = crate::term::clipboard(|c| c.get_image()).filter(|i| i.bytes.len() <= MAX_IMAGE && i.bytes.len() == i.width * i.height * 4)?;
+    Some((Clipped::Image(hash(&img.bytes)), ToHelper::ClipImage(to_dib(img.width, img.height, &img.bytes))))
+}
+
+fn hash(b: &[u8]) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    b.hash(&mut h);
+    h.finish()
+}
+
+/// RGBA pixels (rows top to bottom) as CF_DIB, what Windows pastes pictures from: a 40-byte
+/// BITMAPINFOHEADER, then 32-bit BGRA rows bottom to top.
+fn to_dib(w: usize, h: usize, rgba: &[u8]) -> Vec<u8> {
+    let mut d = Vec::with_capacity(40 + rgba.len());
+    for v in [40, w as u32, h as u32] {
+        d.extend_from_slice(&v.to_le_bytes());
+    }
+    d.extend_from_slice(&[1, 0, 32, 0]); // one plane, 32 bits a pixel
+    // Uncompressed (BI_RGB), the pixels' size, then resolution and palette left out.
+    for v in [0, (w * h * 4) as u32, 0, 0, 0, 0] {
+        d.extend_from_slice(&v.to_le_bytes());
+    }
+    for row in rgba.chunks_exact(w * 4).rev() {
+        for px in row.as_chunks::<4>().0 {
+            d.extend_from_slice(&[px[2], px[1], px[0], px[3]]);
+        }
+    }
+    d
+}
+
+/// CF_DIB (as `to_dib` makes, or 24-bit, top-down, or with BITFIELDS masks as Windows makes)
+/// as (width, height, RGBA rows top to bottom). None for what isn't a 24- or 32-bit picture.
+fn from_dib(d: &[u8]) -> Option<(usize, usize, Vec<u8>)> {
+    let u32_at = |i: usize| Some(u32::from_le_bytes(d.get(i..i + 4)?.try_into().ok()?));
+    let header = u32_at(0)? as usize;
+    let (w, h) = (u32_at(4)? as i32, u32_at(8)? as i32);
+    let bits = usize::from(u16::from_le_bytes(d.get(14..16)?.try_into().ok()?));
+    let (compression, colours) = (u32_at(16)?, u32_at(32)? as usize);
+    if header < 40 || w <= 0 || h == 0 || !matches!(bits, 24 | 32) || !matches!(compression, 0 | 3) {
+        return None;
+    }
+    let (w, top_down, h) = (w as usize, h < 0, h.unsigned_abs() as usize);
+    if w.checked_mul(h)?.checked_mul(4)? > MAX_IMAGE {
+        return None;
+    }
+    // BITFIELDS puts three colour masks after a plain header (taken as the usual BGR order).
+    let masks = if compression == 3 && header == 40 { 12 } else { 0 };
+    let start = header + masks + colours * 4;
+    let (bpp, stride) = (bits / 8, (w * bits / 8 + 3) & !3);
+    let px = d.get(start..start + stride * h)?;
+    let mut out = Vec::with_capacity(w * h * 4);
+    for y in 0..h {
+        let row = &px[if top_down { y } else { h - 1 - y } * stride..][..w * bpp];
+        for p in row.chunks_exact(bpp) {
+            out.extend_from_slice(&[p[2], p[1], p[0], if bpp == 4 { p[3] } else { 0xFF }]);
+        }
+    }
+    // Most 32-bit pictures leave alpha at 0, meaning "no alpha": shown opaque.
+    if bpp == 4 && out.as_chunks::<4>().0.iter().all(|p| p[3] == 0) {
+        out.as_chunks_mut::<4>().0.iter_mut().for_each(|p| p[3] = 0xFF);
+    }
+    Some((w, h, out))
 }
 
 /// A remote desktop's picture as RGBA, for automation's screenshots.
@@ -117,6 +234,10 @@ pub struct RdpTab {
     status: Arc<Mutex<Vec<u8>>>,
     /// Terminal Co-op (coop.rs): a second place the messages go, while the tab is shared.
     sink: Arc<Mutex<Option<UnboundedSender<Vec<u8>>>>>,
+    /// The clipboard content that last crossed, either way.
+    clipped: Arc<Mutex<Option<Clipped>>>,
+    /// The last pointer message, sent again to a window the tab moves to.
+    pointer: Arc<Mutex<Vec<u8>>>,
 }
 
 impl RdpTab {
@@ -144,10 +265,13 @@ impl RdpTab {
             out: Arc::new(Mutex::new(out)),
             status: Default::default(),
             sink: Default::default(),
+            clipped: Default::default(),
+            pointer: Default::default(),
         };
         let config::Kind::Rdp { host, port, user, .. } = tab.session.kind.clone() else { unreachable!("not RDP") };
         let (stdin, child, login, picture) = (tab.stdin.clone(), tab.child.clone(), tab.login.clone(), tab.picture.clone());
-        let (out, last_status, sink) = (tab.out.clone(), tab.status.clone(), tab.sink.clone());
+        let (out, last_status, sink, clipped) = (tab.out.clone(), tab.status.clone(), tab.sink.clone(), tab.clipped.clone());
+        let last_pointer = tab.pointer.clone();
         std::thread::spawn(move || {
             // A window gone (the tab moving to another) misses messages until `attach` catches it up.
             // A Co-op sink gets a copy of each message; without one nothing is copied.
@@ -253,13 +377,11 @@ impl RdpTab {
                         status("", false);
                     }
                     FromHelper::Frame(body) => {
+                        let m = frame_msg(&body);
                         // Painted and sent under one lock: `attach` sends the whole picture
                         // between frames, never half of one.
                         let mut p = picture.lock().unwrap();
                         p.paint(&body);
-                        let mut m = Vec::with_capacity(1 + body.len());
-                        m.push(MSG_FRAME);
-                        m.extend_from_slice(&body);
                         ui(m);
                         drop(p);
                     }
@@ -276,6 +398,34 @@ impl RdpTab {
                         return;
                     }
                     FromHelper::Status(s) => status(&s, false),
+                    // A copy on the desktop: brought here if the setting allows (text and pictures
+                    // come back as ClipText / ClipImage; files go on the clipboard from the
+                    // helper, on Windows).
+                    FromHelper::ClipOffer { text, files, image } => {
+                        if clipboard_allows(FROM_DESKTOP) && (text || image || (files && cfg!(windows))) {
+                            send(ToHelper::ClipFetch);
+                        }
+                    }
+                    FromHelper::ClipText(t) => {
+                        if clipboard_allows(FROM_DESKTOP) && crate::term::clipboard(|c| c.set_text(t.as_str())).is_some() {
+                            *clipped.lock().unwrap() = Some(Clipped::Text(t));
+                        }
+                    }
+                    FromHelper::ClipImage(dib) => {
+                        if clipboard_allows(FROM_DESKTOP)
+                            && let Some((width, height, px)) = from_dib(&dib)
+                        {
+                            let h = hash(&px);
+                            if crate::term::clipboard(|c| c.set_image(arboard::ImageData { width, height, bytes: px.into() })).is_some() {
+                                *clipped.lock().unwrap() = Some(Clipped::Image(h));
+                            }
+                        }
+                    }
+                    FromHelper::PointerDefault | FromHelper::PointerHidden | FromHelper::PointerBitmap { .. } => {
+                        let m = pointer_msg(msg);
+                        *last_pointer.lock().unwrap() = m.clone();
+                        ui(m);
+                    }
                 }
             }
             status(if last.is_empty() { "disconnected" } else { &last }, true);
@@ -287,10 +437,20 @@ impl RdpTab {
     /// and the whole picture, then the changes as they come.
     pub fn attach(&self, out: Channel) {
         let p = self.picture.lock().unwrap();
-        for m in catch_up(&self.status.lock().unwrap(), &p) {
+        for m in catch_up(&self.status.lock().unwrap(), &p).into_iter().chain(self.last_pointer()) {
             let _ = out.send(InvokeResponseBody::Raw(m));
         }
         *self.out.lock().unwrap() = out;
+    }
+
+    /// The last pointer message, if the desktop has sent one.
+    fn last_pointer(&self) -> Option<Vec<u8>> {
+        Some(self.pointer.lock().unwrap().clone()).filter(|m| !m.is_empty())
+    }
+
+    /// The window took a frame: the helper may send the next (`ToHelper::Drawn`).
+    pub fn drawn(&self) {
+        self.send(ToHelper::Drawn);
     }
 
     /// Terminal Co-op: from now on the messages the window gets go to `sink` as well (None stops
@@ -300,7 +460,7 @@ impl RdpTab {
     pub fn share(&self, sink: Option<UnboundedSender<Vec<u8>>>) {
         let p = self.picture.lock().unwrap();
         if let Some(s) = &sink {
-            catch_up(&self.status.lock().unwrap(), &p).into_iter().for_each(|m| _ = s.send(m));
+            catch_up(&self.status.lock().unwrap(), &p).into_iter().chain(self.last_pointer()).for_each(|m| _ = s.send(m));
         }
         *self.sink.lock().unwrap() = sink;
     }
@@ -328,16 +488,17 @@ impl RdpTab {
         }
     }
 
-    fn send(&self, m: ToHelper) {
-        if let Some(w) = self.stdin.lock().unwrap().as_mut() {
-            let _ = m.write(w);
+    /// Whether the helper got `m` (false before it has started, or once it's gone).
+    fn send(&self, m: ToHelper) -> bool {
+        match self.stdin.lock().unwrap().as_mut() {
+            Some(w) => m.write(w).is_ok(),
+            None => false,
         }
     }
 
     pub fn input(&self, ev: Input) {
         match ev {
             Input::Key { code, down } => {
-                use std::sync::atomic::Ordering::Relaxed;
                 let Some(scancode) = scancode(&code) else { return };
                 if matches!(code.as_str(), "MetaLeft" | "MetaRight") {
                     self.win.store(if down { scancode } else { 0 }, Relaxed);
@@ -350,8 +511,8 @@ impl RdpTab {
                 }
                 self.send(ToHelper::Key { scancode, pressed: down });
             }
-            Input::Text { text } => typing(&text).into_iter().for_each(|m| self.send(m)),
-            Input::Move { x, y } => self.send(ToHelper::MouseMove { x, y }),
+            Input::Text { text } => typing(&text).into_iter().for_each(|m| _ = self.send(m)),
+            Input::Move { x, y } => _ = self.send(ToHelper::MouseMove { x, y }),
             Input::Button { button, down, x, y } => {
                 self.send(ToHelper::MouseMove { x, y });
                 self.send(ToHelper::MouseButton { button, pressed: down });
@@ -370,15 +531,28 @@ impl RdpTab {
                     self.send(ToHelper::Key { scancode, pressed: false });
                 }
                 if let Some(s) = crate::term::clipboard(|c| c.get_text()) {
-                    typing(&s).into_iter().for_each(|m| self.send(m));
+                    typing(&s).into_iter().for_each(|m| _ = self.send(m));
                 }
             }
-            Input::Resize { width, height } => self.send(ToHelper::Resize { width, height }),
+            Input::Resize { width, height } => _ = self.send(ToHelper::Resize { width, height }),
             Input::Release => {
-                self.win.store(0, std::sync::atomic::Ordering::Relaxed);
+                self.win.store(0, Relaxed);
                 self.send(ToHelper::ReleaseAll);
             }
-            Input::Sync { caps, num, scroll } => self.send(ToHelper::Sync { caps, num, scroll }),
+            Input::Sync { caps, num, scroll } => _ = self.send(ToHelper::Sync { caps, num, scroll }),
+            Input::Clip => {
+                if !clipboard_allows(TO_DESKTOP) {
+                    return;
+                }
+                let Some((now, m)) = clipboard_now() else { return };
+                let mut last = self.clipped.lock().unwrap();
+                if last.as_ref() == Some(&now) {
+                    return;
+                }
+                if self.send(m) {
+                    *last = Some(now);
+                }
+            }
         }
     }
 }
@@ -412,56 +586,140 @@ impl Drop for RdpTab {
     }
 }
 
-/// The UI says whether a remote desktop has the keyboard: its Windows keys then go to the desktop
-/// instead of opening the Start menu here (Windows), as `win-key` events `[right, down]`.
+/// The UI says which remote desktop has the keyboard (`on`), and Settings › Terminal › RDP lets it
+/// take the keyboard from the system: the Windows keys and the system's shortcuts then go to
+/// that desktop instead of acting here (Windows).
 #[tauri::command]
-pub fn desktop_keys(app: tauri::AppHandle, on: bool) {
+pub fn desktop_keys(app: tauri::AppHandle, id: u32, on: bool) {
     #[cfg(windows)]
-    win_key::grab(&app, on);
+    grab::grab(&app, id, on);
     #[cfg(not(windows))]
-    let _ = (app, on);
+    let _ = (app, id, on);
 }
 
-/// A low-level keyboard hook takes the Windows keys from the system while a desktop has the
-/// keyboard and xtermium is in front. Windows never sees them down, so the keys pressed with one
-/// held reach the desktop too, and nothing stays stuck when the key comes back up.
+/// A tab closed or moving to another window lets go of the keyboard: its view may be gone
+/// without saying so (a detached window closed while the desktop had the keyboard), and the
+/// keys mustn't keep going to it. The view in the window it moves to takes it again on focus.
+pub fn let_go(id: u32) {
+    #[cfg(windows)]
+    grab::want(id, false);
+    #[cfg(not(windows))]
+    let _ = id;
+}
+
+/// A low-level keyboard hook takes the Windows keys and the system's shortcuts (Alt+Tab,
+/// Alt+Esc, Alt+Space, Alt+F4, Ctrl+Esc, Ctrl+Shift+Esc) from the system while a desktop has the
+/// keyboard and xtermium is in front, and every key pressed while a Windows key it took is down.
+/// Windows never sees them, so Win+E opens Explorer on the desktop and not here.
+///
+/// The hook is set only while a desktop has the keyboard: the rest of the time no key on this
+/// computer passes through xtermium. Windows calls it while our own window is in front only
+/// because main.rs turns tao's raw input off (`device_event_filter`).
+///
+/// The keys it takes go straight to the desktop's tab from here (`crate::desktop_input`), in the
+/// order they were pressed: E after the Windows key, never before it, however busy the window
+/// is. A key taken on its way down is taken on its way up too, so nothing stays stuck.
+/// Ctrl+Alt+Del and Win+L stay the system's (no program can take them).
 #[cfg(windows)]
-mod win_key {
+mod grab {
     use std::sync::OnceLock;
-    use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
+    use std::sync::atomic::{AtomicBool, AtomicU32, Ordering::Relaxed, Ordering::SeqCst};
     use std::sync::mpsc::{Sender, channel};
-    use tauri::{AppHandle, Emitter};
+    use tauri::AppHandle;
     use windows::Win32::Foundation::{HINSTANCE, LPARAM, LRESULT, WPARAM};
     use windows::Win32::System::LibraryLoader::GetModuleHandleW;
-    use windows::Win32::UI::Input::KeyboardAndMouse::{VK_LWIN, VK_RWIN};
+    use windows::Win32::UI::Input::KeyboardAndMouse::{
+        GetAsyncKeyState, VK_CONTROL, VK_ESCAPE, VK_F4, VK_LWIN, VK_RWIN, VK_SPACE, VK_TAB,
+    };
     use windows::Win32::UI::WindowsAndMessaging::*;
 
+    /// A desktop has the keyboard.
     static GRAB: AtomicBool = AtomicBool::new(false);
-    /// A Windows key went down to the desktop: its release goes there too.
-    static HELD: AtomicBool = AtomicBool::new(false);
-    /// Where the hook hands the keys it takes, `[right, down]`.
-    static KEYS: OnceLock<Sender<(bool, bool)>> = OnceLock::new();
+    /// The tab whose desktop gets the keys (or last got them: releases still go there).
+    static TAB: AtomicU32 = AtomicU32::new(0);
+    /// The views that have the keyboard, the latest last: keys go to that one. Moving between
+    /// two desktops sends one's "off" and the other's "on", which may arrive in either order.
+    static WANT: std::sync::Mutex<Vec<u32>> = std::sync::Mutex::new(Vec::new());
+    /// The keys taken on their way down, by virtual key: their releases are taken too.
+    static HELD: [AtomicBool; 256] = [const { AtomicBool::new(false) }; 256];
+    /// Where the hook hands the keys it takes: the key's code, and down or up.
+    static TAKEN: OnceLock<Sender<(String, bool)>> = OnceLock::new();
+    /// The thread that sets and removes the hook, 0 before it's there.
+    static HOOK_THREAD: AtomicU32 = AtomicU32::new(0);
 
-    pub fn grab(app: &AppHandle, on: bool) {
-        GRAB.store(on, Relaxed);
+    pub fn grab(app: &AppHandle, id: u32, on: bool) {
+        want(id, on);
         let (tx, rx) = channel();
-        if on && KEYS.set(tx).is_ok() {
+        if on && TAKEN.set(tx).is_ok() {
             // The hook must answer Windows at once: one that keeps it waiting is dropped without
             // a word, and the Windows key then opens the Start menu here. So it only hands the
-            // key over, and this thread tells the UI.
+            // key over, and this thread passes it on.
             let app = app.clone();
-            std::thread::spawn(move || rx.into_iter().for_each(|k| _ = app.emit("win-key", k)));
+            std::thread::spawn(move || {
+                for (code, down) in rx {
+                    crate::desktop_input(&app, TAB.load(Relaxed), super::Input::Key { code, down });
+                }
+            });
             // The hook runs on the thread that set it, which must pump messages.
-            std::thread::spawn(|| unsafe {
-                let module = GetModuleHandleW(None).ok().map(|m| HINSTANCE(m.0));
-                if SetWindowsHookExW(WH_KEYBOARD_LL, Some(hook), module, 0).is_ok() {
-                    let mut msg = MSG::default();
-                    while GetMessageW(&mut msg, None, 0, 0).as_bool() {}
+            std::thread::spawn(|| {
+                let mut msg = MSG::default();
+                // SAFETY: makes this thread's queue before others post to it.
+                let _ = unsafe { PeekMessageW(&mut msg, None, 0, 0, PM_NOREMOVE) };
+                HOOK_THREAD.store(unsafe { windows::Win32::System::Threading::GetCurrentThreadId() }, SeqCst);
+                let mut hook_ = None;
+                follow(&mut hook_);
+                // SAFETY: this thread's own message loop.
+                while unsafe { GetMessageW(&mut msg, None, 0, 0) }.as_bool() {
+                    if msg.message == WM_APP && msg.hwnd.is_invalid() {
+                        follow(&mut hook_);
+                    }
                 }
             });
         }
     }
 
+    /// Tab `id`'s view has the keyboard (`on`) or not any more; the hook follows.
+    pub fn want(id: u32, on: bool) {
+        let last = {
+            let mut want = WANT.lock().unwrap();
+            want.retain(|&w| w != id);
+            if on {
+                want.push(id);
+            }
+            want.last().copied()
+        };
+        if let Some(t) = last {
+            TAB.store(t, Relaxed);
+        }
+        // SeqCst with HOOK_THREAD: the hook thread starting up either sees this or gets the post.
+        if GRAB.swap(last.is_some(), SeqCst) != last.is_some() {
+            let thread = HOOK_THREAD.load(SeqCst);
+            if thread != 0 {
+                // SAFETY: posting to the hook thread, which has a message queue (it pumps one).
+                let _ = unsafe { PostThreadMessageW(thread, WM_APP, WPARAM(0), LPARAM(0)) };
+            }
+        }
+    }
+
+    /// Sets the hook while a desktop has the keyboard and removes it once none has. Set anew
+    /// each time, so it's the newest: Windows asks the newest hook first, and one set since (a
+    /// key remapper's, another app's) would otherwise see the Windows key first and could keep
+    /// it from us.
+    fn follow(hook_: &mut Option<HHOOK>) {
+        if let Some(h) = hook_.take() {
+            // SAFETY: a hook this thread set.
+            let _ = unsafe { UnhookWindowsHookEx(h) };
+            // Releases it didn't see (the lock screen takes Win+L's) mustn't keep a key taken.
+            HELD.iter().for_each(|h| h.store(false, Relaxed));
+        }
+        if GRAB.load(SeqCst) {
+            // SAFETY: our own module, and a hook procedure that lives as long as the program.
+            let module = unsafe { GetModuleHandleW(None) }.ok().map(|m| HINSTANCE(m.0));
+            *hook_ = unsafe { SetWindowsHookExW(WH_KEYBOARD_LL, Some(hook), module, 0) }.ok();
+        }
+    }
+
+    /// Whether xtermium has the foreground window.
     fn in_front() -> bool {
         let mut pid = 0;
         // SAFETY: plain queries about the foreground window.
@@ -469,17 +727,42 @@ mod win_key {
         pid == std::process::id()
     }
 
+    fn held(vk: u16) -> bool {
+        HELD[usize::from(vk)].load(Relaxed)
+    }
+
+    /// Whether the system would act on `vk` pressed now: a Windows key always, any key while one
+    /// we took is down, Tab, Space and F4 with Alt, Esc with Alt or Ctrl.
+    fn system(vk: u16, alt: bool) -> bool {
+        // SAFETY: a plain query of a key's state.
+        let ctrl = || unsafe { GetAsyncKeyState(VK_CONTROL.0.into()) } < 0;
+        match vk {
+            _ if vk == VK_LWIN.0 || vk == VK_RWIN.0 || held(VK_LWIN.0) || held(VK_RWIN.0) => true,
+            _ if vk == VK_ESCAPE.0 => alt || ctrl(),
+            _ => alt && [VK_TAB.0, VK_SPACE.0, VK_F4.0].contains(&vk),
+        }
+    }
+
+    /// Windows waits on this for every key: it decides, hands a taken key over and returns.
     unsafe extern "system" fn hook(code: i32, w: WPARAM, l: LPARAM) -> LRESULT {
-        // SAFETY: for HC_ACTION, lparam points at the key's KBDLLHOOKSTRUCT.
-        let k = unsafe { &*(l.0 as *const KBDLLHOOKSTRUCT) };
-        let right = k.vkCode == VK_RWIN.0 as u32;
-        let win = right || k.vkCode == VK_LWIN.0 as u32;
-        if code == HC_ACTION as i32 && win && !k.flags.contains(LLKHF_INJECTED) {
+        if code == HC_ACTION as i32 {
+            // SAFETY: for HC_ACTION, lparam points at the key's KBDLLHOOKSTRUCT.
+            let k = unsafe { &*(l.0 as *const KBDLLHOOKSTRUCT) };
+            let vk = (k.vkCode & 0xFF) as u16;
             let down = matches!(w.0 as u32, WM_KEYDOWN | WM_SYSKEYDOWN);
-            if HELD.load(Relaxed) || (down && GRAB.load(Relaxed) && in_front()) {
-                HELD.store(down, Relaxed);
-                if let Some(keys) = KEYS.get() {
-                    let _ = keys.send((right, down));
+            let take = held(vk) || (down && GRAB.load(Relaxed) && system(vk, k.flags.contains(LLKHF_ALTDOWN)) && in_front());
+            // Keys another program sent in our stead (a key remapper, a KVM switch) count too:
+            // xtermium sends none itself. The Windows keys go by their virtual key: some
+            // keyboards and remappers report them without the scancode (or extended flag) they have.
+            let code_ = || match vk {
+                _ if vk == VK_LWIN.0 => Some("MetaLeft".to_string()),
+                _ if vk == VK_RWIN.0 => Some("MetaRight".to_string()),
+                _ => super::code_of((k.scanCode & 0xFF) as u16 | if k.flags.contains(LLKHF_EXTENDED) { 0xE000 } else { 0 }),
+            };
+            if take && let Some(code) = code_() {
+                HELD[usize::from(vk)].store(down, Relaxed);
+                if let Some(keys) = TAKEN.get() {
+                    let _ = keys.send((code, down));
                 }
                 return LRESULT(1);
             }
@@ -508,11 +791,48 @@ pub(crate) fn catch_up(status: &[u8], p: &Picture) -> Vec<Vec<u8>> {
     v
 }
 
+/// A frame's changed areas for the window: deflated when that's worth it. The IPC into the page
+/// costs per byte (about 13 ms a megabyte on WebView2) and a dragged window sends a megabyte or
+/// more each frame, while desktop pictures shrink ten- to thirty-fold at the fastest level in a
+/// few milliseconds. The page inflates them natively (`DecompressionStream`).
+fn frame_msg(body: &[u8]) -> Vec<u8> {
+    use std::io::Write as _;
+    if body.len() >= PACK_FROM {
+        let mut z = flate2::write::ZlibEncoder::new(vec![MSG_FRAME_PACKED], flate2::Compression::fast());
+        if z.write_all(body).is_ok()
+            && let Ok(m) = z.finish()
+        {
+            return m;
+        }
+    }
+    let mut m = Vec::with_capacity(1 + body.len());
+    m.push(MSG_FRAME);
+    m.extend_from_slice(body);
+    m
+}
+
 fn size_msg(width: u16, height: u16) -> Vec<u8> {
     let mut m = vec![MSG_SIZE];
     m.extend_from_slice(&width.to_le_bytes());
     m.extend_from_slice(&height.to_le_bytes());
     m
+}
+
+/// `[MSG_POINTER]…` for the window, from the helper's pointer message.
+fn pointer_msg(p: FromHelper) -> Vec<u8> {
+    match p {
+        FromHelper::PointerBitmap { width, height, hot_x, hot_y, rgba } => {
+            let mut m = Vec::with_capacity(10 + rgba.len());
+            m.extend_from_slice(&[MSG_POINTER, 2]);
+            for n in [width, height, hot_x, hot_y] {
+                m.extend_from_slice(&n.to_le_bytes());
+            }
+            m.extend_from_slice(&rgba);
+            m
+        }
+        FromHelper::PointerHidden => vec![MSG_POINTER, 1],
+        _ => vec![MSG_POINTER, 0],
+    }
 }
 
 /// `DOMAIN\user` → ("DOMAIN", "user"); `.\user` (local account) → ("", "user").
@@ -561,9 +881,67 @@ fn trust_certificate(host: &str, port: u16, key: &[u8], prompt: &Prompter) -> bo
     }
 }
 
+/// The letter rows and the scancode of each row's first key.
+const ROWS: [(&str, u16); 3] = [("QWERTYUIOP", 0x10), ("ASDFGHJKL", 0x1E), ("ZXCVBNM", 0x2C)];
+/// The numpad's digits 0 to 9 as keys (Num Lock off they are the arrows, Home, End…), and with
+/// Alt held the digits of a character code.
+const NUMPAD: [u16; 10] = [0x52, 0x4F, 0x50, 0x51, 0x4B, 0x4C, 0x4D, 0x47, 0x48, 0x49];
+/// The other keys by name.
+const NAMED: &[(&str, u16)] = &[
+    ("Escape", 0x01),
+    ("Minus", 0x0C),
+    ("Equal", 0x0D),
+    ("Backspace", 0x0E),
+    ("Tab", 0x0F),
+    ("BracketLeft", 0x1A),
+    ("BracketRight", 0x1B),
+    ("Enter", 0x1C),
+    ("ControlLeft", 0x1D),
+    ("Semicolon", 0x27),
+    ("Quote", 0x28),
+    ("Backquote", 0x29),
+    ("ShiftLeft", 0x2A),
+    ("Backslash", 0x2B),
+    ("Comma", 0x33),
+    ("Period", 0x34),
+    ("Slash", 0x35),
+    ("ShiftRight", 0x36),
+    ("NumpadMultiply", 0x37),
+    ("AltLeft", 0x38),
+    ("Space", 0x39),
+    ("CapsLock", 0x3A),
+    ("IntlBackslash", 0x56),
+    ("NumLock", 0x45),
+    ("ScrollLock", 0x46),
+    ("NumpadSubtract", 0x4A),
+    ("NumpadAdd", 0x4E),
+    ("NumpadDecimal", 0x53),
+    ("NumpadEqual", 0x59),
+    ("IntlRo", 0x73),
+    ("IntlYen", 0x7D),
+    ("NumpadComma", 0x7E),
+    ("NumpadEnter", 0xE01C),
+    ("NumpadDivide", 0xE035),
+    ("PrintScreen", 0xE037),
+    ("ControlRight", 0xE01D),
+    ("AltRight", 0xE038),
+    ("Home", 0xE047),
+    ("ArrowUp", 0xE048),
+    ("PageUp", 0xE049),
+    ("ArrowLeft", 0xE04B),
+    ("ArrowRight", 0xE04D),
+    ("End", 0xE04F),
+    ("ArrowDown", 0xE050),
+    ("PageDown", 0xE051),
+    ("Insert", 0xE052),
+    ("Delete", 0xE053),
+    ("MetaLeft", 0xE05B),
+    ("MetaRight", 0xE05C),
+    ("ContextMenu", 0xE05D),
+];
+
 /// PC scancode set 1 (0xE0xx = extended) for a DOM `KeyboardEvent.code`.
 fn scancode(code: &str) -> Option<u16> {
-    const ROWS: [(&str, u16); 3] = [("QWERTYUIOP", 0x10), ("ASDFGHJKL", 0x1E), ("ZXCVBNM", 0x2C)];
     if let Some(k) = code.strip_prefix("Key") {
         return ROWS.iter().find_map(|(row, base)| row.find(k).filter(|_| k.len() == 1).map(|i| base + i as u16));
     }
@@ -582,62 +960,34 @@ fn scancode(code: &str) -> Option<u16> {
             _ => None,
         };
     }
-    // The numpad as keys (Num Lock off they are the arrows, Home, End…), and with Alt held the
-    // digits of a character code.
     if let Some(d) = code.strip_prefix("Numpad").and_then(|d| d.parse::<usize>().ok()).filter(|d| *d <= 9) {
-        return Some([0x52, 0x4F, 0x50, 0x51, 0x4B, 0x4C, 0x4D, 0x47, 0x48, 0x49][d]);
+        return Some(NUMPAD[d]);
     }
-    Some(match code {
-        "Escape" => 0x01,
-        "Minus" => 0x0C,
-        "Equal" => 0x0D,
-        "Backspace" => 0x0E,
-        "Tab" => 0x0F,
-        "BracketLeft" => 0x1A,
-        "BracketRight" => 0x1B,
-        "Enter" => 0x1C,
-        "ControlLeft" => 0x1D,
-        "Semicolon" => 0x27,
-        "Quote" => 0x28,
-        "Backquote" => 0x29,
-        "ShiftLeft" => 0x2A,
-        "Backslash" => 0x2B,
-        "Comma" => 0x33,
-        "Period" => 0x34,
-        "Slash" => 0x35,
-        "ShiftRight" => 0x36,
-        "NumpadMultiply" => 0x37,
-        "AltLeft" => 0x38,
-        "Space" => 0x39,
-        "CapsLock" => 0x3A,
-        "IntlBackslash" => 0x56,
-        "NumLock" => 0x45,
-        "ScrollLock" => 0x46,
-        "NumpadSubtract" => 0x4A,
-        "NumpadAdd" => 0x4E,
-        "NumpadDecimal" => 0x53,
-        "NumpadEqual" => 0x59,
-        "IntlRo" => 0x73,
-        "IntlYen" => 0x7D,
-        "NumpadComma" => 0x7E,
-        "NumpadEnter" => 0xE01C,
-        "NumpadDivide" => 0xE035,
-        "PrintScreen" => 0xE037,
-        "ControlRight" => 0xE01D,
-        "AltRight" => 0xE038,
-        "Home" => 0xE047,
-        "ArrowUp" => 0xE048,
-        "PageUp" => 0xE049,
-        "ArrowLeft" => 0xE04B,
-        "ArrowRight" => 0xE04D,
-        "End" => 0xE04F,
-        "ArrowDown" => 0xE050,
-        "PageDown" => 0xE051,
-        "Insert" => 0xE052,
-        "Delete" => 0xE053,
-        "MetaLeft" => 0xE05B,
-        "MetaRight" => 0xE05C,
-        "ContextMenu" => 0xE05D,
+    NAMED.iter().find(|(c, _)| *c == code).map(|&(_, s)| s)
+}
+
+/// The DOM `KeyboardEvent.code` of a scancode (`scancode` the other way), for keys the keyboard
+/// hook takes (`grab`).
+#[cfg_attr(not(windows), allow(dead_code))]
+fn code_of(sc: u16) -> Option<String> {
+    if let Some((c, _)) = NAMED.iter().find(|&&(_, s)| s == sc) {
+        return Some(c.to_string());
+    }
+    if let Some(d) = NUMPAD.iter().position(|&s| s == sc) {
+        return Some(format!("Numpad{d}"));
+    }
+    for (row, base) in ROWS {
+        if let Some(k) = sc.checked_sub(base).and_then(|i| row.chars().nth(i.into())) {
+            return Some(format!("Key{k}"));
+        }
+    }
+    Some(match sc {
+        0x02..=0x0A => format!("Digit{}", sc - 0x01),
+        0x0B => "Digit0".into(),
+        0x3B..=0x44 => format!("F{}", sc - 0x3A),
+        0x57 | 0x58 => format!("F{}", sc - 0x57 + 11),
+        0x64..=0x6E => format!("F{}", sc - 0x64 + 13),
+        0x76 => "F24".into(),
         _ => return None,
     })
 }
@@ -664,6 +1014,44 @@ mod tests {
         p.paint(&[1, 0, 0]); // a cut-off message changes nothing
     }
 
+    /// Pictures cross the clipboard as CF_DIB and come back as they went; Windows' own forms
+    /// (24-bit with padded rows, top-down, alpha left at 0) read right too.
+    #[test]
+    fn clipboard_pictures() {
+        // 3x2: red, green, blue / white, black, half-transparent grey.
+        let rgba = [255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 9, 9, 9, 128];
+        let dib = super::to_dib(3, 2, &rgba);
+        assert_eq!(dib.len(), 40 + 24);
+        assert_eq!(dib[40..44], [255, 255, 255, 255]); // bottom row first, as BGRA
+        assert_eq!(super::from_dib(&dib), Some((3, 2, rgba.to_vec())));
+
+        // 24-bit, top-down (negative height): rows padded to 4 bytes.
+        let mut d = super::to_dib(2, 1, &[0; 8])[..40].to_vec();
+        d[8..12].copy_from_slice(&(-1i32).to_le_bytes());
+        d[14] = 24;
+        d.extend_from_slice(&[1, 2, 3, 4, 5, 6, 0, 0]);
+        assert_eq!(super::from_dib(&d), Some((2, 1, vec![3, 2, 1, 255, 6, 5, 4, 255])));
+
+        // 32-bit with alpha all 0: opaque.
+        let zero = super::to_dib(1, 1, &[7, 8, 9, 0]);
+        assert_eq!(super::from_dib(&zero), Some((1, 1, vec![7, 8, 9, 255])));
+        assert_eq!(super::from_dib(&dib[..50]), None); // cut short
+    }
+
+    /// Big frames go deflated and inflate to the same areas; small ones go as they are.
+    #[test]
+    fn big_frames_go_packed() {
+        use std::io::Read as _;
+        let body: Vec<u8> = [0u16, 0, 128, 64].iter().flat_map(|n| n.to_le_bytes()).chain((0..128 * 64 * 4).map(|i| (i / 512) as u8)).collect();
+        let m = super::frame_msg(&body);
+        assert_eq!(m[0], super::MSG_FRAME_PACKED);
+        assert!(m.len() < body.len() / 4);
+        let mut back = vec![];
+        flate2::read::ZlibDecoder::new(&m[1..]).read_to_end(&mut back).unwrap();
+        assert_eq!(back, body);
+        assert_eq!(super::frame_msg(&body[..100])[..], [&[super::MSG_FRAME][..], &body[..100]].concat()[..]);
+    }
+
     /// A window or Co-op viewer that starts watching gets the status, the size, then the whole
     /// picture as one frame; before the desktop is there it gets only the status.
     #[test]
@@ -685,6 +1073,18 @@ mod tests {
         assert_eq!(super::split_user(r".\Administrator"), ("".into(), "Administrator".into()));
         assert_eq!(super::split_user(r"CORP\jdoe"), ("CORP".into(), "jdoe".into()));
         assert_eq!(super::split_user("jdoe@corp.example"), ("".into(), "jdoe@corp.example".into()));
+    }
+
+    /// The keyboard hook's scancodes become the codes the view would have sent, and back.
+    #[test]
+    fn scancodes_both_ways() {
+        for sc in (0..0x100).chain(0xE000..0xE100) {
+            if let Some(code) = super::code_of(sc) {
+                assert_eq!(super::scancode(&code), Some(sc), "{code}");
+            }
+        }
+        let code = |sc| super::code_of(sc).unwrap();
+        assert_eq!([code(0xE05B), code(0x12), code(0x0F), code(0x3E), code(0x48), code(0xE048)], ["MetaLeft", "KeyE", "Tab", "F4", "Numpad8", "ArrowUp"]);
     }
 
     #[test]

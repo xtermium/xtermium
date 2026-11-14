@@ -46,7 +46,7 @@ Both scripts check each download against its sha256 before installing anything. 
 Every feature is free except two that need **Pro**, a hosted service: sync and Terminal Co-op.
 
 - **[Connections](https://github.com/xtermium/xtermium/wiki/Usage#connections):** SSH with keys, your agent and jump hosts, telnet, serial ports, the local shell and WinRM, each coming back by itself where it can.
-- **[Remote desktops](https://github.com/xtermium/xtermium/wiki/Usage#remote-desktops):** RDP and VNC in a tab, with the host's files beside them (shared folders over RDP, SFTP over VNC).
+- **[Remote desktops](https://github.com/xtermium/xtermium/wiki/Usage#remote-desktops):** RDP and VNC in a tab, with the host's files beside them (shared folders over RDP, SFTP over VNC). RDP shares the clipboard both ways (text, pictures and files) and, while it has the keyboard, takes the Windows shortcuts (Win+E, Alt+Tab) for the desktop.
 - **[Websites and BMC consoles](https://github.com/xtermium/xtermium/wiki/Usage#websites-and-bmc-consoles)** in your browser or in a tab, each website with its own cookies and sign-ins.
 - **[Sessions and workspaces](https://github.com/xtermium/xtermium/wiki/Usage#sessions):** a folder tree, shared logins with an SSH gateway, workspaces, snippets, and import from MobaXterm or an OpenSSH config.
 - **[Tabs and panes](https://github.com/xtermium/xtermium/wiki/Usage#tabs-and-panes):** split panes for any kind of tab, broadcast, saved layouts, a tab in its own window.

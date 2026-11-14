@@ -167,6 +167,10 @@ export type Settings = {
   ssh_keepalive: number;
   ssh_compression: boolean;
   rdp_quality: number;
+  /** What crosses RDP's shared clipboard: 1 this computer's to the desktop, 2 the desktop's here, 3 both, 0 nothing. */
+  rdp_clipboard: number;
+  /** A remote desktop with the keyboard takes the Windows keys and system shortcuts from this computer. */
+  rdp_keyboard: boolean;
   /** RDP file panels log in to the host's shares as the desktop's login (sessions can override). */
   smb_auto_login: boolean;
   /** Local automation: MCP server and the `xtermium` command line (Settings > MCP). */

@@ -133,6 +133,9 @@
       N_("Copy on select"),
       N_("Right-click pastes"),
       N_("Strip whitespace from the start and end of what you paste"),
+      N_("RDP"),
+      N_("Copy and paste with remote desktops: text, pictures and files"),
+      N_("Take the keyboard: the Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop"),
       N_("Show a scroll bar"),
       N_("Making a pane bigger or smaller with the keyboard changes it by"),
       N_("Scroll to the bottom on output"),
@@ -1325,6 +1328,18 @@ xtermium close 3`}</pre>
         <label class="check"><input type="checkbox" bind:checked={s.copy_on_select} />{_("Copy on select")}</label>
         <label class="check"><input type="checkbox" bind:checked={s.right_click_paste} />{_("Right-click pastes")}</label>
         <label class="check"><input type="checkbox" bind:checked={s.strip_paste} />{_("Strip whitespace from the start and end of what you paste")}</label>
+      </div>
+      <span>{_("RDP")}</span>
+      <div class="col">
+        <span class="weak">{_("Copy and paste with remote desktops: text, pictures and files")}</span>
+        <div class="row wrap" role="group" aria-label={_("Copy and paste with remote desktops: text, pictures and files")}>
+          {#each [[0, N_("Disabled"), N_("Nothing crosses the clipboard")], [1, N_("Host to RDP"), N_("What you copy here can be pasted on the remote desktop")], [2, N_("RDP to host"), N_("What you copy on the remote desktop can be pasted here")], [3, N_("Universal"), N_("Both ways")]] as const as [mode, name, tip] (mode)}
+            <button class:selected={s.rdp_clipboard === mode} aria-pressed={s.rdp_clipboard === mode} title={_(tip)} onclick={() => (s.rdp_clipboard = mode)}>{_(name)}</button>
+          {/each}
+        </div>
+        <label class="check" title={_("Off: they act on this computer. Ctrl+Alt+Del always does.")}>
+          <input type="checkbox" bind:checked={s.rdp_keyboard} />{_("Take the keyboard: the Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop")}
+        </label>
       </div>
     </div>
     <h3>{_("Background")}</h3>

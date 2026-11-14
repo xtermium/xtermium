@@ -419,8 +419,8 @@ fn events(ev: Input, h: &mut Held) -> Vec<X11Event> {
             }
             v
         }
-        // RFB has no way to set the lock keys.
-        Input::Sync { .. } => vec![],
+        // RFB has no way to set the lock keys; the shared clipboard is RDP's.
+        Input::Sync { .. } | Input::Clip => vec![],
         Input::Resize { .. } => vec![], // handled by the session (`run`)
     }
 }
