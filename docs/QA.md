@@ -60,6 +60,8 @@ The macOS build ships unsigned, and nobody has run these on a Mac yet.
 - Getting started away from the start screen: the pill at the tab bar's end, its popover
   under it (lined up with the pill's end, the keyboard on Try it, Escape back to the
   terminal), the palette's Getting started and the Done toast's Show.
+- More tabs than fit: the trackpad's sideways scroll and the mouse wheel over the tab strip, the
+  arrows over its faded ends and the All tabs list.
 
 ## Linux
 
@@ -69,15 +71,20 @@ The macOS build ships unsigned, and nobody has run these on a Mac yet.
 - The clipboard on X11 and Wayland, in terminals and in Co-op.
 - Getting started away from the start screen, as under macOS: the pill, its popover and where
   the keyboard goes, on X11 and Wayland.
+- More tabs than fit, as under macOS: the strip's fades (CSS masks on WebKitGTK), its arrows and
+  the All tabs list.
 
 ## Right to left
 
 - The Arabic locale with the new title bar, the sidebar row on the tab line and the
   Getting started guide.
+- More tabs than fit in Arabic: the strip scrolls from the right, each arrow points and goes the
+  way its end leads, and the All tabs list opens on screen.
 
 ## Windows
 
 - Unlocking with Windows Hello (needs a camera or a fingerprint reader).
+- The All tabs list over a website or BMC console tab: the view steps aside while it's open.
 
 ## Remote desktops
 

@@ -759,7 +759,21 @@ Quiet and exact: small, flat faces that brighten a step under the pointer.
   the tab is visible in a split, and full on the active one. A tab whose connection is gone draws
   it in `warn`. The tab's icon is always in its kind hue, and the active tab's name is in
   `short-strong`, as the title bar's field names it (the mono's widths don't change with weight,
-  so the strip doesn't shift). A drag shows a 2px amber insertion bar.
+  so the strip doesn't shift). A drag shows a 2px amber insertion bar. Tabs keep their width;
+  more than fit scroll sideways (the wheel scrolls it), with no scrollbar. At an end with tabs past
+  it, a flat chevron (`fg`, amber when pointed at) lies over the strip: the tabs are hidden under
+  its 26px and fade in over the next 21px, and the chevron's button covers both, since what shows
+  of a tab there is mostly its X and a click meant to go back would close it. It glides the strip
+  a page that way. A page that would carry the tab in use out of view stops short, with that tab
+  at the far side clear of the chevron and fade there; the next click carries on past it. A tab
+  scrolled into view (a click, Ctrl+Tab, All tabs) glides too, so tabs of one name still show
+  which way the strip went, and stops clear of the chevron and the fade
+  (`scroll-padding-inline`). Reduced motion makes both jump.
+- **All tabs:** while tabs don't fit, the tab-strip tools start with a flat chevron ("All tabs
+  (16)"), amber while open. It drops a menu (`.tasks-list.all-tabs`) hung from its end (right to
+  left too), one row per
+  tab in strip order: its icon in its kind hue and its name, the tab in use on the `picked` wash and
+  holding the keyboard. It is as tall as the window allows, then scrolls; a click shows that tab.
 - **Session rack:** 21px rows, folders with a rotating caret (0.12s) and a hairline guide under
   each level. Leaves indent past the caret so icons in one level line up. A session with an open
   tab gets a 7px green dot on its icon's corner, hollow once the connection is gone. Chosen rows
@@ -795,7 +809,8 @@ Quiet and exact: small, flat faces that brighten a step under the pointer.
   session, the cipher (and "+ zlib" when compressed) and the round-trip time, which turns `warn`
   past 200 ms. At the end come the amber broadcast marker and the terminal's columns × rows. With
   no tab it says "No tab".
-- **Tab-strip tools** come as the tabs do, at the strip's end: Tasks (a layers glyph and a count)
+- **Tab-strip tools** come as the tabs do, at the strip's end: All tabs while tabs don't fit,
+  Getting started's progress while it's unfinished, Tasks (a layers glyph and a count)
   while a tab runs in the background or in a window of its own; File Browser and Snippets once a
   terminal-type tab is open (File Browser stays dim until a connected SSH, RDP or VNC tab is on
   screen); Broadcast with two or more tabs. Saved layouts and the layout segment live in the title
