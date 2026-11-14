@@ -95,6 +95,14 @@ wiki, https://github.com/xtermium/xtermium/wiki. This file is how it's built and
   The workspace in use is `config::workspace()` (persisted in `settings.workspace`, which only the
   `workspace` command changes; `save_settings` ignores the UI's copy). `save_store` carries the
   workspace a save belongs to, so a save racing a switch lands in the right one.
+- **Ids.** Every session, every folder record and every workspace has an `id` of its own (16
+  random bytes in hex; `Store::ids`, `own_ids`): given by `sanitize` and `use_workspace`, kept
+  through renames and moves, new for a copy (a clone, a duplicate, what a workspace sync adds).
+  A workspace's id and colour are `Store::id` and `Store::color` of its own record, so the UI has
+  the one in use as `app.store.id`; `workspace_list` (Boot, `Workspaces`) lists all of them. Tell
+  things apart by id, never by name: a tab is its session's `id` in its workspace's `id`
+  (App.svelte `Tab.workspace`, `sessionId`). Sessions still name their folder by its path, and
+  folders without a record have no id.
 - Workspaces keep only sessions and folders apart. Shared logins, tunnels, snippets and layouts
   live at the top of the store for all of them: `split` hands the workspace in use those along
   with its sessions, `join` puts them back at the top, and `Store::hoist` (in `split`) moves up
@@ -139,6 +147,8 @@ wiki, https://github.com/xtermium/xtermium/wiki. This file is how it's built and
   A value derived from others is written as `calc(…)` so it reads as derived.
   `ui/lib/scale.test.ts` (in `npm test`) fails on off-scale spacing or a raw font size. Colours
   `--fg --weak --line --raised --gold` (the accent, phosphor amber; user-changeable), per-kind hues `--k-*`.
+  The interface is in the system face (`--ui`, inherited from `body`); the mono (`--mono`) only
+  for what is read character by character: code, commands, `kbd`, fingerprints, passcodes.
   Rounded floating panels on a darker window, icon-only tool buttons with tooltips. Only layers
   floating over the work cast a shadow, from `--shadow-float/-menu/-dialog`, and they arrive with
   `float-in` (menus excepted; app.css). Svelte transitions don't obey app.css's reduced-motion
@@ -159,10 +169,11 @@ wiki, https://github.com/xtermium/xtermium/wiki. This file is how it's built and
 - Enter does the obvious thing: in a filter field it acts on the first hit (runs the snippet, adds
   the scheme; highlight that row); a search bar closes and puts the keyboard on its first hit (the
   session's row in the tree, the setting's control, lit while the search is open), and a yes/no question focuses its
-  yes button (`{@attach (el) => el.focus()}`, as Close tab), unless yes can't be undone or is a
-  security call: trusting a new host key, deleting a folder or sessions, a restore, a new automation
-  token, discarding an edit. Those focus Cancel/Reject (Keep editing), so Enter never does the
-  irreversible thing. A handler that moves the keyboard to a terminal calls `e.preventDefault()`,
+  yes button (`{@attach (el) => el.focus()}`, as Close tab), unless yes can't be undone: deleting
+  a folder or sessions, a restore, a new automation token, discarding an edit. Those focus Cancel
+  (Keep editing), so Enter never does the irreversible thing. Trusting a host, RDP server or BMC
+  seen for the first time focuses Trust, as ssh's "yes" (the owner's call, 2026-11-14); a key
+  that changed is refused whatever is answered. A handler that moves the keyboard to a terminal calls `e.preventDefault()`,
   or the Enter's keypress lands in it.
 - **i18n**: all UI text through `_("…")` (or `N_("…")` in tables), keyed by the English;
   `ui/locales/<code>.json`: ar (right to left), de, el, es, fi, fr, hi, ja, nb, pl, sv, zh-CN;

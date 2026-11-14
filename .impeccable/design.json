@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-07T00:53:42.000Z",
+  "generatedAt": "2026-11-14T20:46:21.000Z",
   "title": "Design System: xtermium",
   "extensions": {
     "colorMeta": {
@@ -448,19 +448,19 @@
       },
       "headline": {
         "displayName": "Headline",
-        "purpose": "The lead sentence under the logo on the start screen: JetBrains Mono 600 at --t-xl, -0.025em."
+        "purpose": "The lead sentence under the logo on the start screen: the system face, 600 at --t-xl, -0.025em."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Dialog and page titles (h2, --t-l) in JetBrains Mono 600, -0.01em; h3 is mono 600 at body size."
-      },
-      "short": {
-        "displayName": "Short",
-        "purpose": "Buttons in JetBrains Mono (--short, --t); menu items, list rows, the Settings page list and the kind picker keep the system face."
+        "purpose": "Dialog and page titles (h2, --t-l) in the system face, 600, -0.01em; h3 is 600 at body size."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "Default interface text in the system face: fields, field labels, rows, menus (--t)."
+        "purpose": "Default interface text in the system face, inherited from body: buttons, fields, field labels, rows, menus, tab names (--t)."
+      },
+      "body-strong": {
+        "displayName": "Body, strong",
+        "purpose": "The focused tab's name in the title bar's field and the steps of Getting started, at 500. The active tab itself is not set heavier."
       },
       "prose": {
         "displayName": "Prose",
@@ -468,19 +468,15 @@
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Counts, hints and secondary lines in the system face (--t-s)."
+        "purpose": "Counts, hints, secondary lines, the status bar and tags in the system face (--t-s)."
       },
-      "label-short": {
+      "label-mono": {
         "displayName": "Label (mono)",
-        "purpose": "The status bar, tags and kbd in JetBrains Mono at --t-s."
+        "purpose": "kbd in JetBrains Mono at --t-s."
       },
       "mono": {
         "displayName": "Mono",
-        "purpose": "code, kbd, pre and tunnel addresses in JetBrains Mono; always left to right."
-      },
-      "short-strong": {
-        "displayName": "Short, strong",
-        "purpose": "Where the keyboard goes: the focused tab's name in the title bar's field and on the active tab."
+        "purpose": "What is read character by character: code, kbd, pre, snippet commands, a host key's fingerprint, the sign-in code, the Co-op passcode, tunnel addresses and ring traffic figures in JetBrains Mono; always left to right."
       }
     },
     "shadows": [
@@ -610,9 +606,9 @@
       "name": "Button",
       "kind": "button",
       "refersTo": "button",
-      "description": "The default face: a raised surface a step above the panel that brightens a step under the pointer; its label in JetBrains Mono.",
+      "description": "The default face: a raised surface a step above the panel that brightens a step under the pointer; its label in the system face, like all text.",
       "html": "<button class=\"ds-btn\">Connect</button>",
-      "css": ".ds-btn { font: 400 var(--t, 13px)/1.4 \"JetBrains Mono Variable\", \"Cascadia Mono\", Consolas, monospace; display: inline-flex; align-items: center; gap: 5px; min-height: var(--control, 26px); padding: 3px 8px; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--hover, #26262c); } .ds-btn:focus-visible { outline: 1px solid var(--gold, #ffb000); outline-offset: -1px; } .ds-btn:disabled { opacity: 0.45; cursor: default; }"
+      "css": ".ds-btn { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: inline-flex; align-items: center; gap: 5px; min-height: var(--control, 26px); padding: 3px 8px; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--hover, #26262c); } .ds-btn:focus-visible { outline: 1px solid var(--gold, #ffb000); outline-offset: -1px; } .ds-btn:disabled { opacity: 0.45; cursor: default; }"
     },
     {
       "name": "Primary Button",
@@ -620,7 +616,7 @@
       "refersTo": "button-primary",
       "description": "Amber fill with amber ink (the ground), one per dialog, on its main action.",
       "html": "<button class=\"ds-btn ds-btn-primary\">Save</button>",
-      "css": ".ds-btn { font: 400 var(--t, 13px)/1.4 \"JetBrains Mono Variable\", \"Cascadia Mono\", Consolas, monospace; display: inline-flex; align-items: center; gap: 5px; min-height: var(--control, 26px); padding: 3px 8px; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--hover, #26262c); } .ds-btn:focus-visible { outline: 1px solid var(--gold, #ffb000); outline-offset: -1px; } .ds-btn:disabled { opacity: 0.45; cursor: default; } .ds-btn-primary { background: var(--gold, #ffb000); color: var(--gold-ink, #050506); } .ds-btn-primary:hover { background: color-mix(in srgb, var(--gold, #ffb000) 86%, white); }"
+      "css": ".ds-btn { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: inline-flex; align-items: center; gap: 5px; min-height: var(--control, 26px); padding: 3px 8px; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--hover, #26262c); } .ds-btn:focus-visible { outline: 1px solid var(--gold, #ffb000); outline-offset: -1px; } .ds-btn:disabled { opacity: 0.45; cursor: default; } .ds-btn-primary { background: var(--gold, #ffb000); color: var(--gold-ink, #050506); } .ds-btn-primary:hover { background: color-mix(in srgb, var(--gold, #ffb000) 86%, white); }"
     },
     {
       "name": "Toggle (on)",
@@ -628,7 +624,7 @@
       "refersTo": "button-on",
       "description": "A toggle that is on or an option that is picked: amber wash, amber text, 55% amber border.",
       "html": "<span style=\"display:inline-flex;gap:5px\"><button class=\"ds-btn ds-btn-on\">Dark</button><button class=\"ds-btn\">Light</button></span>",
-      "css": ".ds-btn { font: 400 var(--t, 13px)/1.4 \"JetBrains Mono Variable\", \"Cascadia Mono\", Consolas, monospace; display: inline-flex; align-items: center; gap: 5px; min-height: var(--control, 26px); padding: 3px 8px; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--hover, #26262c); } .ds-btn:focus-visible { outline: 1px solid var(--gold, #ffb000); outline-offset: -1px; } .ds-btn:disabled { opacity: 0.45; cursor: default; } .ds-btn-on, .ds-btn-on:hover { background: var(--gold-soft, rgba(255, 176, 0, 0.14)); border-color: color-mix(in srgb, var(--gold, #ffb000) 55%, transparent); color: var(--gold, #ffb000); }"
+      "css": ".ds-btn { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: inline-flex; align-items: center; gap: 5px; min-height: var(--control, 26px); padding: 3px 8px; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--hover, #26262c); } .ds-btn:focus-visible { outline: 1px solid var(--gold, #ffb000); outline-offset: -1px; } .ds-btn:disabled { opacity: 0.45; cursor: default; } .ds-btn-on, .ds-btn-on:hover { background: var(--gold-soft, rgba(255, 176, 0, 0.14)); border-color: color-mix(in srgb, var(--gold, #ffb000) 55%, transparent); color: var(--gold, #ffb000); }"
     },
     {
       "name": "Tool Button",
@@ -660,13 +656,13 @@
       "refersTo": "title-bar",
       "description": "On the window's ground: the mark and 26px tools at the start (New session a filled key 13px apart), the find button and the field naming the focused tab with the workspace chevron in the centre, the layouts at the end; one top and bottom edge for every control.",
       "html": "<div class=\"ds-titlebar\"><div class=\"ds-tb-start\"><button class=\"ds-tb-tool\" title=\"Collapse the sidebar\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"21\" height=\"21\" viewBox=\"0 0 24 24\"><path d=\"M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z\"/></svg></button><button class=\"ds-tb-tool\" title=\"Open a local shell\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"21\" height=\"21\" viewBox=\"0 0 24 24\"><path d=\"M12 14h6v2h-6zM6.293 9.707 8.586 12l-2.293 2.293 1.414 1.414L11.414 12 7.707 8.293z\"/><path d=\"M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM4 18V6h16l.002 12H4z\"/></svg></button><button class=\"ds-tb-tool ds-tb-new\" title=\"New session\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"21\" height=\"21\" viewBox=\"0 0 24 24\"><path d=\"M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z\"/></svg></button></div><div class=\"ds-tb-centre\"><button class=\"ds-tb-tool\" title=\"Find a session\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"21\" height=\"21\" viewBox=\"0 0 24 24\"><path d=\"M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z\"/></svg></button><div class=\"ds-tb-field\"><button class=\"ds-tb-where\"><span style=\"color: var(--k-shell, #33b8a6)\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M12 14h6v2h-6zM6.293 9.707 8.586 12l-2.293 2.293 1.414 1.414L11.414 12 7.707 8.293z\"/><path d=\"M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM4 18V6h16l.002 12H4z\"/></svg></span><b>local</b><span class=\"ds-tb-weak\">pwsh</span></button><button class=\"ds-tb-ws\" title=\"Workspace: Default\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\"><path d=\"M16.293 9.293 12 13.586 7.707 9.293l-1.414 1.414L12 16.414l5.707-5.707z\"/></svg></button></div></div><div class=\"ds-tb-end\"><button class=\"ds-tb-tool on\" title=\"Single\"><svg width=\"21\" height=\"17\" viewBox=\"0 0 20 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><rect x=\"1\" y=\"1\" width=\"18\" height=\"14\" rx=\"1.5\"/></svg></button><button class=\"ds-tb-tool\" title=\"Side by side\"><svg width=\"21\" height=\"17\" viewBox=\"0 0 20 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><rect x=\"1.75\" y=\"1\" width=\"7.5\" height=\"14\" rx=\"1.5\"/><rect x=\"10.75\" y=\"1\" width=\"7.5\" height=\"14\" rx=\"1.5\"/></svg></button></div></div>",
-      "css": ".ds-titlebar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: var(--bar, 34px); padding: 0 13px; color: var(--weak, #9d9da6); background: rgb(var(--window-rgb, 5, 5, 6)); font: 400 var(--t, 13px)/1.4 \"JetBrains Mono Variable\", \"Cascadia Mono\", Consolas, monospace; } .ds-tb-start, .ds-tb-centre, .ds-tb-end { display: flex; align-items: center; gap: 3px; } .ds-tb-end { justify-content: flex-end; } .ds-tb-tool { display: grid; place-items: center; width: var(--control, 26px); height: var(--control, 26px); padding: 0; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: transparent; color: inherit; cursor: pointer; } .ds-tb-tool:hover { background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); } .ds-tb-tool:focus-visible { outline: 1px solid var(--gold, #ffb000); } .ds-tb-tool.on { background: var(--gold-soft, rgba(255, 176, 0, 0.14)); border-color: color-mix(in srgb, var(--gold, #ffb000) 55%, transparent); color: var(--gold, #ffb000); } .ds-tb-new { margin-inline-start: 13px; background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); } .ds-tb-new:hover { background: var(--hover, #26262c); } .ds-tb-field { display: flex; width: 377px; height: var(--control, 26px); border: 1px solid var(--line, #2c2c33); border-radius: var(--r-control, 3px); background: rgba(var(--deep-rgb, 8, 8, 10), 1); overflow: hidden; } .ds-tb-field:hover { border-color: color-mix(in srgb, var(--fg, #e6e6e1) 25%, var(--line, #2c2c33)); } .ds-tb-where { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 0 8px; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; } .ds-tb-where b { font-weight: 500; color: var(--fg, #e6e6e1); } .ds-tb-where:hover { color: var(--fg, #e6e6e1); } .ds-tb-ws { display: grid; place-items: center; width: var(--control, 26px); padding: 0; border: 0; border-inline-start: 1px solid var(--line, #2c2c33); background: none; color: inherit; cursor: pointer; } .ds-tb-ws:hover { background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); }"
+      "css": ".ds-titlebar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: var(--bar, 34px); padding: 0 13px; color: var(--weak, #9d9da6); background: rgb(var(--window-rgb, 5, 5, 6)); font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; } .ds-tb-start, .ds-tb-centre, .ds-tb-end { display: flex; align-items: center; gap: 3px; } .ds-tb-end { justify-content: flex-end; } .ds-tb-tool { display: grid; place-items: center; width: var(--control, 26px); height: var(--control, 26px); padding: 0; border: 1px solid transparent; border-radius: var(--r-control, 3px); background: transparent; color: inherit; cursor: pointer; } .ds-tb-tool:hover { background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); } .ds-tb-tool:focus-visible { outline: 1px solid var(--gold, #ffb000); } .ds-tb-tool.on { background: var(--gold-soft, rgba(255, 176, 0, 0.14)); border-color: color-mix(in srgb, var(--gold, #ffb000) 55%, transparent); color: var(--gold, #ffb000); } .ds-tb-new { margin-inline-start: 13px; background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); } .ds-tb-new:hover { background: var(--hover, #26262c); } .ds-tb-field { display: flex; width: 377px; height: var(--control, 26px); border: 1px solid var(--line, #2c2c33); border-radius: var(--r-control, 3px); background: rgba(var(--deep-rgb, 8, 8, 10), 1); overflow: hidden; } .ds-tb-field:hover { border-color: color-mix(in srgb, var(--fg, #e6e6e1) 25%, var(--line, #2c2c33)); } .ds-tb-where { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 0 8px; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; } .ds-tb-where b { font-weight: 500; color: var(--fg, #e6e6e1); } .ds-tb-where:hover { color: var(--fg, #e6e6e1); } .ds-tb-ws { display: grid; place-items: center; width: var(--control, 26px); padding: 0; border: 0; border-inline-start: 1px solid var(--line, #2c2c33); background: none; color: inherit; cursor: pointer; } .ds-tb-ws:hover { background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); }"
     },
     {
       "name": "Tab Strip",
       "kind": "nav",
       "refersTo": "tab",
-      "description": "Flat 34px tabs split by hairlines; a kind-coloured connector on top, the active tab joins its pane and names itself in mono 500.",
+      "description": "Flat 34px tabs split by hairlines; a kind-coloured connector on top, the active tab joins its pane and is told by colour, not weight.",
       "html": "<div class=\"ds-strip\"><div class=\"ds-tab active\" style=\"--kind: var(--k-ssh, #5c8df0)\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M12 14h6v2h-6zM6.293 9.707 8.586 12l-2.293 2.293 1.414 1.414L11.414 12 7.707 8.293z\"/><path d=\"M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM4 18V6h16l.002 12H4z\"/></svg><span>web-01</span></div><div class=\"ds-tab\" style=\"--kind: var(--k-rdp, #9c70e6)\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M20 3H4c-1.103 0-2 .897-2 2v11c0 1.103.897 2 2 2h7v2H8v2h8v-2h-3v-2h7c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zM4 14V5h16l.002 9H4z\"/></svg><span>dc-02</span></div><div class=\"ds-tab\" style=\"--kind: var(--k-serial, #b5c14a)\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M9 9h6v6H9z\"/><path d=\"M20 6c0-1.103-.897-2-2-2h-2V2h-2v2h-4V2H8v2H6c-1.103 0-2 .897-2 2v2H2v2h2v4H2v2h2v2c0 1.103.897 2 2 2h2v2h2v-2h4v2h2v-2h2c1.103 0 2-.897 2-2v-2h2v-2h-2v-4h2V8h-2V6zM6 18V6h12l.002 12H6z\"/></svg><span>COM3</span></div></div>",
       "css": ".ds-strip { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: flex; height: var(--bar, 34px); background: rgba(var(--panel-rgb, 17, 17, 20), 1); box-shadow: inset 0 -1px var(--line, #2c2c33); } .ds-tab { position: relative; display: flex; align-items: center; gap: 5px; padding: 0 13px 0 8px; color: var(--weak, #9d9da6); border-inline-end: 1px solid var(--line, #2c2c33); box-shadow: inset 0 -1px var(--line, #2c2c33); } .ds-tab svg { color: var(--kind); } .ds-tab::before { content: \"\"; position: absolute; inset: 0 0 auto; height: 2px; background: var(--kind); opacity: 0; } .ds-tab:hover { color: var(--fg, #e6e6e1); } .ds-tab.active { font-weight: 500; background: rgba(var(--bg-rgb, 11, 11, 13), 1); box-shadow: none; color: var(--fg, #e6e6e1); } .ds-tab.active::before { opacity: 1; }"
     },
@@ -682,17 +678,17 @@
       "name": "Tag",
       "kind": "chip",
       "refersTo": "tag",
-      "description": "A folder's tag (prod, lab…) on its row and under a pane: amber on the amber wash, in JetBrains Mono, the One Accent Rule's named exception, since a tag is a fact about where you are.",
+      "description": "A folder's tag (prod, lab…) on its row and under a pane: amber on the amber wash, in the system face, the One Accent Rule's named exception, since a tag is a fact about where you are.",
       "html": "<span class=\"ds-tag\">prod</span><span class=\"ds-tag\">eu-west</span><span class=\"ds-tag\">+2</span>",
-      "css": ".ds-tag { display: inline-block; max-width: 80px; overflow: hidden; text-overflow: ellipsis; margin-inline-end: 5px; padding: 0 5px; border-radius: 3px; font: 400 var(--t-s, 11.5px)/16px \"JetBrains Mono Variable\", \"Cascadia Mono\", Consolas, monospace; color: var(--gold, #ffb000); background: var(--gold-soft, rgba(255, 176, 0, 0.14)); vertical-align: middle; }"
+      "css": ".ds-tag { display: inline-block; max-width: 80px; overflow: hidden; text-overflow: ellipsis; margin-inline-end: 5px; padding: 0 5px; border-radius: 3px; font: 400 var(--t-s, 11.5px)/16px \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; color: var(--gold, #ffb000); background: var(--gold-soft, rgba(255, 176, 0, 0.14)); vertical-align: middle; }"
     },
     {
       "name": "Status Bar",
       "kind": "custom",
       "refersTo": "status-bar",
-      "description": "Under a pane, in JetBrains Mono: user@host, the session's folder with its tags as amber chips, the state dot and uptime, then cipher and round trip, and at the end the broadcast marker and the terminal's size.",
+      "description": "Under a pane, in the system face: user@host, the session's folder with its tags as amber chips, the state dot and uptime, then cipher and round trip, and at the end the broadcast marker and the terminal's size.",
       "html": "<div class=\"ds-status\"><span><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"var(--k-ssh, #5c8df0)\" stroke-width=\"2\"><rect x=\"4\" y=\"10\" width=\"16\" height=\"11\" rx=\"2\"/><path d=\"M8 10V7a4 4 0 0 1 8 0v3\"/></svg>root@web-01:22</span><span>Production/Web<i class=\"ds-tag\">prod</i></span><span><i class=\"dot up\"></i>up 12 min</span><span class=\"grow\"></span><span class=\"broadcast\">broadcast</span><span>118 × 45</span></div>",
-      "css": ".ds-status { box-sizing: border-box; font: 400 var(--t-s, 11.5px)/1.4 \"JetBrains Mono Variable\", \"Cascadia Mono\", Consolas, monospace; display: flex; align-items: center; gap: 13px; height: var(--row, 21px); padding: 0 8px; width: 610px; color: var(--weak, #9d9da6); background: rgba(var(--panel-rgb, 17, 17, 20), 1); border-top: 1px solid var(--line, #2c2c33); white-space: nowrap; } .ds-status span { display: inline-flex; align-items: center; gap: 5px; } .ds-status .grow { flex: 1; } .ds-status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--weak, #9d9da6); } .ds-status .dot.up { background: var(--ok, #4fc08d); } .ds-status .broadcast { color: var(--gold, #ffb000); } .ds-status .ds-tag { font-style: normal; max-width: 80px; overflow: hidden; text-overflow: ellipsis; padding: 0 5px; border-radius: 3px; line-height: 16px; color: var(--gold, #ffb000); background: var(--gold-soft, rgba(255, 176, 0, 0.14)); }"
+      "css": ".ds-status { box-sizing: border-box; font: 400 var(--t-s, 11.5px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: flex; align-items: center; gap: 13px; height: var(--row, 21px); padding: 0 8px; width: 610px; color: var(--weak, #9d9da6); background: rgba(var(--panel-rgb, 17, 17, 20), 1); border-top: 1px solid var(--line, #2c2c33); white-space: nowrap; } .ds-status span { display: inline-flex; align-items: center; gap: 5px; } .ds-status .grow { flex: 1; } .ds-status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--weak, #9d9da6); } .ds-status .dot.up { background: var(--ok, #4fc08d); } .ds-status .broadcast { color: var(--gold, #ffb000); } .ds-status .ds-tag { font-style: normal; max-width: 80px; overflow: hidden; text-overflow: ellipsis; padding: 0 5px; border-radius: 3px; line-height: 16px; color: var(--gold, #ffb000); background: var(--gold-soft, rgba(255, 176, 0, 0.14)); }"
     },
     {
       "name": "Kind Glyph",
@@ -700,7 +696,7 @@
       "refersTo": "button",
       "description": "Start-screen ways to start: a 21px tile in the kind's hue on 15% of itself.",
       "html": "<div class=\"ds-starts\"><button style=\"--kind: var(--k-ssh, #5c8df0)\"><span class=\"glyph\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M12 14h6v2h-6zM6.293 9.707 8.586 12l-2.293 2.293 1.414 1.414L11.414 12 7.707 8.293z\"/><path d=\"M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM4 18V6h16l.002 12H4z\"/></svg></span>SSH</button><button style=\"--kind: var(--k-rdp, #9c70e6)\"><span class=\"glyph\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M20 3H4c-1.103 0-2 .897-2 2v11c0 1.103.897 2 2 2h7v2H8v2h8v-2h-3v-2h7c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zM4 14V5h16l.002 9H4z\"/></svg></span>Remote desktop</button><button style=\"--kind: var(--k-browser, #dd6b9c)\"><span class=\"glyph\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm7.931 9h-2.764a14.67 14.67 0 0 0-1.792-6.243A8.013 8.013 0 0 1 19.931 11zM12.53 4.027c1.035 1.364 2.427 3.78 2.627 6.973H9.03c.139-2.596.994-5.028 2.451-6.974.172-.01.344-.026.519-.026.179 0 .354.016.53.027zm-3.842.7C7.704 6.618 7.136 8.762 7.03 11H4.069a8.013 8.013 0 0 1 4.619-6.273zM4.069 13h2.974c.136 2.379.665 4.478 1.556 6.23A8.01 8.01 0 0 1 4.069 13zm7.381 6.973C10.049 18.275 9.222 15.896 9.041 13h6.113c-.208 2.773-1.117 5.196-2.603 6.972-.182.012-.364.028-.551.028-.186 0-.367-.016-.55-.027zm4.011-.772c.955-1.794 1.538-3.901 1.691-6.201h2.778a8.005 8.005 0 0 1-4.469 6.201z\"/></svg></span>Website</button></div>",
-      "css": ".ds-starts { display: flex; flex-wrap: wrap; gap: 5px; } .ds-starts button { font: 400 var(--t, 13px)/1.4 \"JetBrains Mono Variable\", \"Cascadia Mono\", Consolas, monospace; display: inline-flex; align-items: center; gap: 8px; min-height: var(--control, 26px); padding: 5px 8px 5px 5px; border: 1px solid var(--line, #2c2c33); border-radius: var(--r-menu, 5px); background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); cursor: pointer; } .ds-starts button:hover { background: var(--hover, #26262c); } .ds-starts .glyph { display: grid; place-items: center; width: var(--row, 21px); height: var(--row, 21px); border-radius: var(--r-control, 3px); color: var(--kind); background: color-mix(in srgb, var(--kind) 15%, transparent); }"
+      "css": ".ds-starts { display: flex; flex-wrap: wrap; gap: 5px; } .ds-starts button { font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; min-height: var(--control, 26px); padding: 5px 8px 5px 5px; border: 1px solid var(--line, #2c2c33); border-radius: var(--r-menu, 5px); background: var(--raised, #1d1d22); color: var(--fg, #e6e6e1); cursor: pointer; } .ds-starts button:hover { background: var(--hover, #26262c); } .ds-starts .glyph { display: grid; place-items: center; width: var(--row, 21px); height: var(--row, 21px); border-radius: var(--r-control, 3px); color: var(--kind); background: color-mix(in srgb, var(--kind) 15%, transparent); }"
     },
     {
       "name": "Tooltip",
@@ -716,21 +712,21 @@
       "refersTo": "guide",
       "description": "The start screen's first-run list: eight steps, most important first, each a button that does the step; the next step's number stands out, done ones step back.",
       "html": "<section class=\"ds-guide\"><header><b>Getting started</b><span class=\"ds-gprog\">1 of 8 done</span><button class=\"ds-ghide\">Hide</button></header><ol><li><button class=\"ds-gstep done\"><span class=\"ds-gmark\"><svg fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\"><path d=\"m10 15.586-3.293-3.293-1.414 1.414L10 18.414l9.707-9.707-1.414-1.414z\"/></svg></span><span class=\"ds-gtext\"><span class=\"ds-gtitle\">Open a local shell</span><span class=\"ds-ghint\">A terminal on this computer. Typing on this screen opens one too.</span></span><kbd>Ctrl+Shift+T</kbd></button></li><li><button class=\"ds-gstep next\"><span class=\"ds-gmark\">2</span><span class=\"ds-gtext\"><span class=\"ds-gtitle\">Save your first server</span><span class=\"ds-ghint\">SSH, RDP, VNC, serial, telnet or a website, kept in the sidebar.</span></span><kbd>Ctrl+Shift+N</kbd></button></li><li><button class=\"ds-gstep \"><span class=\"ds-gmark\">3</span><span class=\"ds-gtext\"><span class=\"ds-gtitle\">Find anything from the keyboard</span><span class=\"ds-ghint\">The command palette opens sessions, runs actions and connects to user@host.</span></span><kbd>Ctrl+Shift+P</kbd></button></li><li><button class=\"ds-gstep \"><span class=\"ds-gmark\">4</span><span class=\"ds-gtext\"><span class=\"ds-gtitle\">Work side by side</span><span class=\"ds-ghint\">Put tabs in panes with the layout buttons at the title bar's end.</span></span></button></li></ol></section>",
-      "css": ".ds-guide { width: 610px; border: 1px solid var(--line, #2c2c33); border-radius: var(--r-menu, 5px); background: rgba(var(--panel-rgb, 17, 17, 20), 1); color: var(--fg, #e6e6e1); font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; } .ds-guide header { display: flex; align-items: center; gap: 8px; padding: 5px 5px 5px 13px; border-bottom: 1px solid var(--line, #2c2c33); font-family: \"JetBrains Mono Variable\", monospace; } .ds-guide header b { font-size: var(--t-l, 14.5px); font-weight: 600; } .ds-gprog { color: var(--weak, #9d9da6); font-size: var(--t-s, 11.5px); } .ds-ghide { margin-inline-start: auto; border: 0; background: none; color: var(--weak, #9d9da6); font: inherit; padding: 3px 8px; border-radius: var(--r-control, 3px); } .ds-ghide:hover { background: var(--raised, #1d1d22); } .ds-guide ol { margin: 0; padding: 3px; list-style: none; display: flex; flex-direction: column; gap: 1px; } .ds-gstep { width: 100%; display: grid; grid-template-columns: 21px minmax(0, 1fr) auto; align-items: center; gap: 8px 13px; padding: 5px 8px; border: 0; border-radius: 2px; background: none; color: inherit; text-align: start; cursor: pointer; } .ds-gstep:hover { background: var(--raised, #1d1d22); } .ds-gstep:focus-visible { outline: 1px solid var(--gold, #ffb000); } .ds-gmark { width: 21px; height: 21px; display: grid; place-items: center; border: 1px solid var(--line, #2c2c33); border-radius: 50%; font: 400 var(--t-s, 11.5px) \"JetBrains Mono Variable\", monospace; color: var(--weak, #9d9da6); } .next .ds-gmark { border-color: var(--fg, #e6e6e1); color: var(--fg, #e6e6e1); font-weight: 600; } .done .ds-gmark { border-color: transparent; background: color-mix(in srgb, var(--ok, #5fbf7a) 18%, transparent); color: var(--ok, #5fbf7a); } .ds-gtext { display: flex; flex-direction: column; gap: 1px; min-width: 0; } .ds-gtitle { font-family: \"JetBrains Mono Variable\", monospace; font-weight: 500; } .done .ds-gtitle { color: var(--weak, #9d9da6); font-weight: 400; } .ds-ghint { font-size: var(--t-s, 11.5px); color: var(--weak, #9d9da6); } .ds-gstep kbd { font: 400 var(--t-s, 11.5px) \"JetBrains Mono Variable\", monospace; padding: 0 5px; border: 1px solid var(--line, #2c2c33); border-radius: var(--r-control, 3px); background: rgba(var(--deep-rgb, 8, 8, 10), 1); } .done kbd { opacity: 0.6; }"
+      "css": ".ds-guide { width: 610px; border: 1px solid var(--line, #2c2c33); border-radius: var(--r-menu, 5px); background: rgba(var(--panel-rgb, 17, 17, 20), 1); color: var(--fg, #e6e6e1); font: 400 var(--t, 13px)/1.4 \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; } .ds-guide header { display: flex; align-items: center; gap: 8px; padding: 5px 5px 5px 13px; border-bottom: 1px solid var(--line, #2c2c33);} .ds-guide header b { font-size: var(--t-l, 14.5px); font-weight: 600; } .ds-gprog { color: var(--weak, #9d9da6); font-size: var(--t-s, 11.5px); } .ds-ghide { margin-inline-start: auto; border: 0; background: none; color: var(--weak, #9d9da6); font: inherit; padding: 3px 8px; border-radius: var(--r-control, 3px); } .ds-ghide:hover { background: var(--raised, #1d1d22); } .ds-guide ol { margin: 0; padding: 3px; list-style: none; display: flex; flex-direction: column; gap: 1px; } .ds-gstep { width: 100%; display: grid; grid-template-columns: 21px minmax(0, 1fr) auto; align-items: center; gap: 8px 13px; padding: 5px 8px; border: 0; border-radius: 2px; background: none; color: inherit; text-align: start; cursor: pointer; } .ds-gstep:hover { background: var(--raised, #1d1d22); } .ds-gstep:focus-visible { outline: 1px solid var(--gold, #ffb000); } .ds-gmark { width: 21px; height: 21px; display: grid; place-items: center; border: 1px solid var(--line, #2c2c33); border-radius: 50%; font-size: var(--t-s, 11.5px); color: var(--weak, #9d9da6); } .next .ds-gmark { border-color: var(--fg, #e6e6e1); color: var(--fg, #e6e6e1); font-weight: 600; } .done .ds-gmark { border-color: transparent; background: color-mix(in srgb, var(--ok, #5fbf7a) 18%, transparent); color: var(--ok, #5fbf7a); } .ds-gtext { display: flex; flex-direction: column; gap: 1px; min-width: 0; } .ds-gtitle { font-weight: 500; } .done .ds-gtitle { color: var(--weak, #9d9da6); font-weight: 400; } .ds-ghint { font-size: var(--t-s, 11.5px); color: var(--weak, #9d9da6); } .ds-gstep kbd { font: 400 var(--t-s, 11.5px) \"JetBrains Mono Variable\", monospace; padding: 0 5px; border: 1px solid var(--line, #2c2c33); border-radius: var(--r-control, 3px); background: rgba(var(--deep-rgb, 8, 8, 10), 1); } .done kbd { opacity: 0.6; }"
     }
   ],
   "narrative": {
     "northStar": "The Operator's Rack",
-    "overview": "**Creative North Star: \"The Operator's Rack\"**\n\nxtermium is a rack of live connections, in the brand's world: the operator's terminal of the website (xtermium.com) and the brand kit, carried into the app. The chrome is the website's near-black ground and surfaces, neutral and a hair apart, getting lighter the nearer they sit to the hand. Each kind of connection has its own hue, the way cables on a patch panel are colour-coded: SSH is cobalt, RDP violet, serial chartreuse. One phosphor amber accent marks where you are and what you picked. Nothing else is coloured, so a glance at the rack tells you which kind of session each row and tab is, and a glance at the amber tells you where the keyboard is. The start screen waits at the website's prompt, `~/xtermium $` and a blinking amber block cursor, over the brand kit's logo.\n\nThe feel is quiet and exact, as dense as a modern code editor: 13px text, 26px controls, 21px rows, small precise corners. JetBrains Mono, the brand's face, says everything short (titles, buttons, tags, the status bar, code); the system face says everything long (text, menus and lists), so the app still reads as a native tool. The sidebar (the session rack), the tab area with its panes, and the file panel are rounded panels floating a few pixels apart on a darker window. They are flat at rest and are told apart by tone and hairline, not by shadow. Only things that float above the work cast a shadow: menus, dialogs, the command palette, toasts.\n\nEvery proportion comes from the golden ratio (φ ≈ 1.618). Spacing steps along the Fibonacci scale, padding pairs go 1 : φ from vertical to horizontal, type steps by a quarter of φ, and dialogs are 377, 610 or 987px wide. Settings is a golden rectangle, 987 × 610. `ui/lib/scale.test.ts` enforces the spacing and type scales in `npm test`, so they are rules, not guidelines.",
+    "overview": "**Creative North Star: \"The Operator's Rack\"**\n\nxtermium is a rack of live connections, in the brand's world: the operator's terminal of the website (xtermium.com) and the brand kit, carried into the app. The chrome is the website's near-black ground and surfaces, neutral and a hair apart, getting lighter the nearer they sit to the hand. Each kind of connection has its own hue, the way cables on a patch panel are colour-coded: SSH is cobalt, RDP violet, serial chartreuse. One phosphor amber accent marks where you are and what you picked. Nothing else is coloured, so a glance at the rack tells you which kind of session each row and tab is, and a glance at the amber tells you where the keyboard is. The start screen waits at the website's prompt, `~/xtermium $` and a blinking amber block cursor, over the brand kit's logo.\n\nThe feel is quiet and exact, as dense as a modern code editor: 13px text, 26px controls, 21px rows, small precise corners. The whole interface is in the system face, so the app reads as a native tool; JetBrains Mono, the brand's face, is kept for what is read character by character (code, commands, keys, fingerprints, passcodes). The sidebar (the session rack), the tab area with its panes, and the file panel are rounded panels floating a few pixels apart on a darker window. They are flat at rest and are told apart by tone and hairline, not by shadow. Only things that float above the work cast a shadow: menus, dialogs, the command palette, toasts.\n\nEvery proportion comes from the golden ratio (φ ≈ 1.618). Spacing steps along the Fibonacci scale, padding pairs keep both values on it with the horizontal at least the vertical, type steps by a quarter of φ (rounded to the half pixel), and dialogs are 377, 610 or 987px wide. Settings is a golden rectangle, 987 × 610. `ui/lib/scale.test.ts` enforces, in `npm test`, that padding, margin, gap, inset, offsets and border-radius are on the scale and that every `font-size` is a token; widths, heights and line-heights follow the scale by convention (the token audit at the end names the exceptions).",
     "keyCharacteristics": [
       "Near-black neutrals in six tonal steps (the website's ground, surfaces and hairlines), a dark theme by default and a full light theme.",
       "One accent, Phosphor Amber, which the user can change. It is never decoration.",
-      "Ten cable colours, one per kind of connection, used only to say \"this is an SSH/RDP/… thing\".",
-      "JetBrains Mono for short text, the system face for long text and lists.",
+      "Eleven cable colours, one per kind of connection, used only to say \"this is an SSH/RDP/… thing\".",
+      "The system face for the whole interface; JetBrains Mono only for code, commands, keys, fingerprints and passcodes.",
       "The brand kit's horizontal logo on the start screen and in Settings › About; its own amber and white stay inside it.",
       "Fibonacci spacing (1 2 3 5 8 13 21 34px) and five type sizes, both enforced by a test.",
       "Rounded panels on a darker window. Flat at rest; shadows only on floating layers.",
-      "Icon-only tool buttons with tooltips. Boxicons SVGs, animated only on session rows and tabs.",
+      "Icon-only tool buttons with tooltips. Boxicons SVGs. Session and folder icons move on hover; interface icons only spin or pulse while something waits.",
       "Right-to-left ready: logical properties throughout, with flips for chevrons, menus and carets."
     ],
     "rules": [
@@ -751,7 +747,7 @@
       },
       {
         "name": "The See-Through Chrome Rule",
-        "body": "Chrome backgrounds are written `rgba(var(--panel-rgb), var(--chrome-alpha))` (or the `window`/`bg`/`deep` triplet), never as a hex. `--chrome-alpha` drops below 1 while a window effect is on, and the desktop shows through.",
+        "body": "Chrome backgrounds are written `rgba(var(--panel-rgb), var(--chrome-alpha))` (or the `window`/`bg`/`deep` triplet), never as a hex. `--chrome-alpha` drops below 1 while the Transparent effect is on, and the desktop shows through. Any place is two layers, the window's ground and a panel or terminal on it, and `--chrome-alpha` is worked out so the two together make the Opacity setting, in every window: don't paint a third layer between them. A floating layer is one layer at `--float-alpha`, over what's already there, as a window is over another. The lock screen stays solid: it hides what's behind it. `--solid` (1, or 0 with the Transparent effect) switches off the active tab's and a detached window's own fill so the pane shows through. The title bar is the one place with only the ground under it, so a dark desktop turns it grey on light: there its icons (`--bar-ink`) go from `weak` to ink while `--solid` is 0, and the palette field and the New session key are a second layer at `--chrome-alpha`, as a panel is, instead of solid slabs on it. On light the New session key is `deep` (white, as the field), since `raised` is barely off the bar's grey. Two exceptions, named: the scrim behind a dialog (`--scrim`) and the palette (`--scrim-soft`) is the dark ground at 0.4 and 0.32 (black at 0.18 and 0.12 on light), and the RDP view's bars over the picture use fixed dark greys (`#0c0c0c`, `rgb(12 12 12 / 0.75)`), because they sit on the remote desktop's black, not on chrome.",
         "section": "colors"
       },
       {
@@ -765,18 +761,18 @@
         "section": "typography"
       },
       {
-        "name": "The Short-in-Mono Rule",
-        "body": "As on the website: if it is a title, a button, a tag, a key, a status line or code, it is JetBrains Mono (`var(--short)`, or `var(--mono)` for code). If it is read as text or down a list, it is the system face (`var(--ui)`). Lists are long even when each entry is short, so these stay in the system face: menu items (`.menu button`), the rows of the session rack and the palette (`button.item`), the Settings page list (`.pages button`) and the session editor's kind picker (`.kinds button`, five to a row, where the narrower face keeps the names whole). In Arabic, Hindi, Japanese and Chinese (`lang` ar, hi, ja, zh) `--short` falls back to `--ui`, since JetBrains Mono has no letters for those scripts.",
+        "name": "The Mono-for-Characters Rule",
+        "body": "The system face sets the interface; the mono is only for what is read character by character or must line up: code and commands (`code`, `pre`, `.mono`, snippets, previews), keys (`kbd`), a host key's fingerprint, the sign-in code, the Co-op passcode, addresses and traffic figures, and the start screen's prompt. A title, a button, a tag, a status line, a menu or a list is never in the mono, however short. A new surface takes the system face by inheriting from `body`; it does not set a `font-family` of its own, and there is no token for \"short text\".",
         "section": "typography"
       },
       {
         "name": "The Fibonacci Rule",
-        "body": "Padding, margin, gap, inset and border-radius values are Fibonacci pixels. A stray 4px or 12px fails `npm test`.",
+        "body": "Padding, margin, gap, inset, offsets and border-radius values are Fibonacci pixels; a stray 4px or 12px there fails `npm test`. Widths, heights and line-heights are not tested: keep them on the scale or derived, or name the exception (pane sizers 6px, scrollbars 10px, the title bar's 46px Windows buttons, `progress` 4px).",
         "section": "layout"
       },
       {
         "name": "The Derived Value Rule",
-        "body": "A value worked out from others is written as `calc(…)` so it reads as derived: `calc(8px + 16px + 5px)` is a field's text start past its icon, and `calc(var(--r-menu) - 3px)` is a menu item's corner.",
+        "body": "A value worked out from others is written as `calc(…)` from the tokens it comes from, so it reads as derived and follows them: `calc(8px + var(--icon-s) + var(--gap))` is a search field's text start past its 16px icon (`--icon` is the 18px of controls and rows), `calc(var(--r-menu) - 3px)` a menu item's corner, and `calc(var(--control) + 2 * var(--gap) + 2px)` the collapsed rail.",
         "section": "layout"
       },
       {
@@ -786,37 +782,37 @@
       },
       {
         "name": "The Nested Curve Rule",
-        "body": "A rounded thing inside another keeps the same curve: its radius is the outer one less the room between them, written as `calc()` (a menu item is `calc(var(--r-menu) - 3px)`, a segmented button `calc(var(--r-control) - 1px)`).",
+        "body": "A rounded thing inside another keeps the same curve: its radius is the outer one less the room between them, written as `calc()` (a menu item is `calc(var(--r-menu) - 3px)`, the kind glyph in the session editor `calc(var(--r-control) - 2px)`), and never below `--r-control`: a row inside an 8px-radius, 8px-padded panel keeps 3px.",
         "section": "shapes"
       }
     ],
     "dos": [
-      "Do use only Fibonacci pixels for spacing and radii (1 2 3 5 8 13 21 34), with padding in 1 : φ pairs (`3px 8px`, `5px 8px`, `8px 13px`).",
-      "Do set every text size from the type tokens (`--t-s --t --t-l --t-xl --t-xxl`).",
-      "Do size things with `--row` (21px), `--control` (26px) and `--bar` (34px), and write any derived value as `calc(…)`.",
-      "Do keep amber for focus, selection, toggles that are on, links, drop targets and the one primary action. Read it as `var(--gold)`, since the user can change it.",
-      "Do colour a session by its kind hue (icon, tab connector, glyph tile) through `--kind`.",
-      "Do paint chrome as `rgba(var(--…-rgb), var(--chrome-alpha))` so window effects show through.",
-      "Do end a menu with its destructive item (`.danger`) and start groups with `.sep`.",
-      "Do offer Undo instead of a question when the thing can be put back, and ask (with a danger button) only when it can't: a running connection, a folder of sessions, a restore.",
-      "Do focus the safe answer when yes can't be undone or is a security call (Reject on a new host key, Cancel on a delete or restore, Keep editing on discard), so Enter never does the irreversible thing; an ordinary yes (Close tab, which Reopen can undo) keeps the focus.",
-      "Do make tool buttons icon-only with a tooltip.",
-      "Do keep motion to state and continuity: 0.1–0.2s, arrivals on `--ease-out`, a new floating layer through `float-in`, exits faster than entrances. CSS motion stops under `prefers-reduced-motion` through `ui/app.css`; a Svelte transition must check it itself.",
-      "Do use logical properties (`inset-inline-*`, `margin-inline-*`) so right-to-left mirrors.",
-      "Do set short text (titles, buttons, tags, status lines) in `var(--short)` and anything read as text or down a list (menus, rows, the Settings pages, the kind picker) in `var(--ui)`.",
-      "Do show the logo through `Logo.svelte`, so its tiles and wordmark follow the theme through `--mark`."
+      "**Do** use only Fibonacci pixels for spacing and radii (1 2 3 5 8 13 21 34), with padding pairs on the scale, horizontal at least vertical (`3px 8px`, `5px 8px`, `8px 13px`).",
+      "**Do** set every text size from the type tokens (`--t-s --t --t-l --t-xl --t-xxl`).",
+      "**Do** size things with `--row` (21px), `--control` (26px) and `--bar` (34px), and write any derived value as `calc(…)`.",
+      "**Do** keep amber for focus, selection, toggles that are on, links, drop targets and the one primary action. Read it as `var(--gold)`, since the user can change it.",
+      "**Do** colour a session by its kind hue (icon, tab connector, glyph tile) through `--kind`.",
+      "**Do** paint chrome as `rgba(var(--…-rgb), var(--chrome-alpha))` so the Transparent effect shows through.",
+      "**Do** end a menu with its destructive item (`.danger`) and start groups with `.sep`.",
+      "**Do** offer Undo instead of a question when the thing can be put back, and ask (with a danger button) only when it can't: a running connection, a folder of sessions, a restore.",
+      "**Do** focus the safe answer when yes can't be undone or is a security call (Cancel on a delete or restore, Keep editing on discard), so Enter never does the irreversible thing; an ordinary yes (Close tab, which Reopen can undo) keeps the focus. The one security call that focuses yes is trusting a host, RDP server or BMC seen for the first time (Trust, as ssh's \"yes\"); a key that changed is refused whatever is answered.",
+      "**Do** make tool buttons icon-only with a tooltip.",
+      "**Do** keep motion to state and continuity, in three durations: `--quick` (0.1s) for an exit, `--move` (0.16s) for an arrival or a change of state, `--glide` (0.2s) for a thing moving to another place; arrivals on `--ease-out`, a new floating layer through `float-in`, exits faster than entrances. The longer ones are named: the welcome leaving in 0.12s, the Co-op ring's 0.3s line and seat glide and its 0.5s packets, the 2.6s fade of a found setting. When one view replaces another (the start screen giving way to the shell typed into it), the old one leaves first and the new one arrives after it. CSS motion stops under `prefers-reduced-motion` through `ui/app.css`; a Svelte transition must check it itself.",
+      "**Do** use logical properties (`inset-inline-*`, `margin-inline-*`) so right-to-left mirrors.",
+      "**Do** leave the interface in the system face (`var(--ui)`, inherited from `body`) and use `var(--mono)` only for what is read character by character: code, commands, keys, fingerprints, passcodes and figures that must line up.",
+      "**Do** show the logo through `Logo.svelte`, so its tiles and wordmark follow the theme through `--mark`."
     ],
     "donts": [
-      "Don't use off-scale spacing (4px, 6px, 10px, 12px, 16px) or a raw `font-size` in px; the scale test fails on them.",
-      "Don't put a shadow on a resting panel, tab, row or button, or write a new shadow value for a floating layer: use `--shadow-float`, `--shadow-menu` or `--shadow-dialog`.",
-      "Don't use amber for headings, icons, illustration or large fills other than the primary button.",
-      "Don't use a kind hue to show state, or a status colour to mean a kind of connection.",
-      "Don't let a user's colour recolour a session's icon: marks go on names (`.tinted`) and tab lines, and accent presets stay off the kind hues and the error red.",
-      "Don't hard-code the accent's hex, or the chrome as an opaque hex.",
-      "Don't animate the interface's own icons. Only session and folder icons move, and only on hover.",
-      "Don't add big padding or wide gaps. The densest comfortable layout is the house style.",
-      "Don't set a list, a menu or a five-to-a-row grid in the mono: the names stop fitting and it no longer reads down.",
-      "Don't use the logo's amber `#FFC20E` or `--mark` outside the logo, or recolour, stretch, rotate or add effects to the logo."
+      "**Don't** use off-scale spacing (4px, 6px, 10px, 12px, 16px) in padding, margin, gap, inset, offsets or radii, or a raw `font-size` in px; the scale test fails on those. Sizes (width, height, line-height) aren't tested: keep them on the scale or name the exception.",
+      "**Don't** put a shadow on a resting panel, tab, row or button or write a new shadow value for a floating layer: use `--shadow-float`, `--shadow-menu` or `--shadow-dialog`.",
+      "**Don't** use amber for headings, icons, illustration or large fills other than the primary button.",
+      "**Don't** use a kind hue to show state, or a status colour to mean a kind of connection.",
+      "**Don't** let a user's colour recolour a session's icon: marks go on names (`.tinted`) and tab lines, and accent presets stay off the kind hues and the error red.",
+      "**Don't** hard-code the accent's hex (but for the Amber (default) swatch in Settings › Appearance), or the chrome as an opaque hex.",
+      "**Don't** animate the interface's own icons, bar a spinner or a pulse that says something is waiting. Only session and folder icons move for their own sake, and only on hover.",
+      "**Don't** add big padding or wide gaps. The densest comfortable layout is the house style.",
+      "**Don't** set a title, button, tag, status line, menu or list in the mono, or bring back a token for \"short text\": the interface is one face.",
+      "**Don't** use the logo's amber `#FFC20E` or `--mark` outside the logo, or recolour, stretch, rotate or add effects to the logo."
     ]
   }
 }

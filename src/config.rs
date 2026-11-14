@@ -43,6 +43,15 @@ pub struct Store {
     /// as `split` and `join` move the whole workspace record.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub agent_prompt: String,
+    /// This workspace's own id (`Store::ids`): the same through a rename, so what belongs to a
+    /// workspace (an open tab) is told by it, never by the name. Travels with the workspace's
+    /// record as `agent_prompt` does.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub id: String,
+    /// This workspace's colour (`#rrggbb`, "" for none): the title bar's field wears it, so two
+    /// workspaces aren't taken for each other.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub color: String,
 }
 
 /// Puts each of `from` into `to`, in place of the one `same` says it is, else at the end.
@@ -249,6 +258,10 @@ fn yes() -> bool {
 
 #[derive(Serialize, Deserialize, Clone, Default, PartialEq, Debug)]
 pub struct Folder {
+    /// Its own id (`Store::ids`), the same through a rename or a move. Only folders with a
+    /// record here have one: sessions still name their folder by its path.
+    #[serde(default)]
+    pub id: String,
     /// `/`-separated, like `Session::folder`.
     pub path: String,
     /// Search terms for the folder and everything in it.
@@ -270,6 +283,10 @@ pub struct Folder {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Session {
+    /// Its own id (`Store::ids`), the same through a rename or a move, and unlike any other
+    /// session's in any workspace: two sessions of one name are still two sessions.
+    #[serde(default)]
+    pub id: String,
     pub name: String,
     /// Folder path in the tree, `/`-separated. Empty = root.
     #[serde(default)]
@@ -293,6 +310,7 @@ pub struct Session {
 impl Session {
     pub fn new(name: impl Into<String>, folder: impl Into<String>, kind: Kind) -> Self {
         Self {
+            id: String::new(),
             name: name.into(),
             folder: folder.into(),
             kind,
@@ -1253,8 +1271,47 @@ impl Store {
     /// What both have is updated (sessions by folder and name), what's new is added, nothing is
     /// removed.
     pub fn sync_sessions(&mut self, from: &Store) {
+        // What was here keeps its own id; what comes new gets one (`own_ids`), never the source's.
+        let sessions: std::collections::HashMap<(String, String), String> = self.sessions.iter().map(|s| ((s.folder.clone(), s.name.clone()), s.id.clone())).collect();
+        let folders: std::collections::HashMap<String, String> = self.folders.iter().map(|f| (f.path.clone(), f.id.clone())).collect();
         upsert(&mut self.sessions, &from.sessions, |a, b| a.folder == b.folder && a.name == b.name);
         upsert(&mut self.folders, &from.folders, |a, b| a.path == b.path);
+        for s in &mut self.sessions {
+            s.id = sessions.get(&(s.folder.clone(), s.name.clone())).cloned().unwrap_or_default();
+        }
+        for f in &mut self.folders {
+            f.id = folders.get(&f.path).cloned().unwrap_or_default();
+        }
+    }
+
+    /// Gives this workspace, its sessions and its folders ids of their own (16 random bytes in
+    /// hex): one without, or with one already `seen` (a copy's), gets a new one. True if one
+    /// changed. A session new in the UI comes with its id (api.ts `newSession`), and keeps it.
+    pub fn ids(&mut self, seen: &mut std::collections::HashSet<String>) -> bool {
+        let mut changed = false;
+        let mut own = |id: &mut String| {
+            let ok = !id.is_empty() && id.len() <= 64 && id.chars().all(|c| c.is_ascii_alphanumeric());
+            if !ok || !seen.insert(id.clone()) {
+                *id = crate::vault::hex(&crate::vault::random::<16>());
+                seen.insert(id.clone());
+                changed = true;
+            }
+        };
+        own(&mut self.id);
+        self.sessions.iter_mut().for_each(|s| own(&mut s.id));
+        self.folders.iter_mut().for_each(|f| own(&mut f.id));
+        changed
+    }
+
+    /// Every workspace, session and folder, in every workspace, gets an id of its own: copies (a
+    /// cloned or synced workspace's) get new ones. Returns whether one changed.
+    pub fn own_ids(&mut self) -> bool {
+        let mut seen = Default::default();
+        let mut changed = self.ids(&mut seen);
+        for w in &mut self.workspaces {
+            changed |= w.data.ids(&mut seen);
+        }
+        changed
     }
 
 
@@ -1297,6 +1354,9 @@ pub struct Tabs {
     /// The names tabs were given (renamed in the tab strip), by position; "" for none.
     #[serde(default, rename = "label")]
     pub labels: Vec<String>,
+    /// The id of the workspace each tab was opened in (`Store::id`), by position.
+    #[serde(default, rename = "workspace")]
+    pub workspaces: Vec<String>,
 }
 
 impl Tabs {
@@ -1304,8 +1364,8 @@ impl Tabs {
         read("tabs", &[], |_| Ok(String::new())).ok().and_then(|t| toml::from_str::<Tabs>(&t).ok()).unwrap_or_default()
     }
 
-    pub fn save(tabs: Vec<Session>, labels: Vec<String>) -> Result<()> {
-        write("tabs", &toml::to_string(&Tabs { tabs, labels })?)
+    pub fn save(tabs: Vec<Session>, labels: Vec<String>, workspaces: Vec<String>) -> Result<()> {
+        write("tabs", &toml::to_string(&Tabs { tabs, labels, workspaces })?)
     }
 }
 
@@ -1664,6 +1724,47 @@ mod tests {
     }
 
     /// Each workspace comes out on its own and goes back where it was; the file keeps them all.
+    /// Workspaces, sessions and folders have ids of their own: kept once given (through a split,
+    /// a join and a sync), new for a copy, never shared between two of them.
+    #[test]
+    fn everything_has_its_own_id() {
+        let s = |name: &str| Session::new(name, "Prod", Kind::Shell { program: Default::default(), dir: Default::default() });
+        let mut all = Store { sessions: vec![s("a"), s("a")], folders: vec![Folder { path: "Prod".into(), ..Default::default() }], ..Default::default() };
+        all.workspaces.push(Workspace { name: "Work".into(), data: Store { sessions: vec![s("a")], ..Default::default() } });
+        assert!(all.own_ids());
+        let ids = |st: &Store| -> Vec<String> {
+            let of = |d: &Store| [d.id.clone()].into_iter().chain(d.sessions.iter().map(|s| s.id.clone())).chain(d.folders.iter().map(|f| f.id.clone())).collect::<Vec<_>>();
+            of(st).into_iter().chain(st.workspaces.iter().flat_map(|w| of(&w.data))).collect()
+        };
+        let first = ids(&all);
+        assert_eq!(first.len(), 6);
+        assert!(first.iter().all(|i| i.len() == 32), "{first:?}");
+        assert_eq!(first.iter().collect::<std::collections::HashSet<_>>().len(), 6, "two sessions of one name are still two");
+        assert!(!all.own_ids(), "given once");
+        assert_eq!(ids(&all), first);
+
+        // In and out of use, a workspace keeps its id.
+        let (work, rest) = all.clone().split("Work");
+        assert_eq!(work.id, first[4]);
+        assert_eq!(ids(&rest.join("Work", &work)), first);
+
+        // A clone is a copy: new ids for it, the original's stay.
+        let copy = all.workspaces[0].data.clone();
+        all.workspaces.push(Workspace { name: "Work (clone)".into(), data: copy });
+        assert!(all.own_ids());
+        assert_eq!(ids(&all)[..6], first[..]);
+        assert_eq!(ids(&all).iter().collect::<std::collections::HashSet<_>>().len(), 8);
+
+        // Sync updates what's there under its own id, and what's new gets one of its own.
+        let src = Store { sessions: all.sessions.clone(), ..Default::default() };
+        let was = all.workspaces[0].data.sessions[0].id.clone();
+        all.workspaces[0].data.sessions[0].folder = "Prod".into();
+        all.workspaces[0].data.sync_sessions(&src);
+        all.own_ids();
+        assert_eq!(all.workspaces[0].data.sessions[0].id, was);
+        assert_eq!(ids(&all)[..4], first[..4], "the source keeps its ids");
+    }
+
     #[test]
     fn workspaces_split_and_join() {
         let s = |name: &str| Session::new(name, "", Kind::Shell { program: Default::default(), dir: Default::default() });

@@ -165,6 +165,8 @@ pub struct Settings {
     pub auto_reconnect: bool,
     /// Reopen the tabs that were open when xtermium last closed.
     pub restore_tabs: bool,
+    /// The tab strip shows only the tabs opened in the workspace in use; the others keep running.
+    pub tabs_by_workspace: bool,
     /// The bar under the panes: the focused tab's connection, uptime, cipher, round trip.
     pub status_bar: bool,
     /// Open sessions in the sidebar with one click instead of two.
@@ -454,6 +456,7 @@ impl Default for Settings {
             confirm_close: true,
             auto_reconnect: true,
             restore_tabs: false,
+            tabs_by_workspace: false,
             status_bar: true,
             single_click_open: false,
             quick_shell: true,

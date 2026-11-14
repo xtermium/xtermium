@@ -119,7 +119,6 @@
   }
   h2 {
     margin: 0;
-    font-family: var(--short);
     font-size: var(--t-l);
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -129,7 +128,6 @@
   }
   .progress {
     color: var(--weak);
-    font-family: var(--short);
     font-size: var(--t-s);
     font-variant-numeric: tabular-nums;
   }
@@ -182,7 +180,6 @@
     place-items: center;
     border: 1px solid transparent;
     border-radius: 50%;
-    font-family: var(--short);
     font-size: var(--t-s);
     color: var(--weak);
     font-variant-numeric: tabular-nums;
@@ -198,7 +195,6 @@
   }
   .title {
     min-width: 0;
-    font-family: var(--short);
     font-weight: 500;
   }
   /* done: still there to do again, but stepped back */
@@ -231,7 +227,6 @@
   }
   .hint {
     margin: 0;
-    font-family: var(--ui);
     font-size: var(--t-s);
     color: var(--weak);
     line-height: 1.4;

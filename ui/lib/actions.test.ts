@@ -1,7 +1,7 @@
 // Run with `npm test`: node runs TypeScript directly.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { ACTIONS, bindings, cell, chord, defaultKeys, even, fill, find, type Filter, keysOf, neighbour, nudge, type Os, ownWindow, placeholders, quickConnect, resize, score, shown, TERMINAL_KEYS, tile, wheelAction, wheelChord } from "./actions.ts";
+import { ACTIONS, bindings, follow, cell, chord, defaultKeys, even, fill, find, type Filter, keysOf, neighbour, nudge, type Os, ownWindow, placeholders, quickConnect, resize, score, shown, TERMINAL_KEYS, tile, wheelAction, wheelChord } from "./actions.ts";
 
 const key = (code: string, key: string, mods: Partial<KeyboardEvent> = {}) =>
   chord({ code, key, ctrlKey: false, altKey: false, shiftKey: false, metaKey: false, ...mods } as KeyboardEvent);
@@ -193,4 +193,12 @@ test("the palette finds a session by its folder's tag", () => {
   ];
   assert.deepEqual(find(items, "staging", "sessions").map((it) => it.label), ["Lab/web1"]);
   assert.equal(find(items, "staging", "hosts").length, 0, "Hosts searches the address alone");
+});
+
+test("broadcast's panes are the ticked tabs, and no other", () => {
+  assert.deepEqual(follow([], [1, 2, 3]), [1, 2, 3], "it starts in the strip's order");
+  assert.deepEqual(follow([3, 1, 2], [1, 3]), [3, 1], "unticking hides that pane, the rest stay put");
+  assert.deepEqual(follow([3, 1], [1, 2, 3]), [3, 1, 2], "ticking shows it again, last");
+  assert.deepEqual(follow([1, 2], []), [null], "none ticked leaves one empty pane");
+  assert.deepEqual(follow([null, 7], [7]), [7], "an untiled layout's empty pane goes");
 });

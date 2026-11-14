@@ -185,7 +185,9 @@
       </label>
       {#if ssh.jump}<Endpoint e={ssh.jump} />{/if}
     {:else if s.kind.type === "shell"}
-      <span>{_("Program")}</span><PathInput bind:value={s.kind.program} exec placeholder={_("default shell")} />
+      {@const sh = s.kind}
+      <span>{_("Program")}</span><PathInput bind:value={sh.program} exec placeholder={_("default shell")} />
+      <span>{_("Working folder")}</span><PathInput bind:value={() => sh.dir ?? "", (v) => (sh.dir = v)} dirs placeholder={_("your home folder")} />
     {:else if s.kind.type === "agent"}
       {@const a = s.kind}
       <span>{_("Tool")}</span>
@@ -432,8 +434,6 @@
     justify-content: start;
     padding: 1px;
     padding-inline-end: 5px;
-    /* five to a row: the narrower system face keeps the names whole */
-    font-family: var(--ui);
   }
   .kinds .name {
     overflow: hidden;

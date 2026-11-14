@@ -94,7 +94,7 @@ export const MCP_TOOLS = ["claude", "codex"];
 /** The agent tools whose sessions can turn skills off (src/agent_mcp.rs `SKILL_TOOLS`). */
 export const SKILL_TOOLS = ["claude", "codex", "omp"];
 /** `color`: `#rrggbb` or "" (folder's, else the kind's). `icon`: a built-in icon name, a `data:` image, or "". */
-export type Session = { name: string; folder: string; kind: Kind; style: Style; color: string; icon: string; /** A built-in icon doesn't move on hover. */ still?: boolean; notes: string };
+export type Session = { /** Its own id (src/config.rs `Store::ids`): the same through a rename or a move. */ id: string; name: string; folder: string; kind: Kind; style: Style; color: string; icon: string; /** A built-in icon doesn't move on hover. */ still?: boolean; notes: string };
 export type TunnelKind = "Local" | "Remote" | "Dynamic";
 export type Tunnel = {
   name: string;
@@ -108,9 +108,9 @@ export type Tunnel = {
   autostart?: boolean;
 };
 /** A folder with something to remember; folders also exist through their sessions' paths. */
-export type Folder = { path: string; tags: string[]; color: string; icon: string; still?: boolean; /** Place among its siblings from 1; 0 = by name, after. */ order?: number };
+export type Folder = { id?: string; path: string; tags: string[]; color: string; icon: string; still?: boolean; /** Place among its siblings from 1; 0 = by name, after. */ order?: number };
 /** `agent_prompt`: this workspace's system prompt for AI agent sessions (Settings › General), added to each tool's own. */
-export type Store = { session: Session[]; tunnel: Tunnel[]; folder: Folder[]; snippet: Snippet[]; credential: Credential[]; layout: SavedLayout[]; agent_prompt: string };
+export type Store = { session: Session[]; tunnel: Tunnel[]; folder: Folder[]; snippet: Snippet[]; credential: Credential[]; layout: SavedLayout[]; agent_prompt: string; /** The workspace's own id, and its colour (`#rrggbb` or ""). */ id: string; color: string };
 /** Sessions opened together in a pane arrangement (App.svelte `Layout`): `pane` in tab-strip
  *  order, `at` the pane each was in, `label` the name its tab was given ("" none), `sizes` the
  *  panes' sizes as dragged (none: even). Older layouts have only `pane`, one per pane in order. */
@@ -200,6 +200,8 @@ export type Settings = {
   confirm_close: boolean;
   auto_reconnect: boolean;
   restore_tabs: boolean;
+  /** The tab strip shows only the tabs opened in the workspace in use. */
+  tabs_by_workspace: boolean;
   status_bar: boolean;
   single_click_open: boolean;
   /** With no tabs open, typing on the start screen opens a local shell with what was typed. */
@@ -259,7 +261,9 @@ export type Settings = {
  *  `user@host:port` (SSH), `rdp:user@host:port` or `vnc:host:port`. */
 export type Login = { id: string; password: string };
 /** Workspaces besides the default one (""), the one in use, and its data. */
-export type Workspaces = { workspaces: string[]; workspace: string; store: Store };
+/** A workspace as listed: the default one's name is "". */
+export type WorkspaceInfo = { id: string; name: string; color: string };
+export type Workspaces = { workspace_list: WorkspaceInfo[]; workspaces: string[]; workspace: string; store: Store };
 /** What's behind a place (src/settings.rs `Background`): a picture or a shader, how much shows. */
 export type Background = { kind: "" | "image" | "shader"; name: string; show: number; fit: Fit; stamp: number };
 /** How a background picture fits its place (src/settings.rs `FITS`). */
@@ -293,6 +297,9 @@ export type Boot = {
   tabs: Session[];
   /** The names the reopened tabs were given; "" for none. */
   labels: string[];
+  /** The workspace each of `tabs` was opened in, by position. */
+  tab_workspaces: string[];
+  workspace_list: WorkspaceInfo[];
   workspaces: string[];
   workspace: string;
   schemes: Scheme[];
@@ -471,7 +478,11 @@ export function bytes(m: unknown): Uint8Array {
 
 export const openUrl = (url: string) => invoke("open_url", { url });
 
+/** An id for something new (a session, a copy): 32 hex digits, as the backend makes them. */
+export const newId = () => crypto.randomUUID().replaceAll("-", "");
+
 export const newSession = (kind: KindName = "ssh", folder = "", name = ""): Session => ({
+  id: newId(),
   name,
   folder,
   kind: newKind(kind),

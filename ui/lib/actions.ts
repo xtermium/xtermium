@@ -315,3 +315,11 @@ export function neighbour(rects: [number, number, number, number][], from: numbe
   });
   return best;
 }
+
+/** Broadcast's tiles: the panes for the ticked tabs `keys`. Panes already there keep their
+ *  places, an unticked tab's pane goes, a newly ticked tab's comes last; with none ticked one
+ *  empty pane is left. */
+export function follow(panes: (number | null)[], keys: number[]): (number | null)[] {
+  const next = [...panes.filter((p): p is number => p !== null && keys.includes(p)), ...keys.filter((k) => !panes.includes(k))];
+  return next.length ? next : [null];
+}

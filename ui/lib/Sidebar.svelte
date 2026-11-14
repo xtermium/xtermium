@@ -6,14 +6,14 @@
   // pick several sessions and folders, to drag, colour, delete or move to another workspace together.
   import { invoke } from "@tauri-apps/api/core";
   import { _, N_ } from "./i18n.svelte";
-  import { COLORS, host, KVM_VENDORS, newSession, openUrl, type Folder, type Session, type Workspaces } from "./api";
+  import { COLORS, host, KVM_VENDORS, newId, newSession, openUrl, type Folder, type Session, type Workspaces } from "./api";
   import Appearance from "./Appearance.svelte";
   import Export from "./Export.svelte";
   import Icon from "./Icon.svelte";
   import { menu as menuAt } from "./menu";
   import Modal from "./Modal.svelte";
   import SessionIcon from "./SessionIcon.svelte";
-  import { app, folderColor, inside, lookOf, saveStore, sessionKey, tip, toast, useWorkspaces } from "./state.svelte";
+  import { app, folderColor, inside, lookOf, saveStore, sessionId, sessionKey, tip, toast, useWorkspaces } from "./state.svelte";
 
   const KIND_NAMES: Record<string, string> = {
     ssh: "SSH",
@@ -78,9 +78,9 @@
   }: {
     onopen: (s: Session) => void;
     onedit: (s: Session, index: number | null) => void;
-    /** Sessions with a tab, by `sessionKey`: true while one is connected. */
+    /** Sessions with a tab, by `sessionId`: true while one is connected. */
     live?: Map<string, boolean>;
-    /** The `sessionKey` of the focused tab's session: its row is marked, so the green dots say
+    /** The `sessionId` of the focused tab's session: its row is marked, so the green dots say
      *  which sessions are open and this says which one has the keyboard. */
     current?: string;
   } = $props();
@@ -337,7 +337,7 @@
     let to = _("{name} (copy)", { name: path });
     for (let n = 2; folders.has(to); n++) to = _("{name} (copy {n})", { name: path, n });
     const move = (p: string) => to + p.slice(path.length);
-    const sessions = app.store.session.filter((s) => inside(s.folder, path)).map((s) => ({ ...$state.snapshot(s), folder: move(s.folder) }));
+    const sessions = app.store.session.filter((s) => inside(s.folder, path)).map((s) => ({ ...$state.snapshot(s), id: newId(), folder: move(s.folder) }));
     const copies = app.store.folder.filter((f) => inside(f.path, path)).map((f) => ({ ...$state.snapshot(f), path: move(f.path) }));
     if (!copies.some((f) => f.path === to)) copies.push({ path: to, tags: [], color: "", icon: "" });
     app.store.session.push(...sessions);
@@ -520,14 +520,14 @@
   {@const s = app.store.session[i]}
   {@const look = lookOf(s)}
   {@const one = app.settings?.single_click_open}
-  {@const on = live.get(sessionKey(s))}
+  {@const on = live.get(sessionId(s))}
   <button
     class="flat item leaf"
     class:before={drag?.row === i && !drag.after}
     class:after={drag?.row === i && drag.after}
     class:live={on === true}
     class:idle={on === false}
-    class:current={current === sessionKey(s)}
+    class:current={current === sessionId(s)}
     class:chosen={chosen.has("s" + i)}
     data-session={i}
     tabindex="-1"
@@ -622,7 +622,7 @@
       <button onclick={() => openUrl(url)}><Icon name="globe" />{_("Open in system browser")}</button>
     {/if}
     <button onclick={() => onedit(s, i)}><Icon name="edit" />{_("Edit")}</button>
-    <button onclick={() => onedit({ ...$state.snapshot(s), name: _("{name} (copy)", { name: s.name }) }, null)}><Icon name="copy" />{_("Duplicate")}</button>
+    <button onclick={() => onedit({ ...$state.snapshot(s), id: newId(), name: _("{name} (copy)", { name: s.name }) }, null)}><Icon name="copy" />{_("Duplicate")}</button>
     {#if elsewhere.length}<button onclick={() => (moving = { sessions: [i], folders: [] })}><Icon name="cluster" />{_("Move to workspace…")}</button>{/if}
     <button class="danger" onclick={() => remove(i)}><Icon name="trash" />{_("Delete")}</button>
   </div>

@@ -4,15 +4,18 @@ import { invoke } from "@tauri-apps/api/core";
 import { keysOf, shown } from "./actions";
 import { listen } from "@tauri-apps/api/event";
 import { memberColor } from "./coop";
-import { COLORS, KIND_COLOR, KIND_ICON, OWNER_COLOR, system, type Background, type CoopClick, type CoopControl, type CoopCursor, type CoopEvent, type CoopSelection, type CoopRemote, type CoopRing, type Place, type Session, type Scheme, type Settings, type Store, type Workspaces } from "./api";
+import { COLORS, KIND_COLOR, KIND_ICON, OWNER_COLOR, system, type Background, type CoopClick, type CoopControl, type CoopCursor, type CoopEvent, type CoopSelection, type CoopRemote, type CoopRing, type Place, type Session, type Scheme, type Settings, type Store, type WorkspaceInfo, type Workspaces } from "./api";
 import { _, setLanguage } from "./i18n.svelte";
 import { shrinkIcon } from "./images";
 import { oneAtATime } from "./serial";
 
 export const app = $state({
-  store: { session: [], tunnel: [], folder: [], snippet: [], credential: [], layout: [], agent_prompt: "" } as Store,
+  store: { session: [], tunnel: [], folder: [], snippet: [], credential: [], layout: [], agent_prompt: "", id: "", color: "" } as Store,
   /** Workspaces besides the default one (""), and the one in use. */
   workspaces: [] as string[],
+  /** Every workspace with its id and colour, the default one first. The one in use is `store`:
+   *  its colour there is the fresher one. */
+  workspaceList: [] as WorkspaceInfo[],
   workspace: "",
   /** The Settings window is open (Settings.svelte `openSettings` opens it on a page). */
   showSettings: false,
@@ -144,7 +147,7 @@ invoke<CoopEvent>("coop_state")
   .catch(() => {});
 
 /** Tabs to reopen, with the names they were given, handed over once by boot(). */
-let restore: [Session, string][] = [];
+let restore: [Session, string, string | undefined][] = [];
 export const takeRestore = () => restore.splice(0);
 
 /** Fields an older or empty store leaves out. */
@@ -154,6 +157,8 @@ function filled(s: Store): Store {
   s.credential ??= [];
   s.layout ??= [];
   s.agent_prompt ??= "";
+  s.id ??= "";
+  s.color ??= "";
   return s;
 }
 
@@ -168,7 +173,7 @@ export const coopColor = (id: string) => {
 
 /** Takes a workspace switch's (or sync's) answer: the workspaces and the data of the one in use. */
 export function useWorkspaces(w: Workspaces) {
-  Object.assign(app, { workspaces: w.workspaces, workspace: w.workspace, store: filled(w.store) });
+  Object.assign(app, { workspaces: w.workspaces, workspaceList: w.workspace_list, workspace: w.workspace, store: filled(w.store) });
 }
 // Automation switched workspaces.
 listen<Workspaces>("workspaces", ({ payload }) => useWorkspaces(payload));
@@ -338,6 +343,10 @@ export const lookOf = (s: Session) => ({
 /** Which saved session a tab is of: its folder and name (a reload or sync makes new objects). */
 export const sessionKey = (s: Session) => `${s.folder}\n${s.name}`;
 
+/** Which saved session a tab is of, for the sidebar's marks: the session's own id, the same
+ *  through a rename or a move ("" for one never saved). */
+export const sessionId = (s: Session) => s.id ?? "";
+
 /** Each place's background picture (a `data:` URL) or shader source, as Settings set them. */
 export const backdrops = $state<Record<Place, string>>({ terminal: "", sidebar: "", bar: "" });
 const stamps: Record<Place, number> = { terminal: -1, sidebar: -1, bar: -1 };
@@ -378,7 +387,7 @@ export function siteIcon(s: Session) {
 export async function boot() {
   const b = await invoke<import("./api").Boot>("boot");
   await setLanguage(b.settings.language);
-  restore = b.tabs.map((s, i) => [s, b.labels[i] ?? ""]);
+  restore = b.tabs.map((s, i) => [s, b.labels[i] ?? "", b.tab_workspaces[i]]);
   useWorkspaces(b);
   system.os = b.os;
   Object.assign(app, {

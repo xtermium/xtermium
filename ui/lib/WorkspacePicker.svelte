@@ -7,7 +7,8 @@
   import { _ } from "./i18n.svelte";
   import { portal } from "./menu";
   import { openSettings } from "./Settings.svelte";
-  import { app, workspaceOp } from "./state.svelte";
+  import { COLORS } from "./api";
+  import { app, saveStore, workspaceOp } from "./state.svelte";
 
   /** `x`, `y`: where it hangs (the field's start, in a right-to-left language its end); `width`: the field's. */
   let { x, y, width, onclose }: { x: number; y: number; width: number; onclose: () => void } = $props();
@@ -19,6 +20,13 @@
   let field: HTMLInputElement;
 
   const nameOf = (w: string) => w || _("Default");
+  /** A workspace's colour, "" for none; the one in use is read from the store, where it's set. */
+  const colorOf = (w: string) => (w === app.workspace ? app.store.color : (app.workspaceList.find((x) => x.name === w)?.color ?? ""));
+  function paint(c: string) {
+    app.store.color = c;
+    saveStore();
+    field.focus();
+  }
   const q = $derived(query.trim().toLocaleLowerCase());
   /** Every workspace: the backend lists the others only (api.ts `Workspaces`), the default one is "". */
   const every = $derived(["", ...app.workspaces.filter(Boolean)]);
@@ -74,7 +82,7 @@
   <input bind:this={field} bind:value={query} oninput={() => ((page = 0), (sel = 0))} {@attach (el) => el.focus()} placeholder={_("Search workspaces, or type a name to create one")} aria-label={_("Search workspaces")} />
   {#each rows as r, i (r.kind + r.w)}
     <button class:sel={i === sel} class:first={i === 0} aria-current={r.kind === "current" ? "true" : undefined} onclick={() => pick(r)} onpointermove={() => (sel = i)}>
-      <Icon name={r.kind === "new" ? "plus" : r.kind === "current" ? "check" : "cluster"} />
+      <Icon name={r.kind === "new" ? "plus" : r.kind === "current" ? "check" : "cluster"} color={r.kind === "new" ? undefined : colorOf(r.w) || undefined} />
       <span class="label">{r.kind === "new" ? _("Create workspace “{name}”", { name: r.w }) : nameOf(r.w)}</span>
       {#if r.kind === "current"}<span class="hint">{_("current")}</span>{/if}
     </button>
@@ -88,7 +96,14 @@
       <button class="flat" disabled={page >= pages - 1} onclick={() => turn(1)}>{_("Next")}</button>
     </div>
   {/if}
-  <button class="sep" onclick={() => (onclose(), openSettings("workspaces"))}><Icon name="cog" />{_("Manage workspaces…")}</button>
+  <!-- The colour of the workspace in use: the title bar's field wears it. -->
+  <div class="row tint sep" role="group" aria-label={_("Colour of this workspace")}>
+    <button class="swatch auto" class:selected={!app.store.color} title={_("No colour")} aria-label={_("No colour")} style:--c="var(--weak)" onclick={() => paint("")}></button>
+    {#each COLORS as c (c)}
+      <button class="swatch" class:selected={app.store.color === c} title={c} aria-label={_("Colour {c}", { c })} style:--c={c} onclick={() => paint(c)}></button>
+    {/each}
+  </div>
+  <button onclick={() => (onclose(), openSettings("workspaces"))}><Icon name="cog" />{_("Manage workspaces…")}</button>
 </div>
 
 <style>

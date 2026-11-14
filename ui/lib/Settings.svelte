@@ -868,6 +868,7 @@
     <div class="col">
       <label class="check"><input type="checkbox" bind:checked={s.confirm_close} />{_("Ask before closing a tab that is still connected")}</label>
       <label class="check"><input type="checkbox" bind:checked={s.keep_running} />{_("Keep running in the tray when the window is closed, so tabs and background tasks go on")}</label>
+      <label class="check"><input type="checkbox" bind:checked={s.tabs_by_workspace} />{_("Show only the tabs opened in the workspace in use; the others keep running until you switch back")}</label>
       <label class="check"><input type="checkbox" bind:checked={s.status_bar} />{_("Show a status bar under each pane: connection, uptime, encryption and response time")}</label>
       <!-- last, so the note under the list is read with it -->
       <label class="check"><input type="checkbox" bind:checked={s.restore_tabs} />{_("Reopen the tabs that were open when xtermium closed")}</label>
@@ -1866,8 +1867,6 @@ xtermium close 3`}</pre>
     justify-content: flex-start;
     color: var(--weak);
     border: 0;
-    /* a list of places, read down like the rows: the system face */
-    font-family: var(--ui);
     /* a long name (some languages') takes two lines rather than running out of the list */
     white-space: normal;
     text-align: start;
