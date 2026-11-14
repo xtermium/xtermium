@@ -1103,11 +1103,13 @@
     if (broadcasting) {
       guideDone("broadcast");
       untiled = layout;
-      // The panes follow the ticks (the effect above), in the strip's order to begin with.
+      // The panes are the ticked tabs, in the strip's order to begin with; the effect above
+      // keeps them so. Set in one go: a tab left without a pane for a moment would put its
+      // terminal to sleep.
       const was = panes[focus];
-      panes = [];
       layout = "tiles";
-      return void tick().then(() => ((focus = Math.max(0, panes.indexOf(was))), refocus()));
+      panes = follow([], ticked.map((t) => t.key));
+      focus = Math.max(0, panes.indexOf(was));
     } else if (layout === "tiles") {
       // Back to the layout it started from; one that was tiled before shows every tab again.
       if (untiled === "tiles") panes = strip.length ? strip.map((t) => t.key) : [null];

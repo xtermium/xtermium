@@ -311,7 +311,7 @@ impl Store {
         }
         self.layouts.retain(|l| !l.name.is_empty() && !l.panes.is_empty() && seen.insert(l.name.clone()));
         self.profiles(&mut Default::default());
-        self.ids(&mut Default::default());
+        self.ids(&mut Default::default(), None);
     }
 
     /// Gives every website session a browser profile of its own (web.rs): one without, or with one

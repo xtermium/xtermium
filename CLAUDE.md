@@ -95,9 +95,12 @@ wiki, https://github.com/xtermium/xtermium/wiki. This file is how it's built and
   The workspace in use is `config::workspace()` (persisted in `settings.workspace`, which only the
   `workspace` command changes; `save_settings` ignores the UI's copy). `save_store` carries the
   workspace a save belongs to, so a save racing a switch lands in the right one.
-- **Ids.** Every session, every folder record and every workspace has an `id` of its own (16
-  random bytes in hex; `Store::ids`, `own_ids`): given by `sanitize` and `use_workspace`, kept
-  through renames and moves, new for a copy (a clone, a duplicate, what a workspace sync adds).
+- **Ids.** Every session, every folder record and every workspace has an `id` of its own (32
+  hex digits; `Store::ids`, `own_ids`): given by `sanitize` and `use_workspace`, kept through
+  renames and moves, new for a copy (a clone, a duplicate, what a workspace sync adds). An id
+  given to the whole store (`own_ids`) is worked out from what the thing is, not drawn, so two
+  syncing computers give a store from before ids the same ones and sync sees no conflict; keep
+  that when changing how ids are made.
   A workspace's id and colour are `Store::id` and `Store::color` of its own record, so the UI has
   the one in use as `app.store.id`; `workspace_list` (Boot, `Workspaces`) lists all of them. Tell
   things apart by id, never by name: a tab is its session's `id` in its workspace's `id`

@@ -99,22 +99,24 @@ The macOS build ships unsigned, and nobody has run these on a Mac yet.
 - A shared RDP desktop in a Terminal Co-op ring: the guest's picture and pointer, and what a
   guest with control can paste (the owner's clipboard once it was offered to the desktop).
 - The RDP helper's macOS and Linux builds (compiled first by the nightly).
-- Broadcast's ticks with a remote desktop or a BMC console among the tabs: an unticked one gets
-  no keys and leaves the tiles (seen with local shells only, 2026-11-14).
+- Broadcast's ticks with a BMC console among the tabs: an unticked one gets no keys and leaves
+  the tiles. Seen with local shells and with an RDP tab to the xrdp container on 2026-11-14 (a
+  key typed in a shell reached the desktop only while its tab was ticked); text typed in a
+  terminal didn't show in that desktop's field, which a real Windows host should be tried for.
 
 ## Tabs and workspaces
 
 - "Only this workspace's tabs" with a website or BMC console tab open in the workspace left
   behind: its native view must go out of sight with the tab and come back with it (seen with
   local shells only, 2026-11-14).
-- Ids after a sync between two computers that each gave their sessions ids before syncing: the
-  pulled store's ids should replace this computer's, once, and stay (unit-tested within one
-  store only: clone, workspace sync, split and join).
-- An AI agent session started from an npm folder that is on the PATH in quotes, on a computer
-  where that failed with "not a valid Win32 application" (the lookup is unit-tested; the
-  report came from someone else's computer).
-- The trust prompt for an RDP server's key and a BMC's certificate: Enter trusts, and the
-  fingerprint is set in the mono (seen with an SSH host key only).
+- Ids on two syncing computers updated from a version before ids: each gives the same ids to
+  the same store, so the first sync after the update should ask nothing (unit-tested: two
+  copies of one store come out identical; not run against the sync server with two devices).
+- An AI agent session on the computer that reported "not a valid Win32 application": here a
+  PATH entry in quotes holding npm's `claude` and `claude.cmd` reproduced the lookup and the
+  fix was seen working (2026-11-14), but what that computer's PATH holds isn't known.
+- The trust prompt for a BMC's certificate: Enter trusts, and the fingerprint is set in the
+  mono (seen with an SSH host key and an RDP server's key).
 
 ## Automation
 
