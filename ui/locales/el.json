@@ -1146,5 +1146,21 @@
   "Create workspace “{name}”": "Δημιουργία χώρου εργασίας «{name}»",
   "current": "τρέχων",
   "{from}–{to} of {total}": "{from}–{to} από {total}",
-  "Manage workspaces…": "Διαχείριση χώρων εργασίας…"
+  "Manage workspaces…": "Διαχείριση χώρων εργασίας…",
+  "Earlier tabs": "Προηγούμενες καρτέλες",
+  "Later tabs": "Επόμενες καρτέλες",
+  "All tabs ({n})": "Όλες οι καρτέλες ({n})",
+  "All tabs": "Όλες οι καρτέλες",
+  "Nothing crosses the clipboard": "Τίποτα δεν περνά από το πρόχειρο",
+  "To the desktop": "Προς την επιφάνεια εργασίας",
+  "What you copy here can be pasted on the remote desktop": "Ό,τι αντιγράφεις εδώ μπορεί να επικολληθεί στην απομακρυσμένη επιφάνεια εργασίας",
+  "From the desktop": "Από την επιφάνεια εργασίας",
+  "What you copy on the remote desktop can be pasted here": "Ό,τι αντιγράφεις στην απομακρυσμένη επιφάνεια εργασίας μπορεί να επικολληθεί εδώ",
+  "Both ways": "Και προς τις δύο κατευθύνσεις",
+  "What you copy on either side can be pasted on the other": "Ό,τι αντιγράφεις στη μία πλευρά μπορεί να επικολληθεί στην άλλη",
+  "Shared clipboard": "Κοινόχρηστο πρόχειρο",
+  "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "Το πλήκτρο Windows και οι συντομεύσεις συστήματος (Win+E, Alt+Tab) πηγαίνουν στην απομακρυσμένη επιφάνεια εργασίας όσο έχει το πληκτρολόγιο",
+  "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "Ό,τι αντιγράφεις περνά ανάμεσα σε αυτόν τον υπολογιστή και τις επιφάνειες εργασίας RDP: κείμενο, εικόνες και αρχεία.",
+  "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "Ό,τι αντιγράφεις περνά ανάμεσα σε αυτόν τον υπολογιστή και τις επιφάνειες εργασίας RDP: κείμενο και εικόνες και προς τις δύο κατευθύνσεις, αρχεία προς την επιφάνεια εργασίας.",
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Ανενεργό: ενεργούν σε αυτόν τον υπολογιστή. Τα Ctrl+Alt+Del και Win+L πάντα."
 }

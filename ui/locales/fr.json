@@ -1146,5 +1146,21 @@
   "Create workspace “{name}”": "Créer l'espace de travail « {name} »",
   "current": "actuel",
   "{from}–{to} of {total}": "{from}–{to} sur {total}",
-  "Manage workspaces…": "Gérer les espaces de travail…"
+  "Manage workspaces…": "Gérer les espaces de travail…",
+  "Earlier tabs": "Onglets précédents",
+  "Later tabs": "Onglets suivants",
+  "All tabs ({n})": "Tous les onglets ({n})",
+  "All tabs": "Tous les onglets",
+  "Nothing crosses the clipboard": "Rien ne passe par le presse-papiers",
+  "To the desktop": "Vers le bureau",
+  "What you copy here can be pasted on the remote desktop": "Ce que vous copiez ici peut être collé sur le bureau à distance",
+  "From the desktop": "Depuis le bureau",
+  "What you copy on the remote desktop can be pasted here": "Ce que vous copiez sur le bureau à distance peut être collé ici",
+  "Both ways": "Dans les deux sens",
+  "What you copy on either side can be pasted on the other": "Ce que vous copiez d'un côté peut être collé de l'autre",
+  "Shared clipboard": "Presse-papiers partagé",
+  "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "La touche Windows et les raccourcis système (Win+E, Alt+Tab) vont au bureau à distance tant qu'il a le clavier",
+  "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "Ce que vous copiez passe entre cet ordinateur et les bureaux RDP : texte, images et fichiers.",
+  "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "Ce que vous copiez passe entre cet ordinateur et les bureaux RDP : texte et images dans les deux sens, fichiers vers le bureau.",
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Désactivé : ils agissent sur cet ordinateur. Ctrl+Alt+Suppr et Win+L toujours."
 }

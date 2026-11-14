@@ -75,7 +75,7 @@ Full commands, seeding and traps: `references/visual-check.md`.
 | Idle-lock test | `GetLastInputInfo` is system-wide: it fires within seconds only if nobody touches the computer |
 | Checking a `code` (VS Code) launch | put a fake `code.cmd` first on the test exe's PATH that logs its arguments (for example `node "%~dp0args.js" %*`) |
 | `cargo fmt --check` reports about 100 diffs | they are pre-existing on `main`: don't reformat files; format only your change |
-| RDP against an xrdp server renders sheared row by row | an open decoder bug (it stays garbled with xrdp's compression off); test RDP against a real Windows host where you can |
+| RDP needs a server and no Windows host is at hand | an xrdp stand-in: `docker run -d --rm -p 127.0.0.1:13389:3389 scottyhardy/docker-remote-desktop` (login `ubuntu` / `ubuntu`); the picture is right there, but it never answers a resize, so check resizing against a real host |
 
 ## Common mistakes
 

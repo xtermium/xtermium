@@ -313,7 +313,7 @@
     if (paste) return down && send({ t: "paste" });
     // Ctrl+V pastes on the desktop: it gets what the clipboard here holds first, if that changed.
     if (down && !e.repeat && e.ctrlKey && e.code === "KeyV") clip();
-    // The Windows keys stay this computer's unless the desktop may take them (Settings › Terminal › RDP).
+    // The Windows keys stay this computer's unless the desktop may take them (Settings › Defaults › Remote desktop).
     if (!grabs && (e.code === "MetaLeft" || e.code === "MetaRight")) return;
     // The lock keys go over as their states here, not as presses that would toggle whatever the
     // desktop had (Num Lock on there would turn the arrows of a numpad here into digits).
@@ -330,7 +330,7 @@
   }
 
   // The Windows keys and the system's shortcuts (Win+E, Alt+Tab, Ctrl+Esc…) reach the desktop,
-  // not this computer, while this view has the keyboard, if Settings › Terminal › RDP says so:
+  // not this computer, while this view has the keyboard, if Settings › Defaults › Remote desktop says so:
   // the backend takes them from the system and sends them to the tab itself (src/rdp.rs `grab`).
   // Anywhere else in xtermium (settings, the sidebar, another pane) they're this computer's.
   // Not for a viewer's: its keys go to the owner (as they come here).
@@ -346,7 +346,7 @@
   });
 
   /** The desktop gets to paste what the clipboard here holds (only what changed crosses, and
-   *  only if Settings › Terminal › RDP lets it). RDP only; a viewer's would be the owner's. */
+   *  only if Settings › Defaults › Remote desktop lets it). RDP only; a viewer's would be the owner's. */
   const clip = () => void (session.kind.type === "rdp" && !peer && send({ t: "clip" }));
 
   function wheel(e: WheelEvent) {

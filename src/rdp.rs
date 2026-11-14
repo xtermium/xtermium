@@ -75,11 +75,11 @@ pub enum Input {
         scroll: bool,
     },
     /// The view took the keyboard, or a paste chord is on its way: the desktop gets to paste
-    /// what the clipboard here holds now (Settings › Terminal › RDP allowing).
+    /// what the clipboard here holds now (Settings › Defaults › Remote desktop allowing).
     Clip,
 }
 
-/// What may cross the shared clipboard (Settings › Terminal › RDP): this computer's to the
+/// What may cross the shared clipboard (Settings › Defaults › Remote desktop): this computer's to the
 /// desktop, the desktop's to here, both (the default) or neither.
 pub const TO_DESKTOP: u8 = 1;
 pub const FROM_DESKTOP: u8 = 2;
@@ -586,7 +586,7 @@ impl Drop for RdpTab {
     }
 }
 
-/// The UI says which remote desktop has the keyboard (`on`), and Settings › Terminal › RDP lets it
+/// The UI says which remote desktop has the keyboard (`on`), and Settings › Defaults › Remote desktop lets it
 /// take the keyboard from the system: the Windows keys and the system's shortcuts then go to
 /// that desktop instead of acting here (Windows).
 #[tauri::command]

@@ -1146,5 +1146,21 @@
   "Create workspace “{name}”": "वर्कस्पेस “{name}” बनाएँ",
   "current": "मौजूदा",
   "{from}–{to} of {total}": "{total} में से {from}–{to}",
-  "Manage workspaces…": "वर्कस्पेस प्रबंधित करें…"
+  "Manage workspaces…": "वर्कस्पेस प्रबंधित करें…",
+  "Earlier tabs": "पहले के टैब",
+  "Later tabs": "बाद के टैब",
+  "All tabs ({n})": "सभी टैब ({n})",
+  "All tabs": "सभी टैब",
+  "Nothing crosses the clipboard": "क्लिपबोर्ड से कुछ नहीं गुज़रता",
+  "To the desktop": "डेस्कटॉप की ओर",
+  "What you copy here can be pasted on the remote desktop": "जो आप यहाँ कॉपी करते हैं, उसे रिमोट डेस्कटॉप पर पेस्ट किया जा सकता है",
+  "From the desktop": "डेस्कटॉप से",
+  "What you copy on the remote desktop can be pasted here": "जो आप रिमोट डेस्कटॉप पर कॉपी करते हैं, उसे यहाँ पेस्ट किया जा सकता है",
+  "Both ways": "दोनों ओर",
+  "What you copy on either side can be pasted on the other": "जो आप किसी भी ओर कॉपी करते हैं, उसे दूसरी ओर पेस्ट किया जा सकता है",
+  "Shared clipboard": "साझा क्लिपबोर्ड",
+  "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "जब तक कीबोर्ड रिमोट डेस्कटॉप के पास है, Windows कुंजी और सिस्टम शॉर्टकट (Win+E, Alt+Tab) उसी को जाते हैं",
+  "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "जो आप कॉपी करते हैं, वह इस कंप्यूटर और RDP डेस्कटॉप के बीच आता-जाता है: टेक्स्ट, चित्र और फ़ाइलें।",
+  "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "जो आप कॉपी करते हैं, वह इस कंप्यूटर और RDP डेस्कटॉप के बीच आता-जाता है: टेक्स्ट और चित्र दोनों ओर, फ़ाइलें डेस्कटॉप की ओर।",
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "बंद: वे इस कंप्यूटर पर काम करते हैं। Ctrl+Alt+Del और Win+L हमेशा यहीं काम करते हैं।"
 }

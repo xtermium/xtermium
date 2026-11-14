@@ -88,8 +88,17 @@ The macOS build ships unsigned, and nobody has run these on a Mac yet.
 
 ## Remote desktops
 
-- RDP to xrdp: the picture is drawn sheared, row by row (an open decoder bug). Then the
-  resize that keeps the session and the login with a saved password, on a real xrdp host.
+- RDP to xrdp: resizing the tab (the resize that keeps the session), on a real xrdp host. The
+  picture and the saved-password login were seen right against the
+  `scottyhardy/docker-remote-desktop` container on 2026-11-14 (helper on the individual IronRDP
+  crates, no vendored patches); that container never answered a resize.
+- The shared clipboard on macOS and Linux (text and pictures both ways, files to the desktop),
+  and files from the desktop pasted in Explorer on Windows with the current helper.
+- The Windows shortcuts on the desktop (Win+E, Alt+Tab, Alt+F4) with a key remapper running,
+  and in a tab moved to a window of its own.
+- A shared RDP desktop in a Terminal Co-op ring: the guest's picture and pointer, and what a
+  guest with control can paste (the owner's clipboard once it was offered to the desktop).
+- The RDP helper's macOS and Linux builds (compiled first by the nightly).
 
 ## Automation
 

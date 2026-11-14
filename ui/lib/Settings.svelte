@@ -38,6 +38,14 @@
   import { passkeyMake, passkeysWork } from "./passkey";
   import { filled } from "./slider";
 
+  /** What crosses RDP's shared clipboard (src/rdp.rs `TO_DESKTOP`, `FROM_DESKTOP`): the mode, its name and its tip. */
+  const CLIPBOARD: [number, string, string][] = [
+    [0, N_("Off"), N_("Nothing crosses the clipboard")],
+    [1, N_("To the desktop"), N_("What you copy here can be pasted on the remote desktop")],
+    [2, N_("From the desktop"), N_("What you copy on the remote desktop can be pasted here")],
+    [3, N_("Both ways"), N_("What you copy on either side can be pasted on the other")],
+  ];
+
   /** `onrun`: runs a command in a new local shell (the MCP page's Run buttons; App.svelte). */
   let { onclose, onrun }: { onclose: () => void; onrun: (command: string) => void } = $props();
   const s = $derived(app.settings!);
@@ -133,9 +141,6 @@
       N_("Copy on select"),
       N_("Right-click pastes"),
       N_("Strip whitespace from the start and end of what you paste"),
-      N_("RDP"),
-      N_("Copy and paste with remote desktops: text, pictures and files"),
-      N_("Take the keyboard: the Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop"),
       N_("Show a scroll bar"),
       N_("Making a pane bigger or smaller with the keyboard changes it by"),
       N_("Scroll to the bottom on output"),
@@ -160,6 +165,8 @@
       N_("Reconnect by itself when a connection drops (up to 8 tries, waiting longer each time)"),
       N_("Remote desktop"),
       N_("Picture"),
+      N_("Shared clipboard"),
+      N_("The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard"),
       N_("The file panel opens the host's shared folders (SMB) with the desktop's login, without asking"),
     ],
     workspaces: [N_("Default workspace"), N_("New workspace"), N_("Sync")],
@@ -1329,18 +1336,6 @@ xtermium close 3`}</pre>
         <label class="check"><input type="checkbox" bind:checked={s.right_click_paste} />{_("Right-click pastes")}</label>
         <label class="check"><input type="checkbox" bind:checked={s.strip_paste} />{_("Strip whitespace from the start and end of what you paste")}</label>
       </div>
-      <span>{_("RDP")}</span>
-      <div class="col">
-        <span class="weak">{_("Copy and paste with remote desktops: text, pictures and files")}</span>
-        <div class="row wrap" role="group" aria-label={_("Copy and paste with remote desktops: text, pictures and files")}>
-          {#each [[0, N_("Disabled"), N_("Nothing crosses the clipboard")], [1, N_("Host to RDP"), N_("What you copy here can be pasted on the remote desktop")], [2, N_("RDP to host"), N_("What you copy on the remote desktop can be pasted here")], [3, N_("Universal"), N_("Both ways")]] as const as [mode, name, tip] (mode)}
-            <button class:selected={s.rdp_clipboard === mode} aria-pressed={s.rdp_clipboard === mode} title={_(tip)} onclick={() => (s.rdp_clipboard = mode)}>{_(name)}</button>
-          {/each}
-        </div>
-        <label class="check" title={_("Off: they act on this computer. Ctrl+Alt+Del always does.")}>
-          <input type="checkbox" bind:checked={s.rdp_keyboard} />{_("Take the keyboard: the Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop")}
-        </label>
-      </div>
     </div>
     <h3>{_("Background")}</h3>
     <div class="form"><BackgroundPicker place="terminal" label={_("Behind the text")} /></div>
@@ -1592,6 +1587,25 @@ xtermium close 3`}</pre>
       <QualityBar bind:value={s.rdp_quality} />
     </div>
     <p class="weak">{_("For RDP sessions that don't have their own setting. Applies the next time a session connects.")}</p>
+    <div class="form">
+      <span>{_("Shared clipboard")}</span>
+      <div class="row wrap" role="group" aria-label={_("Shared clipboard")}>
+        {#each CLIPBOARD as [mode, name, tip] (mode)}
+          <button class:selected={s.rdp_clipboard === mode} aria-pressed={s.rdp_clipboard === mode} title={_(tip)} onclick={() => (s.rdp_clipboard = mode)}>{_(name)}</button>
+        {/each}
+        {@render back(["rdp_clipboard"], (d) => _(CLIPBOARD.find(([mode]) => mode === d.rdp_clipboard)?.[1] ?? ""))}
+      </div>
+    </div>
+    <p class="weak">
+      {app.os === "windows"
+        ? _("What you copy crosses between this computer and RDP desktops: text, pictures and files.")
+        : _("What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.")}
+    </p>
+    {#if app.os === "windows"}
+      <label class="check" title={_("Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.")}>
+        <input type="checkbox" bind:checked={s.rdp_keyboard} />{_("The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard")}
+      </label>
+    {/if}
     <label class="check"><input type="checkbox" bind:checked={s.smb_auto_login} />{_("The file panel opens the host's shared folders (SMB) with the desktop's login, without asking")}</label>
   {:else if page === "backup"}
     <h3>{_("Sessions")}</h3>
