@@ -2122,6 +2122,9 @@ fn run_argv(
         cmd.cwd(d.home_dir());
     }
     cmd.env("TERM", term);
+    // A file of the program's exact name with no `.exe` or `.cmd` beside it (a script for sh, as
+    // npm installs next to its `.cmd`): Windows can't start it (os error 193).
+    let script = |e: &anyhow::Error| cfg!(windows) && e.to_string().contains("(os error 193)");
     // Windows says "CreateProcessW … failed: The system cannot find the file specified. (os error 2)".
     let missing = |e: &anyhow::Error| {
         e.to_string().contains("(os error 2)")
@@ -2129,6 +2132,7 @@ fn run_argv(
     };
     run_cmd(cmd, rx, feed).map_err(|e| match name {
         Some(p) if missing(&e) => anyhow::anyhow!("{p} wasn't found: install it, or check that it's on your PATH"),
+        Some(p) if script(&e) => anyhow::anyhow!("{p} on your PATH is a script Windows can't start: there is no {p}.exe or {p}.cmd beside it. Install it again, or give its full path as a custom command"),
         _ => e,
     })
 }
@@ -2142,8 +2146,11 @@ fn through_cmd(argv: Vec<String>, path: &str) -> Vec<String> {
         return argv;
     }
     let Some(name) = argv.first().filter(|n| !n.contains(['\\', '/', '.'])) else { return argv };
-    for dir in path.split(';').filter(|d| !d.is_empty()) {
-        let found = |ext: &str| std::path::Path::new(dir).join(format!("{name}{ext}")).is_file();
+    // The entries as Windows reads them (one may be in quotes), not split on `;` by hand: a
+    // quoted npm folder was missed here, and the pty library, which does read it, then started
+    // the script for sh that npm puts beside the `.cmd` ("not a valid Win32 application").
+    for dir in std::env::split_paths(path).filter(|d| !d.as_os_str().is_empty()) {
+        let found = |ext: &str| dir.join(format!("{name}{ext}")).is_file();
         if found(".exe") || found(".com") {
             return argv;
         }
@@ -2400,6 +2407,12 @@ mod tests {
         assert_eq!(through_cmd(argv("codex"), &path), argv("codex"), "an exe of that name: Windows finds it itself");
         assert_eq!(through_cmd(argv("aider"), &path), argv("aider"), "not there at all: left for the error message");
         assert_eq!(through_cmd(argv("C:/tools/claude.cmd"), &path), argv("C:/tools/claude.cmd"), "a path is run as it is");
+        // npm's script for sh sits beside the `.cmd`, and a PATH entry may be in quotes.
+        std::fs::write(dir.join("claude"), "#!/bin/sh").unwrap();
+        if cfg!(windows) {
+            let quoted = format!("C:\nowhere;\"{path}\"");
+            assert_eq!(through_cmd(argv("claude"), &quoted), ["cmd", "/c", "claude", "--model", "x"], "a quoted folder is read as Windows reads it");
+        }
         let _ = std::fs::remove_dir_all(&dir);
     }
 
