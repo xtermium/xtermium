@@ -189,7 +189,6 @@
   }
   .meta {
     grid-area: meta;
-    font-family: var(--ui);
     color: var(--weak);
     font-size: var(--t-s);
     white-space: nowrap;

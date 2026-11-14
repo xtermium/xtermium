@@ -9,7 +9,6 @@ use crate::term::Typed;
 use crate::{App, Kind, Tab};
 use std::collections::HashMap;
 use std::sync::Mutex;
-use std::sync::atomic::Ordering::Relaxed;
 use tauri::AppHandle;
 use wezterm_term::{KeyCode, KeyModifiers};
 
@@ -26,7 +25,7 @@ pub fn joins(kind: &Kind) -> bool {
 
 /// Broadcast is on and tab `id` is ticked.
 fn ticked(app: &App, id: u32) -> bool {
-    app.broadcast.load(Relaxed) && !app.broadcast_off.lock().unwrap().contains(&id)
+    app.broadcast.lock().unwrap().contains(&id)
 }
 
 fn kind(t: &Tab) -> &Kind {

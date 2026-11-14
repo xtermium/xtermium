@@ -96,6 +96,7 @@ fn ciphers(list: &mut Vec<String>) {
 impl Store {
     pub fn sanitize(&mut self) {
         self.agent_prompt = lines(&self.agent_prompt).chars().take(32_768).collect();
+        self.color = color(&self.color);
         for s in &mut self.sessions {
             s.folder = folder(&s.folder);
             s.notes = lines(&s.notes);
@@ -310,6 +311,7 @@ impl Store {
         }
         self.layouts.retain(|l| !l.name.is_empty() && !l.panes.is_empty() && seen.insert(l.name.clone()));
         self.profiles(&mut Default::default());
+        self.ids(&mut Default::default());
     }
 
     /// Gives every website session a browser profile of its own (web.rs): one without, or with one

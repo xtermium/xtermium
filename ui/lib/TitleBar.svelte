@@ -120,7 +120,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--fg);
-    font-family: var(--short);
     font-weight: 500;
   }
   .end {

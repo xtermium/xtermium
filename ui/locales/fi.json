@@ -239,7 +239,6 @@
   "Host / port": "Isäntä / portti",
   "Icon": "Kuvake",
   "Icon name": "Kuvakkeen nimi",
-  "Icons from Boxicons, type set in JetBrains Mono.": "Kuvakkeet Boxiconsista, kirjasin JetBrains Mono.",
   "Image…": "Kuva…",
   "Import": "Tuo",
   "Import a scheme from a link to its JSON, or paste the JSON: a terminal.sexy export or a Windows Terminal scheme.": "Tuo väriteema linkistä sen JSONiin tai liitä JSON: terminal.sexy-vienti tai Windows Terminal -teema.",

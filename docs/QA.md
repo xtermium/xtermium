@@ -99,6 +99,22 @@ The macOS build ships unsigned, and nobody has run these on a Mac yet.
 - A shared RDP desktop in a Terminal Co-op ring: the guest's picture and pointer, and what a
   guest with control can paste (the owner's clipboard once it was offered to the desktop).
 - The RDP helper's macOS and Linux builds (compiled first by the nightly).
+- Broadcast's ticks with a remote desktop or a BMC console among the tabs: an unticked one gets
+  no keys and leaves the tiles (seen with local shells only, 2026-11-14).
+
+## Tabs and workspaces
+
+- "Only this workspace's tabs" with a website or BMC console tab open in the workspace left
+  behind: its native view must go out of sight with the tab and come back with it (seen with
+  local shells only, 2026-11-14).
+- Ids after a sync between two computers that each gave their sessions ids before syncing: the
+  pulled store's ids should replace this computer's, once, and stay (unit-tested within one
+  store only: clone, workspace sync, split and join).
+- An AI agent session started from an npm folder that is on the PATH in quotes, on a computer
+  where that failed with "not a valid Win32 application" (the lookup is unit-tested; the
+  report came from someone else's computer).
+- The trust prompt for an RDP server's key and a BMC's certificate: Enter trusts, and the
+  fingerprint is set in the mono (seen with an SSH host key only).
 
 ## Automation
 

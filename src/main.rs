@@ -66,9 +66,8 @@ pub struct App {
     dark: AtomicBool,
     tabs: Mutex<HashMap<u32, Tab>>,
     pub next_id: AtomicU32,
-    broadcast: AtomicBool,
-    /// Tabs unticked for broadcast (every tab takes part until unticked).
-    broadcast_off: Mutex<HashSet<u32>>,
+    /// The tabs broadcast types into: the ones ticked in the tab strip, empty while it's off.
+    broadcast: Mutex<HashSet<u32>>,
     tunnels: Mutex<HashMap<String, flow::Running>>,
     prompter: Prompter,
     replies: Arc<Mutex<HashMap<u32, prompt::Reply>>>,
@@ -178,7 +177,10 @@ impl App {
         self.use_workspace(all, &ws);
     }
 
-    fn use_workspace(&self, all: Store, ws: &str) {
+    fn use_workspace(&self, mut all: Store, ws: &str) {
+        // Whatever brought this store (a load, a clone, a sync, a restore): every workspace,
+        // session and folder in it has an id of its own from here on.
+        all.own_ids();
         let (data, rest) = all.split(ws);
         config::set_workspace(ws);
         self.settings.lock().unwrap().workspace = ws.into();
@@ -190,8 +192,22 @@ impl App {
         self.rest.lock().unwrap().workspaces.iter().map(|w| w.name.clone()).collect()
     }
 
+    /// Every workspace, the default one ("") first: its id, name and colour. The one in use is
+    /// read from `store`, where its record is while it's out of `rest`.
+    fn workspace_list(&self) -> Vec<Place> {
+        let ws = config::workspace();
+        let store = self.store.lock().unwrap();
+        let rest = self.rest.lock().unwrap();
+        let of = |name: &str, d: &Store| {
+            let d = if name == ws { &*store } else { d };
+            Place { id: d.id.clone(), name: name.into(), color: d.color.clone() }
+        };
+        std::iter::once(of("", &rest)).chain(rest.workspaces.iter().map(|w| of(&w.name, &w.data))).collect()
+    }
+
     fn in_use(&self) -> Workspaces {
         Workspaces {
+            workspace_list: self.workspace_list(),
             workspaces: self.workspaces(),
             workspace: config::workspace(),
             store: self.store.lock().unwrap().clone(),
@@ -222,7 +238,9 @@ impl App {
                 // Website sessions saved before they had profiles get theirs; profiles of sessions
                 // that are gone go.
                 let (changed, profiles) = s.own_profiles();
-                if changed {
+                // Ids too, kept from the first start that gives them: the tabs to reopen name
+                // their workspace by its id.
+                if s.own_ids() || changed {
                     let _ = s.save();
                 }
                 web::sweep_sites(&profiles);
@@ -279,6 +297,10 @@ struct Boot {
     /// Tabs to reopen (Settings > General), empty unless that's on, and the names they were given.
     tabs: Vec<Session>,
     labels: Vec<String>,
+    /// The id of the workspace each of those tabs was opened in (none for one never recorded).
+    tab_workspaces: Vec<String>,
+    /// Every workspace with its id and colour, the default one first.
+    workspace_list: Vec<Place>,
     /// Workspaces besides the default one, and the one in use ("" the default).
     workspaces: Vec<String>,
     workspace: String,
@@ -293,6 +315,8 @@ struct Boot {
 fn boot(app: State<App>) -> Boot {
     // One lock: guards taken inside the literal below live until it's built.
     let settings = app.settings.lock().unwrap().clone();
+    // Before the literal: it locks the store, which a guard in the literal would still hold.
+    let workspace_list = app.workspace_list();
     let mut tabs = if settings.restore_tabs { config::Tabs::load() } else { config::Tabs::default() };
     // Started from a folder in File Explorer: its shell opens after the tabs put back, and shows.
     if let Some(dir) = app.here.lock().unwrap().take() {
@@ -308,6 +332,8 @@ fn boot(app: State<App>) -> Boot {
         recovery: config::has_recovery(),
         tabs: tabs.tabs,
         labels: tabs.labels,
+        tab_workspaces: tabs.workspaces,
+        workspace_list,
         workspaces: app.workspaces(),
         workspace: config::workspace(),
         settings,
@@ -331,7 +357,12 @@ async fn save_store(handle: AppHandle, mut store: Store, workspace: String) -> R
         store.sanitize();
         store.workspaces.clear();
         if workspace == config::workspace() {
-            *app.store.lock().unwrap() = store.clone();
+            // A workspace's id is given once, here: a save can't change it.
+            let mut held = app.store.lock().unwrap();
+            if !held.id.is_empty() {
+                store.id = held.id.clone();
+            }
+            *held = store.clone();
         } else {
             let mut rest = app.rest.lock().unwrap();
             *rest = rest.join(&workspace, &store);
@@ -362,8 +393,19 @@ enum WorkspaceOp {
     Sync { from: String, to: String },
 }
 
+/// A workspace as the UI lists it.
+#[derive(Serialize)]
+struct Place {
+    id: String,
+    name: String,
+    color: String,
+}
+
 #[derive(Serialize)]
 struct Workspaces {
+    /// Every workspace with its id and colour, the default one first (`workspaces` has the
+    /// others' names alone).
+    workspace_list: Vec<Place>,
     workspaces: Vec<String>,
     workspace: String,
     /// The data of the workspace in use.
@@ -404,7 +446,8 @@ fn workspace_op(app: &App, op: WorkspaceOp) -> Res<Workspaces> {
         }
         WorkspaceOp::Add { name } => {
             let name = valid(&name)?;
-            app.rest.lock().unwrap().workspaces.push(config::Workspace { name, data: Store::default() });
+            let data = Store { id: vault::hex(&vault::random::<16>()), ..Default::default() };
+            app.rest.lock().unwrap().workspaces.push(config::Workspace { name, data });
         }
         WorkspaceOp::Rename { name, to } => {
             if !taken(&name) {
@@ -668,8 +711,8 @@ fn regex_error(pattern: String) -> String {
 
 /// Remembers the open tabs, to reopen them next time.
 #[tauri::command]
-fn save_tabs(tabs: Vec<Session>, labels: Vec<String>) -> Res<()> {
-    config::Tabs::save(tabs, labels).map_err(fail)
+fn save_tabs(tabs: Vec<Session>, labels: Vec<String>, workspaces: Vec<String>) -> Res<()> {
+    config::Tabs::save(tabs, labels, workspaces).map_err(fail)
 }
 
 /// The UI tells us whether it is showing light or dark (for "Auto" colours).
@@ -1724,15 +1767,11 @@ fn term_find(app: State<App>, id: u32, query: String, case: bool, step: i32) -> 
     }
 }
 
+/// The tabs broadcast types into, all of them at once (none: it's off). The UI sends the whole
+/// list whenever it changes, so a tab that reconnected under a new id can't stay ticked here.
 #[tauri::command]
-fn set_broadcast(app: State<App>, on: bool) {
-    app.broadcast.store(on, Relaxed);
-}
-
-#[tauri::command]
-fn set_tab_broadcast(app: State<App>, id: u32, on: bool) {
-    let mut off = app.broadcast_off.lock().unwrap();
-    if on { off.remove(&id) } else { off.insert(id) };
+fn set_broadcast(app: State<App>, ids: HashSet<u32>) {
+    *app.broadcast.lock().unwrap() = ids;
 }
 
 /// Async: the shared clipboard and paste read the clipboard, which on X11 can wait for its owner,
@@ -1944,8 +1983,7 @@ fn main() {
         dark: AtomicBool::new(true),
         tabs: Mutex::new(HashMap::new()),
         next_id: AtomicU32::new(1),
-        broadcast: AtomicBool::new(false),
-        broadcast_off: Mutex::default(),
+        broadcast: Mutex::default(),
         tunnels: Mutex::new(HashMap::new()),
         prompter,
         replies: Default::default(),
@@ -2113,7 +2151,6 @@ fn main() {
             term_resize,
             term_scroll,
             set_broadcast,
-            set_tab_broadcast,
             rdp_input,
             rdp_drawn,
             rdp::desktop_keys,

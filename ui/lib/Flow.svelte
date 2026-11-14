@@ -206,7 +206,6 @@
   }
   text {
     fill: var(--fg);
-    font-family: var(--ui);
   }
   .small {
     font-size: var(--t-s);

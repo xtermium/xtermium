@@ -69,7 +69,7 @@
   </div>
 
   <strong>{_("Built with")}</strong>
-  <div class="weak">Tauri, Svelte, wezterm-term, russh, russh-sftp, IronRDP, portable-pty, serialport.<br />{_("Icons from Boxicons, type set in JetBrains Mono.")}</div>
+  <div class="weak">Tauri, Svelte, wezterm-term, russh, russh-sftp, IronRDP, portable-pty, serialport.<br />{_("Icons from Boxicons, code and keys set in JetBrains Mono.")}</div>
   <div class="weak">Apache License 2.0 · <button class="link" onclick={notices}>{_("Third-party notices")}</button></div>
   {#if noticesError}<span class="row error"><Icon name="x-circle" />{noticesError}</span>{/if}
 </div>

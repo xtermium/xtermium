@@ -38,31 +38,26 @@ typography:
     fontWeight: 400
     lineHeight: 1.4
   headline:
-    fontFamily: "JetBrains Mono Variable, Cascadia Mono, Consolas, monospace"
+    fontFamily: "Segoe UI Variable Text, Segoe UI, system-ui, -apple-system, Ubuntu, sans-serif"
     fontSize: "16.5px"
     fontWeight: 600
     lineHeight: 1.618
     letterSpacing: "-0.025em"
   title:
-    fontFamily: "JetBrains Mono Variable, Cascadia Mono, Consolas, monospace"
+    fontFamily: "Segoe UI Variable Text, Segoe UI, system-ui, -apple-system, Ubuntu, sans-serif"
     fontSize: "14.5px"
     fontWeight: 600
     lineHeight: 1.4
     letterSpacing: "-0.01em"
-  short:
-    fontFamily: "JetBrains Mono Variable, Cascadia Mono, Consolas, monospace"
-    fontSize: "13px"
-    fontWeight: 400
-    lineHeight: 1.4
-  short-strong:
-    fontFamily: "JetBrains Mono Variable, Cascadia Mono, Consolas, monospace"
-    fontSize: "13px"
-    fontWeight: 500
-    lineHeight: 1.4
   body:
     fontFamily: "Segoe UI Variable Text, Segoe UI, system-ui, -apple-system, Ubuntu, sans-serif"
     fontSize: "13px"
     fontWeight: 400
+    lineHeight: 1.4
+  body-strong:
+    fontFamily: "Segoe UI Variable Text, Segoe UI, system-ui, -apple-system, Ubuntu, sans-serif"
+    fontSize: "13px"
+    fontWeight: 500
     lineHeight: 1.4
   prose:
     fontFamily: "Segoe UI Variable Text, Segoe UI, system-ui, -apple-system, Ubuntu, sans-serif"
@@ -74,7 +69,7 @@ typography:
     fontSize: "11.5px"
     fontWeight: 400
     lineHeight: 1.4
-  label-short:
+  label-mono:
     fontFamily: "JetBrains Mono Variable, Cascadia Mono, Consolas, monospace"
     fontSize: "11.5px"
     fontWeight: 400
@@ -105,7 +100,7 @@ components:
   button:
     backgroundColor: "{colors.raised}"
     textColor: "{colors.fg}"
-    typography: "{typography.short}"
+    typography: "{typography.body}"
     rounded: "{rounded.control}"
     padding: "3px 8px"
     height: "{spacing.control}"
@@ -162,7 +157,6 @@ components:
   tab-active:
     backgroundColor: "{colors.bg}"
     textColor: "{colors.fg}"
-    typography: "{typography.short-strong}"
   title-bar:
     backgroundColor: "transparent"
     textColor: "{colors.weak}"
@@ -185,7 +179,7 @@ components:
   guide-step:
     backgroundColor: "transparent"
     textColor: "{colors.fg}"
-    typography: "{typography.short-strong}"
+    typography: "{typography.body-strong}"
     rounded: "2px"
     padding: "3px 8px"
   guide-step-open:
@@ -193,11 +187,11 @@ components:
     padding: "5px 8px 8px"
   guide-step-done:
     textColor: "{colors.weak}"
-    typography: "{typography.short}"
+    typography: "{typography.body}"
   title-field:
     backgroundColor: "{colors.deep}"
     textColor: "{colors.weak}"
-    typography: "{typography.short}"
+    typography: "{typography.body}"
     rounded: "{rounded.control}"
     padding: "0 8px"
     height: "{spacing.control}"
@@ -224,13 +218,13 @@ components:
   status-bar:
     backgroundColor: "{colors.panel}"
     textColor: "{colors.weak}"
-    typography: "{typography.label-short}"
+    typography: "{typography.label}"
     padding: "0 8px"
     height: "{spacing.row}"
   tag:
     backgroundColor: "{colors.gold-soft}"
     textColor: "{colors.gold}"
-    typography: "{typography.label-short}"
+    typography: "{typography.label}"
     rounded: "{rounded.control}"
     padding: "0 5px"
   toast:
@@ -240,7 +234,7 @@ components:
     padding: "5px 13px"
   kbd:
     backgroundColor: "{colors.deep}"
-    typography: "{typography.label-short}"
+    typography: "{typography.label-mono}"
     rounded: "{rounded.control}"
     padding: "0 5px"
 ---
@@ -262,9 +256,9 @@ The start screen waits at the website's prompt, `~/xtermium $` and a blinking am
 over the brand kit's logo.
 
 The feel is quiet and exact, as dense as a modern code editor: 13px text, 26px controls, 21px
-rows, small precise corners. JetBrains Mono, the brand's face, says everything short (titles,
-buttons, tags, the status bar, code); the system face says everything long (text, menus and
-lists), so the app still reads as a native tool. The sidebar (the session rack), the tab area
+rows, small precise corners. The whole interface is in the system face, so the app reads as a
+native tool; JetBrains Mono, the brand's face, is kept for what is read character by character
+(code, commands, keys, fingerprints, passcodes). The sidebar (the session rack), the tab area
 with its panes, and the file panel are rounded panels floating a few pixels apart on a darker
 window. They are flat at rest and are told apart by tone and hairline, not by shadow. Only things
 that float above the work cast a shadow: menus, dialogs, the command palette, toasts.
@@ -282,7 +276,7 @@ end names the exceptions).
   theme by default and a full light theme.
 - One accent, Phosphor Amber, which the user can change. It is never decoration.
 - Eleven cable colours, one per kind of connection, used only to say "this is an SSH/RDP/… thing".
-- JetBrains Mono for short text, the system face for long text and lists.
+- The system face for the whole interface; JetBrains Mono only for code, commands, keys, fingerprints and passcodes.
 - The brand kit's horizontal logo on the start screen and in Settings › About; its own amber and
   white stay inside it.
 - Fibonacci spacing (1 2 3 5 8 13 21 34px) and five type sizes, both enforced by a test.
@@ -363,7 +357,7 @@ Status, kept apart from the kind hues:
 - **Amber** (`warn`): waiting, slow, or a dead tab's title; the border of the reconnect bar.
   On light, a warning paragraph (`p.warn`, `.row.warn`, or a row holding a `span.warn`, as the
   MCP token warning and the missing recovery passphrase) is a box instead: ink text on
-  `warn-wash` (amber `#ffb000` at 22%) with a 3px `warn-fill` edge at the start, `5px 8px`
+  `warn-wash` (amber `#ffb000` at 22%) inside a 1px `warn-fill` border at 55%, `5px 8px`
   inside, its icon in `warn`. Dark text in the warning's own colour reads as rust on white.
   Short warnings inside a line (a shortcut's clash, a dead tab's name) keep `warn` text.
 - **Signal Red** (`error`): disconnected, failures, the hover of a menu's
@@ -464,34 +458,37 @@ remote desktop's black, not on chrome.
 
 ## Typography
 
-**Short Font:** JetBrains Mono Variable, the brand's face (with Cascadia Mono, Consolas), bundled
+**Interface Font:** Segoe UI Variable Text (with Segoe UI, system-ui, -apple-system, Ubuntu)
+**Mono Font:** JetBrains Mono Variable, the brand's face (with Cascadia Mono, Consolas), bundled
 from `@fontsource-variable/jetbrains-mono`
-**Long Font:** Segoe UI Variable Text (with Segoe UI, system-ui, -apple-system, Ubuntu)
 
-**Character:** the website's split. JetBrains Mono, the face the logo's wordmark is drawn in
-(Bold, as outlines in the artwork), says everything short: titles, buttons, tags, the pane's
-status bar, the start screen's lead, and code and keys. The operating system's own face says
-everything long: body text, prose, field labels, menus and lists, so the app still reads as a
-native tool. `--short` names the short face (`var(--mono)`), `--ui` the long one. The terminal's
-own font is the user's setting and is not part of this system.
+**Character:** the operating system's own face sets the whole interface: titles, buttons, tags,
+the pane's status bar, menus, lists, body text. The app reads as a native tool. `--ui` names it
+and `body` hands it down, so nothing else sets a `font-family`. JetBrains Mono, the face the
+logo's wordmark is drawn in (Bold, as outlines in the artwork), is kept for what is read
+character by character: code, commands, keys, fingerprints and passcodes. `--mono` names it. The
+terminal's own font is the user's setting and is not part of this system.
 
 ### Hierarchy
 - **Prompt** (mono 400, 13px `--t`, 1.4, in `weak`): the start screen's `~/xtermium $`, with the
   `$` at 500 in amber and a blinking amber block cursor after it; decorative, hidden from
   assistive tech. Nowhere else.
-- **Headline** (mono 600, 16.5px `--t-xl`, 1.618 (φ), -0.025em, the website's title tracking): the
+- **Headline** (600, 16.5px `--t-xl`, 1.618 (φ), -0.025em, the website's title tracking): the
   lead sentence under the logo.
-- **Title** (mono 600, 14.5px `--t-l`, 1.4, -0.01em): dialog and page titles (`h2`). Section
-  heads inside a page (`h3`) are mono 600 at body size.
-- **Short** (mono 400, 13px `--t`, 1.4): buttons.
-- **Body** (400, 13px `--t`, 1.4, system face): everything else by default: fields, field
-  labels, rows, menus.
+- **Title** (600, 14.5px `--t-l`, 1.4, -0.01em): dialog and page titles (`h2`). Section
+  heads inside a page (`h3`) are 600 at body size.
+- **Body** (400, 13px `--t`, 1.4): everything else by default: buttons, fields, field labels,
+  rows, menus, tab names.
+- **Body Strong** (500, 13px `--t`, 1.4): the focused tab's name in the title bar's field and the
+  steps of Getting started. The active tab itself is not set heavier.
 - **Prose** (400, 13px, line-height φ = 21px): paragraphs and text areas, so a line of text is
   as tall as a list row. Measure is 55–75ch (62ch on the start screen, 70ch in Settings).
-- **Label** (400, 11.5px `--t-s`): counts, hints and secondary lines in the system face; the
-  status bar, tags and `kbd` at the same size in the mono. Counts use `tabular-nums`.
-- **Mono** (0.92em, JetBrains Mono): `code` (`pre` keeps body size); `kbd` in the mono at label
-  size (`--t-s`). It always runs left to right, even in Arabic.
+- **Label** (400, 11.5px `--t-s`): counts, hints, secondary lines, the status bar and tags.
+  Counts use `tabular-nums`.
+- **Mono** (0.92em, JetBrains Mono): `code` (`pre` keeps body size), `.mono`, `kbd` at label
+  size (`--t-s`), snippet commands and command or terminal previews, a host key's fingerprint in
+  the trust prompt (`--t-s`), the addresses in the tunnel flow diagram and the figures of a
+  Co-op ring's traffic. It always runs left to right, even in Arabic.
 
 `--t-xxl` (18.5px) is used three times: the status centred over an RDP desktop while it connects
 or after it closes, the sign-in code a person approves in the browser (in the mono, letters
@@ -505,14 +502,13 @@ the start screen, 233px in Settings › About).
 **The Golden Line Rule.** Prose and text areas set `line-height: var(--phi)`. Dense UI text
 stays at 1.4.
 
-**The Short-in-Mono Rule.** As on the website: if it is a title, a button, a tag, a key, a status
-line or code, it is JetBrains Mono (`var(--short)`, or `var(--mono)` for code). If it is read as
-text or down a list, it is the system face (`var(--ui)`). Lists are long even when each entry is
-short, so these stay in the system face: menu items (`.menu button`), the rows of the session
-rack and the palette (`button.item`), the Settings page list (`.pages button`) and the session
-editor's kind picker (`.kinds button`, five to a row, where the narrower face keeps the names
-whole). In Arabic, Hindi, Japanese and Chinese (`lang` ar, hi, ja, zh) `--short` falls back to
-`--ui`, since JetBrains Mono has no letters for those scripts.
+**The Mono-for-Characters Rule.** The system face sets the interface; the mono is only for what
+is read character by character or must line up: code and commands (`code`, `pre`, `.mono`,
+snippets, previews), keys (`kbd`), a host key's fingerprint, the sign-in code, the Co-op
+passcode, addresses and traffic figures, and the start screen's prompt. A title, a button, a
+tag, a status line, a menu or a list is never in the mono, however short. A new surface takes the
+system face by inheriting from `body`; it does not set a `font-family` of its own, and there is no
+token for "short text".
 
 ## Layout
 
@@ -526,12 +522,15 @@ until pointed at: the burger that collapses and expands the sidebar, a local she
 Tunnels and the saved layouts' menu, then, 13px apart, New session as a filled key (`raised`).
 In the centre: a field (an inset
 well, 26px tall, `clamp(233px, 38vw, 610px)` wide) naming where the keyboard goes: the focused
-tab's icon in its kind hue, its name (`short-strong`: mono 500, `fg`) and, in `weak`, what the shell or page says
+tab's icon in its kind hue, its name (`body-strong`: 500, `fg`) and, in `weak`, what the shell or page says
 of itself; with no tab open, the palette's own placeholder. The field opens the command palette.
 At its end, behind a hairline, a chevron opens the workspace picker (`ui/lib/WorkspacePicker.svelte`),
 hung under the field at its width in a menu's dress: a search field, a row that creates the name
 typed when no workspace has it, the workspace in use ticked, the others by name ten to a page
-(Previous, Next), then Manage workspaces…. A right click on the bar's free space or the mark
+(Previous, Next), then a row of round swatches (none, then the ten mark colours) that gives the
+workspace in use its colour, then Manage workspaces…. A workspace with a colour wears it on the
+field (`.tinted-field`): the edge at 55% of it, a 13% wash over the field's ground and the chevron
+in it, and its icon in the picker's rows, so two workspaces aren't taken for each other. A right click on the bar's free space or the mark
 opens the window's menu: Windows' own system menu, on Linux a `.menu` of Minimize, Maximize, Close. Locked, the centre is empty. A detached tab's window shows its name
 there. At the end, the five layout buttons (21px glyphs in 26px squares, 3px apart, the one in
 use amber), then the three
@@ -575,12 +574,12 @@ sentence and the ways to start, and a `weak` line that says "Type a command and 
 run it in a shell." Settings › About shows the same logo at 233px.
 
 For someone new, the ways to start give way to **Getting started** (`ui/lib/Guide.svelte`): one
-panel (hairline, `--r-menu`) headed by its title in the short face (`--t-l`, 600), "n of 8 done"
+panel (hairline, `--r-menu`) headed by its title (`--t-l`, 600), "n of 8 done"
 in `weak` ("All done" once every step is) and a flat Hide, over eight rows, most important first: a local shell, a saved server
 (with an import link under it while that step is next), the palette, panes, a tunnel, broadcast,
 the lock, sync. A row is a flat button in three columns, one line each: its number, plain and
-`weak` (a tick on an `ok` tint once done; the next step's in a 21px `fg` ring), the step in the
-short face at 500, and its shortcut as quiet `weak` text, not a key cap. One row is open at a
+`weak` (a tick on an `ok` tint once done; the next step's in a 21px `fg` ring), the step at
+500, and its shortcut as quiet `weak` text, not a key cap. One row is open at a
 time, the next step's to start with: it sits on a `--hover` band with its shortcut in `fg`, and
 under it its hint in the long face at `--t-s` (`weak`) and a Try it button (the list's one
 primary; Do it again, an ordinary button, on a done step). Clicking another row opens that one
@@ -597,7 +596,7 @@ Most steps open a tab, which hides the start screen, so the list is reachable fr
 While it's on, unfinished and behind tabs, the tab strip's tools start with its progress: an
 amber pill (a `gold-soft` wash with a `picked-line` edge, `picked` on hover and while open)
 holding a 16px ring filling in `gold-fill` over a `weak` track at 55%, "Getting started" in `fg`
-at `--t-s` and 500, and "2/8" in the short face at 600. It is the one tinted thing in the strip,
+at `--t-s` and 500, and "2/8" at 600. It is the one tinted thing in the strip,
 where the eye goes, and over nothing (a card floating on the panes would cover output and sit
 under website views). The first time it appears on a device it pulses twice, an amber halo
 spreading 8px and fading; after that the tick's toast says where the list went. Reduced motion
@@ -692,8 +691,7 @@ and never below `--r-control`: a row inside an 8px-radius, 8px-padded panel keep
 ### Buttons
 Quiet and exact: small, flat faces that brighten a step under the pointer.
 - **Shape:** gently squared (3px), 26px tall, `3px 8px` padding, 5px between icon and text; the
-  label is in the mono (`--short`); menu items (`.menu button`) and list rows (`button.item`)
-  keep the system face.
+  label is in the system face at 400, as all text is.
 - **Default:** a `raised` face with no visible border (a transparent 1px keeps sizes equal when a
   state adds one). Hover moves to `hover`. Disabled is 45% opacity; something merely stepped back
   (a lifted tab, the bar of a window without the keyboard, a done step's key, a tab's close glyph,
@@ -758,8 +756,8 @@ Quiet and exact: small, flat faces that brighten a step under the pointer.
   or else its kind hue: drawn dim (30%) on every tab, whether it is connected or idle, at 50% when
   the tab is visible in a split, and full on the active one. A tab whose connection is gone draws
   it in `warn`. The tab's icon is always in its kind hue, and the active tab's name is in
-  `short-strong`, as the title bar's field names it (the mono's widths don't change with weight,
-  so the strip doesn't shift). A drag shows a 2px amber insertion bar. Tabs keep their width;
+  `fg`, not heavier (the strip's widths don't change, so it doesn't shift); the title bar's field
+  names the focused tab at 500. A drag shows a 2px amber insertion bar. Tabs keep their width;
   more than fit scroll sideways (the wheel scrolls it), with no scrollbar. At an end with tabs past
   it, a flat chevron (`fg`, amber when pointed at) lies over the strip: the tabs are hidden under
   its 26px and fade in over the next 21px, and the chevron's button covers both, since what shows
@@ -800,7 +798,7 @@ Quiet and exact: small, flat faces that brighten a step under the pointer.
   export, Account and sync, Security (encryption, recovery passphrase, the lock), MCP
   (sub-sections "AI assistants (MCP)" and "Command line", whose commands and configuration sit in
   `.snippet` wells: `deep`, `8px 13px`, 3px corners, in the mono), Troubleshoot and About.
-- **Status bar:** a 21px panel strip under a tab's view, label size in the mono, in `weak`, items
+- **Status bar:** a 21px panel strip under a tab's view, label size, in `weak`, items
   13px apart.
   It leads with where the keyboard goes: the session's icon (14px) and its address (`user@host:port`
   for SSH), then the session's folder with the folder's
@@ -897,7 +895,8 @@ the editor because it decides every field below it; changing it keeps the host t
 Every terminal that receives broadcast keystrokes gets a 2px inset outline in `--broadcast`
 (the accent on dark, the warning orange on light, as the status bar's marker) or a chosen colour
 (`--oc`), drawn inside the pane at 3px corners. Its style is the user's (steady, breathe, fade,
-ring, march, rainbow, off). While broadcast is on, the focus ring around the pane you type in
+ring, march, rainbow, off). Over the tiles layout the panes are exactly the ticked tabs:
+unticking a tab's box in the strip hides its pane, ticking shows it. While broadcast is on, the focus ring around the pane you type in
 turns to a 2px dashed ring in the text colour (`fg` on dark, `weak` on light, where black dashes
 looked dated), so it never reads as one band with an outline in the same colour. It stays where
 the ring is: stepped further out, the window's edge cut it off at the sides and the bottom. On
@@ -965,9 +964,11 @@ buttons, and never under reduced motion.
 - **Do** end a menu with its destructive item (`.danger`) and start groups with `.sep`.
 - **Do** offer Undo instead of a question when the thing can be put back, and ask (with a
   danger button) only when it can't: a running connection, a folder of sessions, a restore.
-- **Do** focus the safe answer when yes can't be undone or is a security call (Reject on a new
-  host key, Cancel on a delete or restore, Keep editing on discard), so Enter never does the
-  irreversible thing; an ordinary yes (Close tab, which Reopen can undo) keeps the focus.
+- **Do** focus the safe answer when yes can't be undone or is a security call (Cancel on a
+  delete or restore, Keep editing on discard), so Enter never does the irreversible thing; an
+  ordinary yes (Close tab, which Reopen can undo) keeps the focus. The one security call that
+  focuses yes is trusting a host, RDP server or BMC seen for the first time (Trust, as ssh's
+  "yes"); a key that changed is refused whatever is answered.
 - **Do** make tool buttons icon-only with a tooltip.
 - **Do** keep motion to state and continuity, in three durations: `--quick` (0.1s) for an exit,
   `--move` (0.16s) for an arrival or a change of state, `--glide` (0.2s) for a thing moving to
@@ -978,8 +979,9 @@ buttons, and never under reduced motion.
   arrives after it. CSS motion stops under `prefers-reduced-motion` through `ui/app.css`; a
   Svelte transition must check it itself.
 - **Do** use logical properties (`inset-inline-*`, `margin-inline-*`) so right-to-left mirrors.
-- **Do** set short text (titles, buttons, tags, status lines) in `var(--short)` and anything read
-  as text or down a list (menus, rows, the Settings pages, the kind picker) in `var(--ui)`.
+- **Do** leave the interface in the system face (`var(--ui)`, inherited from `body`) and use
+  `var(--mono)` only for what is read character by character: code, commands, keys, fingerprints,
+  passcodes and figures that must line up.
 - **Do** show the logo through `Logo.svelte`, so its tiles and wordmark follow the theme through
   `--mark`.
 
@@ -998,8 +1000,8 @@ buttons, and never under reduced motion.
 - **Don't** animate the interface's own icons, bar a spinner or a pulse that says something is
   waiting. Only session and folder icons move for their own sake, and only on hover.
 - **Don't** add big padding or wide gaps. The densest comfortable layout is the house style.
-- **Don't** set a list, a menu or a five-to-a-row grid in the mono: the names stop fitting and it
-  no longer reads down.
+- **Don't** set a title, button, tag, status line, menu or list in the mono, or bring back a
+  token for "short text": the interface is one face.
 - **Don't** use the logo's amber `#FFC20E` or `--mark` outside the logo, or recolour, stretch,
   rotate or add effects to the logo.
 

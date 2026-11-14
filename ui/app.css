@@ -1,8 +1,9 @@
 /*
   xtermium: "the operator's terminal", in the brand's world (xtermium.com and the brand kit).
   Near-black neutral chrome, one phosphor amber accent, and a colour per connection type (like
-  cable colours on a patch panel). JetBrains Mono, the brand's face, says everything short
-  (titles, buttons, tags, keys, status lines, code); the system face says everything long.
+  cable colours on a patch panel). The interface is set in the system face; JetBrains Mono, the
+  brand's face, is kept for what is read character by character: code, commands, keys,
+  fingerprints and passcodes.
   Dense like a modern code editor: 13px text, 26px controls, small rounded corners. The
   sidebar, the tabs and the file panel float as rounded panels on a darker window, a few
   pixels apart.
@@ -22,9 +23,6 @@
 :root {
   --ui: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Ubuntu", sans-serif;
   --mono: "JetBrains Mono Variable", "Cascadia Mono", Consolas, monospace;
-  /* Short text (titles, buttons, tags, keys, status lines) is in the mono, as on the website;
-     scripts it has no letters for keep the system face (below). */
-  --short: var(--mono);
   --phi: 1.618;
   --r-window: 8px;
   --r-menu: 5px;
@@ -192,10 +190,6 @@
   --mark: #141414;
 }
 
-:root:is([lang|="ar"], [lang|="hi"], [lang|="ja"], [lang|="zh"]) {
-  --short: var(--ui);
-}
-
 * {
   box-sizing: border-box;
 }
@@ -257,7 +251,6 @@ code {
   text-overflow: ellipsis;
   padding: 0 5px;
   border-radius: var(--r-control);
-  font-family: var(--short);
   font-size: var(--t-s);
   line-height: 16px;
   color: var(--gold);
@@ -377,7 +370,6 @@ button {
   border: 1px solid transparent;
   border-radius: var(--r-control);
   background: var(--raised);
-  font-family: var(--short);
   font-weight: 400;
   cursor: pointer;
   white-space: nowrap;
@@ -412,11 +404,6 @@ button.flat:is(.on, .selected) {
 
 button.flat:hover:not(:disabled) {
   background: var(--raised);
-}
-
-/* a row of a list (the session rack, the palette) is read down like a menu: the system face */
-button.item {
-  font-family: var(--ui);
 }
 
 button.icon-only {
@@ -588,13 +575,13 @@ label.check {
   color: var(--warn);
 }
 
-/* On the light theme a warning paragraph is a box: ink text on an amber wash with an amber edge,
+/* On the light theme a warning paragraph is a box: ink text on an amber wash inside a hairline of amber,
    its icon in the warning colour. Text in the warning's own colour reads as rust or mustard on
    white. Short warnings inside a line (a shortcut's clash, a tab's name) keep the coloured text. */
 :root[data-theme="light"] :is(p.warn, .row.warn, p.row:has(> span.warn)) {
   color: var(--fg);
   background: var(--warn-wash);
-  border-inline-start: 3px solid var(--warn-fill);
+  border: 1px solid color-mix(in srgb, var(--warn-fill) 55%, transparent);
   border-radius: var(--r-control);
   padding: 5px 8px;
 }
@@ -610,7 +597,6 @@ label.check {
 }
 
 h2 {
-  font-family: var(--short);
   font-size: var(--t-l);
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -618,7 +604,6 @@ h2 {
 }
 
 h3 {
-  font-family: var(--short);
   font-size: var(--t);
   font-weight: 600;
   margin: 5px 0 0;
@@ -705,8 +690,6 @@ kbd {
   /* the menu's curve, less its padding */
   border-radius: calc(var(--r-menu) - 3px);
   background: transparent;
-  /* a menu is a list to read down, like the rows (button.item): the system face */
-  font-family: var(--ui);
   justify-content: flex-start;
 }
 
@@ -789,6 +772,20 @@ kbd {
 .swatch.auto,
 .swatch.auto:is(:hover, .selected) {
   background: linear-gradient(135deg, transparent 45%, var(--weak) 45% 55%, transparent 55%), color-mix(in srgb, var(--c) 35%, transparent);
+}
+
+/* a row of them in a menu (a tab's colour, a workspace's): round still, over a menu item's shape */
+.menu .tint {
+  gap: var(--gap);
+  padding: 5px 8px;
+}
+.menu .tint .swatch {
+  min-height: 0;
+  padding: 0;
+  border-radius: 50%;
+}
+.menu .tint .swatch:not(.auto) {
+  background: var(--c);
 }
 
 /* the picked one keeps its colour (not the gold wash of other picked buttons), ringed */

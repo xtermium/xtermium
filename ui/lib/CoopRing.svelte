@@ -178,7 +178,6 @@
     padding: 0;
     border: 0;
     border-radius: 50%;
-    font-family: var(--ui);
     /* the ring and its packets pass behind a seat, a dimmed one too */
     background: rgba(var(--panel-rgb), 1);
     /* the third person glides over to the left end when the second leaves, and a new one comes up in its own place */
