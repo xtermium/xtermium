@@ -93,9 +93,11 @@ spacing:
   "21": "21px"
   "34": "34px"
   gap: "5px"
+  panel-gap: "8px"
   row: "21px"
   control: "26px"
   bar: "34px"
+  titlebar: "42px"
 components:
   button:
     backgroundColor: "{colors.raised}"
