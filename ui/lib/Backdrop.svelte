@@ -47,7 +47,7 @@
     inset: 0;
     z-index: -1;
     /* as strong as before the ground took the larger share (api.ts `seeThrough`), on light too */
-    opacity: var(--picture-alpha, 1);
+    opacity: var(--picture-alpha);
     pointer-events: none;
   }
   /* its colour is in the backdrop now: painted twice it would be more solid than set */

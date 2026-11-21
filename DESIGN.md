@@ -817,7 +817,7 @@ Quiet and exact: small, flat faces that brighten a step under the pointer.
   in with Pro or its button turned on) and Settings, last, as a code editor stacks Accounts over
   Manage (Lock is in the title bar, just before the palette field).
   What is showing (the rack, Tunnels, the layouts' menu, Settings, a ring) has its icon in
-  `gold-fill` amber (on light too) and a 2px amber mark at the window's edge, out in the gap. A new session saved while the rack is hidden puts a count
+  `gold-fill` amber (`fg` ink on light, where amber on white is 1.8:1) and a 2px amber mark at the window's edge, out in the gap. A new session saved while the rack is hidden puts a count
   on Sessions (a 13px amber pill, `gold-fill-ink` digits, at the icon's trailing foot, 3px out past the bar into the gap; each new
   count sends the progress button's ring out of it three times, `guide-nudge`) until the rack is
   shown, and, unless its tab is opening, a toast "… is saved in your sessions." with Show. Once

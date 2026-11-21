@@ -51,6 +51,8 @@
      (api.ts `seeThrough`). */
   --window-alpha: 1;
   --chrome-alpha: 1;
+  /* a background picture on a see-through window (Backdrop.svelte) */
+  --picture-alpha: 1;
   /* menus, dialogs, the palette: near solid, and solid with a window effect (below), so what's
      behind never shows through their text */
   --float-alpha: 0.98;

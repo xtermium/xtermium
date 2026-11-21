@@ -2488,6 +2488,12 @@
     background: none;
     color: var(--gold-fill);
   }
+  /* on light the amber icon is 1.8:1 on white, under the 3:1 a graphic asks: it takes the ink, as
+     Lock does in the title bar, and the amber mark at the edge still says where you are */
+  :global(:root[data-theme="light"]) .activity :global(button.on),
+  :global(:root[data-theme="light"]) .activity :global(button.on:hover:not(:disabled)) {
+    color: var(--fg);
+  }
   /* New session, the bar's one call to act: the primary button's amber fill and dark glyph
      (app.css, hover and the light theme included), a control-sized square centred in its row */
   .activity .new {
@@ -2505,7 +2511,7 @@
     min-width: 13px;
     height: 13px;
     padding: 0 3px;
-    border-radius: 13px;
+    border-radius: var(--r-window); /* over half its 13px: a pill */
     background: var(--gold-fill);
     color: var(--gold-fill-ink);
     font-size: var(--t-s);
@@ -2525,7 +2531,6 @@
     inset-block: 8px;
     inset-inline-start: calc(-1 * var(--panel-gap));
     width: 2px;
-    border-radius: 1px;
     background: var(--gold-fill);
   }
   /* Getting started's progress at the tab bar's end: a ring filling with the steps done, the
