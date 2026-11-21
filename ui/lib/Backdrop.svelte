@@ -2,8 +2,9 @@
   // A place's background (Settings: terminal, sidebar, tab bar): its picture or shader, and over
   // it `tint`, the place's own colour at the strength set. It goes in a parent that isolates its
   // stacking (`isolation: isolate`), under everything else there. It stands in for the parent's
-  // own background, which it clears, and is as see-through as that was (`--chrome-alpha`): a
-  // picture mustn't make a Transparent window solid where it's shown.
+  // own background, which it clears, and is see-through on a Transparent window (`--picture-alpha`,
+  // a little stronger than the parent's own fill so a picture doesn't fade): it mustn't make the
+  // window solid where it's shown.
   import { PLACES, type Place } from "./api";
   import { show } from "./shader";
   import { app, backdrops, loadBackdrop } from "./state.svelte";
@@ -38,18 +39,25 @@
 {/if}
 
 <style>
-  /* one layer as see-through as the parent's background was, so the window's ground and this
-     together still make the Opacity setting */
+  /* one layer, see-through on a Transparent window at `--picture-alpha`: a little stronger than the
+     parent's own fill, so with the window's ground a place with a picture is a little more solid
+     than the Opacity setting, rather than the picture fading */
   .place-backdrop {
     position: absolute;
     inset: 0;
     z-index: -1;
-    opacity: var(--chrome-alpha);
+    /* as strong as before the ground took the larger share (api.ts `seeThrough`), on light too */
+    opacity: var(--picture-alpha, 1);
     pointer-events: none;
   }
   /* its colour is in the backdrop now: painted twice it would be more solid than set */
   :global(:has(> .place-backdrop)) {
     background: none !important;
+  }
+  /* a flat button under the pointer (the sidebar's rows, the bars' tools) lets the picture through
+     a little: its solid `raised` stood on it as a slab */
+  :global(:has(> .place-backdrop) button.flat:hover:not(:disabled)) {
+    background: color-mix(in srgb, var(--raised) 60%, transparent);
   }
   .layer {
     position: absolute;

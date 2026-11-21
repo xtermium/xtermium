@@ -352,15 +352,30 @@ export function fontStack(family: string): string {
   return family ? `"${family.replace(/"/g, "")}", ${DEFAULT_MONO}` : DEFAULT_MONO;
 }
 
+/** How much of the see-through the window's ground takes: it lets through (1 - opacity) to this
+ *  power, the panel on it the rest. Nearly all of it: the ground is the work area's own colour in
+ *  both themes, so the title bar and activity bar look the same as the work beside them, with or
+ *  without a panel or terminal on it (their own colours are faint then). A terminal in the other
+ *  theme's colours paints itself near solid instead (Terminal.svelte `--term-alpha`). */
+const GROUND = 0.95;
+
 /** Makes this window as see-through as the settings say. Two layers make up any place: the window's
- *  ground and the panel or terminal on it. Each lets through the square root of what the opacity
- *  setting does, so together they're exactly it. Anything between them paints only `--solid`. */
+ *  ground and the panel or terminal on it. The ground lets through (1 - opacity) to the power
+ *  `GROUND` and the panel the rest, so together they're exactly the setting. Anything between them
+ *  paints only `--solid`. */
 export function seeThrough(s: Settings) {
   const root = document.documentElement.style;
-  root.setProperty("--chrome-alpha", String(s.effect === "None" ? 1 : 1 - Math.sqrt(1 - s.opacity)));
+  const through = (share: number) => String(s.effect === "None" ? 1 : 1 - (1 - s.opacity) ** share);
+  root.setProperty("--window-alpha", through(GROUND));
+  root.setProperty("--chrome-alpha", through(1 - GROUND));
+  // A background picture keeps the strength it had when the two layers split the opacity evenly,
+  // rather than the panel's small share, which made pictures fade on a see-through window.
+  root.setProperty("--picture-alpha", through(0.5));
   root.setProperty("--solid", s.effect === "None" ? "1" : "0");
-  // A floating layer lies over what's already there, like a window over another: one layer.
-  root.setProperty("--float-alpha", String(s.effect === "None" ? 0.98 : Math.min(0.98, s.opacity)));
+  // For styles only a see-through window needs (app.css: stronger ink, tints, solid floats).
+  document.documentElement.toggleAttribute("data-see-through", s.effect !== "None");
+  // A floating layer (`--float-alpha`) goes solid with the flag (app.css): on the glass, anything
+  // less and the screen behind a dialog or menu shows through its text.
 }
 
 export const css = (rgb: number, alpha = 1) =>

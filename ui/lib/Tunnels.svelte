@@ -84,7 +84,7 @@
   }
 </script>
 
-<Modal title={_("SSH tunnels")} width={987} {onclose}>
+<Modal title={_("SSH tunnels")} width={610} {onclose}>
   {#if error}<div class="error">{error}</div>{/if}
   {#if !app.store.tunnel.length}<div class="weak">{_("No tunnels yet. Add one below.")}</div>{/if}
   {#each app.store.tunnel as t, i (t.name)}

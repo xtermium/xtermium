@@ -27,7 +27,7 @@
   "Layout: side by side": "Diseño: lado a lado",
   "Layout: stacked": "Diseño: apilado",
   "Layout: 2 × 2 grid": "Diseño: cuadrícula 2 × 2",
-  "Show or hide the sidebar": "Mostrar u ocultar la barra lateral",
+  "Show or hide the activity bar and sessions": "Mostrar u ocultar la barra de actividad y las sesiones",
   "Show or hide the file panel": "Mostrar u ocultar el panel de archivos",
   "Show or hide the status bar": "Mostrar u ocultar la barra de estado",
   "Tunnels": "Túneles",
@@ -516,9 +516,7 @@
   "Edit {name}": "Editar {name}",
   "Start when xtermium opens": "Iniciar al abrir xtermium",
   "a saved SSH session…": "una sesión SSH guardada…",
-  "Expand the sidebar": "Expandir la barra lateral",
   "Drag to resize; double-click to fit the names": "Arrastre para cambiar el tamaño; doble clic para ajustarlo a los nombres",
-  "Collapse the sidebar": "Contraer la barra lateral",
   "The tunnel is running: stop it to save the changes.": "El túnel está en marcha: deténgalo para guardar los cambios.",
   "{name} is running: stop it first, then edit it.": "{name} está en marcha: deténgalo primero y luego edítelo.",
   "Stop the tunnel to edit it": "Detenga el túnel para editarlo",
@@ -593,7 +591,7 @@
   "{who} checks certificates and can't be told to skip it, so it may refuse xtermium's self-signed one. If it does, forward the port over SSH from that machine (ssh -L {port}:127.0.0.1:{port} this computer) and use http://127.0.0.1:{port}/mcp there.": "{who} comprueba los certificados y no se le puede pedir que lo omita, así que puede rechazar el certificado autofirmado de xtermium. Si pasa, reenvía el puerto por SSH desde ese equipo (ssh -L {port}:127.0.0.1:{port} este-equipo) y usa allí http://127.0.0.1:{port}/mcp.",
   "Third-party notices": "Avisos de terceros",
   "Move tab to a new window": "Mover la pestaña a una ventana nueva",
-  "Collapse or expand the sidebar": "Contraer o expandir la barra lateral",
+  "Show or hide the sessions": "Mostrar u ocultar las sesiones",
   "Turn broadcast on or off": "Activar o desactivar la difusión",
   "Terminal Co-op": "Terminal Co-op",
   "Sync the account now": "Sincronizar la cuenta ahora",
@@ -1161,5 +1159,7 @@
   "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "La tecla Windows y los atajos del sistema (Win+E, Alt+Tab) van al escritorio remoto mientras tiene el teclado",
   "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "Lo que copias cruza entre este equipo y los escritorios RDP: texto, imágenes y archivos.",
   "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "Lo que copias cruza entre este equipo y los escritorios RDP: texto e imágenes en ambos sentidos, archivos hacia el escritorio.",
-  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Desactivado: actúan en este equipo. Ctrl+Alt+Supr y Win+L siempre."
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Desactivado: actúan en este equipo. Ctrl+Alt+Supr y Win+L siempre.",
+  "{name} is saved in your sessions.": "{name} se ha guardado en tus sesiones.",
+  "Sessions: {n} new": "Sesiones: {n} nuevas"
 }

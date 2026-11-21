@@ -89,8 +89,7 @@
   "Cloud": "Pilvi",
   "Codex reads the token from an environment variable, so this command also saves it as <code>XTERMIUM_TOKEN</code> in your user environment (setx). Open a new terminal before starting Codex, and run it again if you make a new token.": "Codex lukee tunnuksen ympäristömuuttujasta, joten tämä komento tallentaa sen myös nimellä <code>XTERMIUM_TOKEN</code> käyttäjäympäristöösi (setx). Avaa uusi pääte ennen Codexin käynnistämistä ja suorita komento uudelleen, jos teet uuden tunnuksen.",
   "Codex reads the token from an environment variable, so this command also saves it as <code>XTERMIUM_TOKEN</code> in ~/.profile. Open a new terminal before starting Codex, and run it again if you make a new token.": "Codex lukee tunnuksen ympäristömuuttujasta, joten tämä komento tallentaa sen myös nimellä <code>XTERMIUM_TOKEN</code> tiedostoon ~/.profile. Avaa uusi pääte ennen Codexin käynnistämistä ja suorita komento uudelleen, jos teet uuden tunnuksen.",
-  "Collapse or expand the sidebar": "Kutista tai laajenna sivupalkki",
-  "Collapse the sidebar": "Kutista sivupalkki",
+  "Show or hide the sessions": "Näytä tai piilota istunnot",
   "Colour": "Väri",
   "Colour words and addresses in terminal output": "Väritä sanat ja osoitteet päätteen tulosteessa",
   "Colour {c}": "Väri {c}",
@@ -169,7 +168,6 @@
   "Enter the jump host, or untick it.": "Anna hyppyisäntä tai poista valinta.",
   "Everything, protected by a passphrase. Import it on any xtermium.": "Kaikki tunnuslauseella suojattuna. Tuo se mihin tahansa xtermiumiin.",
   "Exit": "Lopeta",
-  "Expand the sidebar": "Laajenna sivupalkki",
   "Export": "Vie",
   "Export all sessions": "Vie kaikki istunnot",
   "Export sessions…": "Vie istunnot…",
@@ -466,7 +464,7 @@
   "Show a scroll bar": "Näytä vierityspalkki",
   "Show in the tiles": "Näytä laatoissa",
   "Show or hide the file panel": "Näytä tai piilota tiedostopaneeli",
-  "Show or hide the sidebar": "Näytä tai piilota sivupalkki",
+  "Show or hide the activity bar and sessions": "Näytä tai piilota toimintopalkki ja istunnot",
   "Show or hide the status bar": "Näytä tai piilota tilarivi",
   "Show passphrase": "Näytä tunnuslause",
   "Show the account button in the sidebar": "Näytä tilipainike sivupalkissa",
@@ -1161,5 +1159,7 @@
   "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "Windows-näppäin ja järjestelmän pikanäppäimet (Win+E, Alt+Tab) menevät etätyöpöydälle, kun näppäimistö on sillä",
   "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "Kopioimasi kulkee tämän tietokoneen ja RDP-työpöytien välillä: teksti, kuvat ja tiedostot.",
   "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "Kopioimasi kulkee tämän tietokoneen ja RDP-työpöytien välillä: teksti ja kuvat molempiin suuntiin, tiedostot työpöydälle.",
-  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Pois: ne toimivat tällä tietokoneella. Ctrl+Alt+Del ja Win+L toimivat aina."
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Pois: ne toimivat tällä tietokoneella. Ctrl+Alt+Del ja Win+L toimivat aina.",
+  "{name} is saved in your sessions.": "{name} on tallennettu istuntoihisi.",
+  "Sessions: {n} new": "Istunnot: {n} uutta"
 }

@@ -27,7 +27,7 @@
   "Layout: side by side": "التخطيط: جنبًا إلى جنب",
   "Layout: stacked": "التخطيط: فوق بعض",
   "Layout: 2 × 2 grid": "التخطيط: شبكة 2 × 2",
-  "Show or hide the sidebar": "إظهار الشريط الجانبي أو إخفاؤه",
+  "Show or hide the activity bar and sessions": "إظهار شريط الأنشطة والجلسات أو إخفاؤهما",
   "Show or hide the file panel": "إظهار لوحة الملفات أو إخفاؤها",
   "Show or hide the status bar": "إظهار شريط الحالة أو إخفاؤه",
   "Tunnels": "الأنفاق",
@@ -516,9 +516,7 @@
   "Edit {name}": "تعديل {name}",
   "Start when xtermium opens": "البدء عند فتح xtermium",
   "a saved SSH session…": "جلسة SSH محفوظة…",
-  "Expand the sidebar": "توسيع الشريط الجانبي",
   "Drag to resize; double-click to fit the names": "اسحب لتغيير الحجم؛ انقر نقرًا مزدوجًا لملاءمة الأسماء",
-  "Collapse the sidebar": "طي الشريط الجانبي",
   "The tunnel is running: stop it to save the changes.": "النفق قيد التشغيل: أوقفه لحفظ التغييرات.",
   "{name} is running: stop it first, then edit it.": "{name} قيد التشغيل: أوقفه أولًا ثم عدّله.",
   "Stop the tunnel to edit it": "أوقف النفق لتعديله",
@@ -593,7 +591,7 @@
   "{who} checks certificates and can't be told to skip it, so it may refuse xtermium's self-signed one. If it does, forward the port over SSH from that machine (ssh -L {port}:127.0.0.1:{port} this computer) and use http://127.0.0.1:{port}/mcp there.": "يتحقق {who} من الشهادات ولا يمكن إخباره بتخطي ذلك، لذا قد يرفض شهادة xtermium الموقعة ذاتيًا. إن حدث ذلك، فحوّل المنفذ عبر SSH من ذلك الجهاز (ssh -L {port}:127.0.0.1:{port} هذا-الحاسوب) واستخدم هناك http://127.0.0.1:{port}/mcp.",
   "Third-party notices": "إشعارات الجهات الخارجية",
   "Move tab to a new window": "نقل اللسان إلى نافذة جديدة",
-  "Collapse or expand the sidebar": "طي الشريط الجانبي أو توسيعه",
+  "Show or hide the sessions": "إظهار الجلسات أو إخفاؤها",
   "Turn broadcast on or off": "تشغيل البث أو إيقافه",
   "Terminal Co-op": "Terminal Co-op",
   "Sync the account now": "مزامنة الحساب الآن",
@@ -1161,5 +1159,7 @@
   "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "مفتاح Windows واختصارات النظام (Win+E، Alt+Tab) تذهب إلى سطح المكتب البعيد ما دامت لوحة المفاتيح عنده",
   "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "ما تنسخه يعبر بين هذا الحاسوب وأسطح مكتب RDP: النصوص والصور والملفات.",
   "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "ما تنسخه يعبر بين هذا الحاسوب وأسطح مكتب RDP: النصوص والصور في الاتجاهين، والملفات إلى سطح المكتب.",
-  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "عند الإيقاف: تعمل على هذا الحاسوب. Ctrl+Alt+Del و Win+L يعملان عليه دائمًا."
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "عند الإيقاف: تعمل على هذا الحاسوب. Ctrl+Alt+Del و Win+L يعملان عليه دائمًا.",
+  "{name} is saved in your sessions.": "حُفظت {name} في جلساتك.",
+  "Sessions: {n} new": "الجلسات: {n} جديدة"
 }

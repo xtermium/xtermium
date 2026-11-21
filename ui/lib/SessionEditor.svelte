@@ -13,8 +13,15 @@
   import QualityBar from "./QualityBar.svelte";
   import { app, folderColor, saveStore, siteIcon } from "./state.svelte";
 
-  /** `index`: the session being edited, or null for a new one. `onconnect` opens a saved one. */
-  let { session, index, onclose, onconnect }: { session: Session; index: number | null; onclose: () => void; onconnect?: (s: Session) => void } = $props();
+  /** `index`: the session being edited, or null for a new one. `onconnect` opens a saved one.
+   *  `onadded` hears of a new one saved, and whether it is being opened too. */
+  let {
+    session,
+    index,
+    onclose,
+    onconnect,
+    onadded,
+  }: { session: Session; index: number | null; onclose: () => void; onconnect?: (s: Session) => void; onadded?: (s: Session, opening: boolean) => void } = $props();
 
   // An editable copy: the stored session changes only on Save.
   // svelte-ignore state_referenced_locally
@@ -121,6 +128,7 @@
     // Props read the parent's state, which closing clears: what to open is settled first.
     const go = connect ? onconnect : undefined;
     const saved = app.store.session[at];
+    if (index === null) onadded?.(saved, !!go);
     onclose();
     go?.(saved);
   }

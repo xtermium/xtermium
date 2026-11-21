@@ -21,7 +21,7 @@ colors:
   warn: "#e0b04a"
   error: "#ec6a6a"
   error-ink: "#200a0a"
-  window: "#050506"
+  window: "#0b0b0d"
   deep: "#08080a"
   bg: "#0b0b0d"
   panel: "#111114"
@@ -259,8 +259,10 @@ The feel is quiet and exact, as dense as a modern code editor: 13px text, 26px c
 rows, small precise corners. The whole interface is in the system face, so the app reads as a
 native tool; JetBrains Mono, the brand's face, is kept for what is read character by character
 (code, commands, keys, fingerprints, passcodes). The sidebar (the session rack), the tab area
-with its panes, and the file panel are rounded panels floating a few pixels apart on a darker
-window. They are flat at rest and are told apart by tone and hairline, not by shadow. Only things
+with its panes and the file panel are rounded panels floating 8px apart (`--panel-gap`) on a window of
+the work's own colour (`#0b0b0d`, white on light), set apart by hairlines; the activity bar down
+the window's edge sits on the window itself, as the title bar does above. They are flat at rest
+and are told apart by tone and hairline, not by shadow. Only things
 that float above the work cast a shadow: menus, dialogs, the command palette, toasts.
 
 Every proportion comes from the golden ratio (φ ≈ 1.618). Spacing steps along the Fibonacci
@@ -280,7 +282,7 @@ end names the exceptions).
 - The brand kit's horizontal logo on the start screen and in Settings › About; its own amber and
   white stay inside it.
 - Fibonacci spacing (1 2 3 5 8 13 21 34px) and five type sizes, both enforced by a test.
-- Rounded panels on a darker window. Flat at rest; shadows only on floating layers.
+- Rounded panels on a window of the work's own colour, the activity bar on the window itself. Flat at rest; shadows only on floating layers.
 - Icon-only tool buttons with tooltips. Boxicons SVGs. Session and folder icons move on hover; interface icons only spin or pulse while something waits.
 - Right-to-left ready: logical properties throughout, with flips for chevrons, menus and carets.
 
@@ -319,9 +321,9 @@ colours.
   stronger mix, 18% amber, to tell "into" from "before" (the amber line).
 
 The broadcast marker in a status bar reads the accent through `--broadcast`, an alias of `--gold`
-(as `--fwd` and `--back` alias kind hues for tunnels). On light it is `warn` (`#a34800`): it is the
-one piece of accent text that must stand out, amber text doesn't read there, and ink wouldn't
-stand out.
+(as `--fwd` and `--back` alias kind hues for tunnels). On light it is the accent's fill
+(`gold-fill`, amber), and since amber text doesn't read there, the status bar's marker is an amber
+chip with `gold-fill-ink` text, as the light theme shows amber elsewhere: as a fill.
 
 ### Secondary
 The connection hues, one per kind of session (`--k-*`), keyed like cable colours:
@@ -369,10 +371,11 @@ From the back of the window to the hand, the website's near-black, with no blue 
 - **Ground** (`window`): the window itself, showing in the gaps between panels and split panes.
 - **Inset Well** (`deep`): wells set into a panel: text fields, `kbd`, segmented controls, the
   sidebar's status pill, code snippets. In the light theme it is white, the lightest step.
-- **Base** (`bg`): the content area under the tabs, and the active tab that joins it.
-- **Surface** (`panel`): the sidebar, the tab strip, the file panel, the status bar, and every
-  floating layer (menus, dialogs, palette, toasts at 98% opacity, or the Opacity setting with the
-  Transparent effect on, up to 98%).
+- **Base** (`bg`): the content area under the tabs, the active tab that joins it, and the
+  sidebar's panel, so the sessions and the work read as one.
+- **Surface** (`panel`): the tab strip, the file panel, the status bar, and every
+  floating layer (menus, dialogs, palette, toasts at 98% opacity, solid with the Transparent effect
+  on).
 - **Raised** (`raised`): button faces, menu-item hover, the current Settings page, scrollbar
   thumbs.
 - **Lit** (`hover`): a button under the pointer.
@@ -396,9 +399,9 @@ light theme's ink `gold` would draw a black box.
 The light theme (`:root[data-theme="light"]` in `ui/app.css`) redefines every token above with
 the same roles, in neutral greys with no blue tint and text in the brand's charcoal `#141414`. It
 draws the same elements as dark, in other colours (one exception: links, under Buttons). It
-reads like a light desktop app: a light grey ground (`window` `#e5e5e8`) with near-white panels
-(`#f7f7f8`), white where the work and the fields are (`bg`, `deep`), `raised` `#ececef`,
-`hover` `#e2e2e6`, hairlines `#dcdce1`, soft two-layer shadows and a light scrim. A field's edge is
+reads like a light desktop app: a white ground (`window` `#ffffff`, as white as where the work and
+the fields are, `bg`, `deep`) with near-white panels (`#f7f7f8`), `raised` `#ececef`,
+`hover` `#e2e2e6`, hairlines `#b4b4bb` (dark enough to set the panels apart on white), soft two-layer shadows and a light scrim. A field's edge is
 its own token, `field-line` (`line` on dark): `#8e8e94` on light, 3.0:1 on `panel`, since a white
 field on a near-white panel has nothing else to show where it is. It is neutral first: what the
 accent says as text or a line (links, focus, a field's border, a tag's or a picked option's text) is
@@ -441,16 +444,29 @@ with. State (connected, waiting, failed) is always `ok` / `warn` / `error`, neve
 **The See-Through Chrome Rule.** Chrome backgrounds are written
 `rgba(var(--panel-rgb), var(--chrome-alpha))` (or the `window`/`bg`/`deep` triplet), never as a
 hex. `--chrome-alpha` drops below 1 while the Transparent effect is on, and the desktop shows through.
-Any place is two layers, the window's ground and a panel or terminal on it, and `--chrome-alpha` is
-worked out so the two together make the Opacity setting, in every window: don't paint a third layer
-between them. A floating layer is one layer at `--float-alpha`, over what's already there, as a window
-is over another. The lock screen stays solid: it hides what's behind it. `--solid` (1, or 0 with
+Any place is two layers, the window's ground (`--window-alpha`) and a panel or terminal on it
+(`--chrome-alpha`), worked out so the two together make the Opacity setting, in every window: don't
+paint a third layer between them. The ground takes nearly all of it (it lets through
+`1 - Opacity` to the power 0.95, the panel the rest): it is the work area's own colour in both
+themes, so what sits on the ground alone, the title bar and the activity bar, looks the same as the
+work beside it, with or without a panel or terminal on it; their own colours are faint then. Two
+named exceptions are more solid than the setting: a background picture (Backdrop: terminal,
+sidebar, tab bar) keeps the strength of an even split (`--picture-alpha`, the power 0.5), so it
+doesn't fade on the glass; and a terminal in the other theme's colours (a dark scheme on light, a
+light one on dark) is painted at 0.9 or more (`--term-alpha`), since the ground under it is the
+theme's colour and its text would stand on the wrong ground. A floating layer is one layer at `--float-alpha`, over what's already there, as a window
+is over another: 0.98, and solid while the window is see-through, since on the glass even 2% lets
+the screen behind a dialog show through its text. The lock screen stays solid: it hides what's behind it. `--solid` (1, or 0 with
 the Transparent effect) switches off the active tab's and a detached window's own fill so the pane
-shows through. The title bar is the one place with only the ground under it, so a dark desktop
-turns it grey on light: there its icons (`--bar-ink`) go from `weak` to ink while `--solid` is 0,
-and the palette field and the New session key are a second layer at `--chrome-alpha`, as a panel
-is, instead of solid slabs on it. On light the New session key is `deep` (white, as the field),
-since `raised` is barely off the bar's grey.
+shows through. The title bar and the activity bar have only the ground under them, so a dark desktop
+turns them grey on light: there the title bar's icons (`--bar-ink`) go from `weak` to ink while
+`--solid` is 0, and the palette field is a second layer at `--chrome-alpha`, as a panel is,
+instead of a solid slab on it. While the window is see-through (`data-see-through` on
+the root, set by `seeThrough`), `raised` and `hover` turn into tints (white on dark, ink on light)
+so a hovered row or the guide's open step isn't an opaque slab on the glass (a floating bar that
+used `raised`, as over a remote desktop, takes the float fill instead). Text takes stronger ink, so
+it holds 4.5:1 at the lowest opacity (0.8) over the worst desktop: `weak` `#c4c4cc` on dark (over
+white), and on light (over black) `weak` `#38383e`, `fg` black, hairlines `#85858d`.
 Two exceptions, named: the scrim behind a dialog (`--scrim`) and the palette
 (`--scrim-soft`) is the dark ground at 0.4 and 0.32 (black at 0.18 and 0.12 on light), and the RDP view's bars over
 the picture use fixed dark greys (`#0c0c0c`, `rgb(12 12 12 / 0.75)`), because they sit on the
@@ -512,15 +528,18 @@ token for "short text".
 
 ## Layout
 
-Every window starts with xtermium's own title bar (`TitleBar.svelte`, `--titlebar`, as tall as
-the tab strip: 34px) instead of the system's, so it looks the same on Windows, Linux and macOS. It
-sits on the window's ground with no panel of its own, in three parts. At the start, 13px in, the
-mark alone (`Logo.svelte` with `mark`, 26px; or the picture chosen under Settings › Appearance ›
+Every window starts with xtermium's own title bar (`TitleBar.svelte`, `--titlebar`, 42px: its
+26px controls with 8px of air above and below, the panels' gap (`--panel-gap`), so the field
+stands as far from the panels under it as they stand from each other) instead of the system's, so it looks the same on Windows, Linux and macOS. It
+sits on the window's ground with no panel of its own, in three parts. At the start, 8px in (`--panel-gap`), the
+mark alone (`Logo.svelte` with `mark`, 26px, its centre over the activity bar's buttons; or the picture chosen under Settings › Appearance ›
 App icon, which also takes the mark's place on the start screen, the windows, the taskbar and the
-tray), then the main window's tools, icon-only, 21px glyphs in 26px squares 3px apart, `weak`
-until pointed at: the burger that collapses and expands the sidebar, a local shell,
-Tunnels and the saved layouts' menu, then, 13px apart, New session as a filled key (`raised`).
-In the centre: a field (an inset
+tray). The main window's tools are on the activity bar under the mark.
+In the centre, once a way to unlock is set, Lock: a flat tool like the bar's others (an 18px
+glyph in a 26px square, its hover slab that square, in amber `gold-fill` on dark (the amber
+the activity bar's `+` is filled with), in `fg` black on light), 8px before the field's leading edge. It hangs there
+(absolutely placed) rather than taking room in the row, so the field stays centred on the window
+with or without it. It acts on the whole window, as the field does. Then a field (an inset
 well, 26px tall, `clamp(233px, 38vw, 610px)` wide) naming where the keyboard goes: the focused
 tab's icon in its kind hue, its name (`body-strong`: 500, `fg`) and, in `weak`, what the shell or page says
 of itself; with no tab open, the palette's own placeholder. The field opens the command palette.
@@ -542,14 +561,16 @@ them room. Dialogs, the palette and the lock screen start under the bar, so the 
 be moved, minimized and closed. There is no full-screen mode.
 
 Every control in the bar is as tall as the field (`--control`), so the row shares one top and
-bottom edge, centred in the bar. The sidebar has no header: its first row's middle sits on the tab
-strip's middle beside it (`calc((var(--bar) - var(--row)) / 2)` above it), and the collapsed rail
-holds the sidebar's foot and, while there is a message, a button for it that opens the sidebar. Finding a session is the palette's job (it searches names, addresses, folders and
-folder tags).
+bottom edge, centred in the bar. The sidebar has no header: its list starts 5px inside its panel's
+edge, so the first row's middle sits within half a pixel of the tab strip's middle beside it. With the sidebar
+hidden, a message waits behind a button on the activity bar that shows it. Finding a session is
+the palette's job (it searches names, addresses, folders and folder tags).
 
-Under the bar the window is padded by the gap (`--gap`, 5px) and holds up to three floating panels in a row:
-the session rack (resizable; it collapses to a 38px rail), the center (a 34px tab strip over
-the panes), and the file panel (340px). The splitter between rack and center is the gap itself.
+Under the bar the window is padded by the panels' gap (`--panel-gap`, 8px) and holds, in a row, the activity bar
+(26px, as wide as its buttons and the mark above them, then the panels' gap), and three floating panels: the session
+rack (resizable; the activity bar's Sessions shows and hides it), the center (a 34px tab strip
+over the panes), and the file panel (340px). The splitter between rack and
+center is the gap itself.
 Split panes are each their own panel (5px corners, 1px hairline) with the window's dark showing
 between them. Pane sizers are 6px hit areas centred on that gap, amber-tinted on hover.
 
@@ -560,8 +581,9 @@ asides, `13px` for a dialog body. Panel and column widths are Fibonacci (144, 23
 or derived with `calc()`; a content-driven maximum (a tab title, a tooltip) may be any value; the
 ones that are neither yet are in the token audit. Heights come from three
 tokens: `--row` 21px (list rows, status bar, small buttons), `--control` 26px (buttons, fields,
-menu items), `--bar` 34px (the tab strip). Dialogs are 377, 610 or 987px wide and keep 21px from
-the window's edge.
+menu items), `--bar` 34px (the tab strip). Dialogs are 377, 610 or 987px wide (987 is Settings
+alone) and keep 21px from the window's edge and from the title bar, so on a short window the
+body scrolls and the buttons stay in view.
 
 The start screen sits on the golden section: the room above the welcome and below it go 1 : φ,
 in a column at most 610px wide, 13px between its parts. The welcome starts at the website's
@@ -616,7 +638,7 @@ until the shell can take keys and the welcome has gone, then fades in over 0.2s 
 one after the other, never a crossfade of the logo over the shell's text. Under reduced motion
 it is a cut.
 
-Forms are a two-column grid (labels in `weak`, minimum 120px, gaps `8px 13px`), and a label
+Forms are a two-column grid (labels in `weak`, minimum 120px, gaps `8px 13px`; `5px 13px` in Settings, a long column read down), and a label
 beside a multi-line field aligns to its first baseline.
 A customisable setting with more than two values ends its row with a flat reset button, shown
 only once the value differs from the default and naming that default in its tooltip; it keeps
@@ -637,7 +659,8 @@ tested: keep them on the scale or derived, or name the exception (pane sizers 6p
 tokens it comes from, so it reads as derived and follows them: `calc(8px + var(--icon-s) +
 var(--gap))` is a search field's text start past its 16px icon (`--icon` is the 18px of controls
 and rows), `calc(var(--r-menu) - 3px)` a menu item's corner, and
-`calc(var(--control) + 2 * var(--gap) + 2px)` the collapsed rail.
+`calc(var(--control) + 2 * var(--panel-gap))` the title bar, its field as far from the panels
+as they stand from each other.
 
 ## Elevation & Depth
 
@@ -772,15 +795,38 @@ Quiet and exact: small, flat faces that brighten a step under the pointer.
   left too), one row per
   tab in strip order: its icon in its kind hue and its name, the tab in use on the `picked` wash and
   holding the keyboard. It is as tall as the window allows, then scrolls; a click shows that tab.
+- **Rack top:** no head: the list starts at the top of the rack's panel.
 - **Session rack:** 21px rows, folders with a rotating caret (0.12s) and a hairline guide under
   each level. Leaves indent past the caret so icons in one level line up. A session with an open
   tab gets a 7px green dot on its icon's corner, hollow once the connection is gone. Chosen rows
   take the amber wash; the keyboard's row (`.current`) is `raised` with a 2px amber inset edge on
-  its leading side. A marked session's or folder's name is in its mark.
+  its leading side. A marked session's or folder's name is in its mark. Over a sidebar picture,
+  the `.current` row and a row under the pointer are `raised` at 60%, so the picture shows
+  through rather than a solid slab standing on it.
+- **Empty rack:** with nothing saved (no session, no folder) the rack opens with "No saved sessions
+  yet" in semibold, a line in `weak` label size on what goes there, then New session (the gold
+  primary) and Import sessions, full width, in an `8px 13px` block. It goes with the first save.
+- **Activity bar:** as in a code editor, a 26px column on the window down its edge, the panels' gap from the window's edge and from the sidebar (no panel, no
+  sidebar picture), its buttons centred under the mark: icon-only rows as tall as the tab strip
+  (`bar`), 21px glyphs in `weak`, full ink under the pointer with no slab. First New session, the
+  bar's one call to act: a 26px primary square (the amber fill, a dark 18px `+`, centred in its
+  row; Ctrl+Shift+N), then Sessions
+  (a layers glyph; shows or hides the rack; Ctrl+Shift+L), a local shell, Tunnels and the saved layouts' menu
+  (opening beside the bar, level with its button); at the foot, while there is a message and the
+  rack is hidden, a button that shows it, then the account, Terminal Co-op (in a ring, or signed
+  in with Pro or its button turned on) and Settings, last, as a code editor stacks Accounts over
+  Manage (Lock is in the title bar, just before the palette field).
+  What is showing (the rack, Tunnels, the layouts' menu, Settings, a ring) has its icon in
+  `gold-fill` amber (on light too) and a 2px amber mark at the window's edge, out in the gap. A new session saved while the rack is hidden puts a count
+  on Sessions (a 13px amber pill, `gold-fill-ink` digits, at the icon's trailing foot, 3px out past the bar into the gap; each new
+  count sends the progress button's ring out of it three times, `guide-nudge`) until the rack is
+  shown, and, unless its tab is opening, a toast "… is saved in your sessions." with Show. Once
+  the rack shows, the new rows' folders open, the first scrolls into view, and each new row's
+  `gold-soft` wash and 55% amber hairline swell and ebb twice over 2.4s (`.arrived`); a session
+  saved with the rack showing pulses its row the same way.
+  Ctrl+Shift+B hides the bar and the rack together.
 - **Sidebar foot:** the status pill (an inset well, label size in `weak`, fading in over 0.16s
-  when a message arrives) on a row of its own, then, at the trailing end of the foot's row,
-  Settings, Lock (when a lock is set), Terminal Co-op (in a ring, or signed in with Pro or its
-  button turned on) and the account, in that order. The account is a flat icon button; signed
+  when a message arrives) on a row of its own. The account (on the activity bar) is a flat icon button; signed
   in, it shows an 18px round avatar: the account's picture when it has one, else the first letter
   of the name on a solid amber disc. It is ringed 2px in `error` when
   sync fails or the quota is full and in `warn` when it is nearly full. Its menu opens upwards,
@@ -893,8 +939,8 @@ the editor because it decides every field below it; changing it keeps the host t
 
 ### Broadcast Outline (signature)
 Every terminal that receives broadcast keystrokes gets a 2px inset outline in `--broadcast`
-(the accent on dark, the warning orange on light, as the status bar's marker) or a chosen colour
-(`--oc`), drawn inside the pane at 3px corners. Its style is the user's (steady, breathe, fade,
+(the accent on dark, its amber fill on light, drawn as it is) or a chosen colour
+(`--oc`, on light darkened to Oklab 0.7 if pale), drawn inside the pane at 3px corners. Its style is the user's (steady, breathe, fade,
 ring, march, rainbow, off). Over the tiles layout the panes are exactly the ticked tabs:
 unticking a tab's box in the strip hides its pane, ticking shows it. While broadcast is on, the focus ring around the pane you type in
 turns to a 2px dashed ring in the text colour (`fg` on dark, `weak` on light, where black dashes
@@ -934,8 +980,10 @@ other person has selected is drawn row by row in their ring colour at 30%, under
 
 ### Backgrounds
 A picture or a GLSL shader behind the terminals, the sidebar or the tab bar (each its own),
-drawn under the place's own colour at the strength set (a range of 5–95% in steps of 5,
-`Backdrop.svelte`). A picture
+drawn under the place's own colour at the strength set (a range of 5–95% in steps of 5, 25% by
+default, with a reset button as other sliders have; `Backdrop.svelte`, `BackgroundPicker.svelte`).
+Over a picture, a flat button under the pointer (the sidebar's rows, the bars' tools) is
+`raised` at 60%. A picture
 fills its place by default, cut to fit; it can also stretch, fit whole, tile at its size, or sit
 centred at its size (`FITS`). A shader always fills. The place isolates its stacking, so the
 backdrop stays under everything in it.

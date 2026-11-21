@@ -8,10 +8,10 @@ The website's near-black ground, surfaces, hairlines, ink and muted, neutral wit
 
 | Role | Token | Hex |
 |---|---|---|
-| The window, showing between panels | `window` | `#050506` |
+| The window, showing between panels | `window` | `#0b0b0d` (the work area's own colour) |
 | Wells: fields, `kbd`, segmented controls, snippets | `deep` | `#08080a` |
-| Content under the tabs, the active tab | `bg` | `#0b0b0d` |
-| Sidebar, tab strip, file panel, status bar, every floating layer | `panel` | `#111114` |
+| Content under the tabs, the active tab, the sidebar's panel | `bg` | `#0b0b0d` |
+| Tab strip, file panel, status bar, every floating layer | `panel` | `#111114` |
 | Button faces, menu-item hover, current Settings page | `raised` | `#1d1d22` |
 | Button under the pointer | `hover` | `#26262c` |
 | Every 1px border | `line` | `#2c2c33` |
@@ -63,9 +63,9 @@ Short face (`--short`, `--mono`): JetBrains Mono Variable, the brand's face (the
 
 ## Layout and sizes
 
-- The window is padded by `--gap` (5px) and holds up to three floating panels: the session rack (resizable, collapses to a 38px rail), the centre (34px tab strip over the panes) and the file panel (340px).
+- The window is padded by `--panel-gap` (8px, also between its main sections and under the title bar's field) and holds the activity bar (26px, as wide as its buttons and the mark above, on the window, under the mark: New session as an amber primary square, Sessions (layers glyph), local shell, tunnels, layouts; account, Co-op, Settings at its foot; a new session saved while the sidebar is hidden puts an amber count on Sessions, pulsing as it grows, and its row pulses amber twice once the sidebar shows; Lock sits in the title bar 8px before the palette field, flat, hung there so the field stays centred), then the floating panels: the session rack (resizable, shown and hidden by Sessions), the centre (34px tab strip over the panes) and the file panel (340px).
 - Split panes are each their own panel (5px corners, hairline) with the window's dark between them; pane sizers are 6px hit areas, amber-tinted on hover.
-- Forms: a two-column grid, labels in `weak` (120 to 233px, ending in `…` past that), gaps `8px 13px`.
+- Forms: a two-column grid, labels in `weak` (120 to 233px, ending in `…` past that), gaps `8px 13px` (`5px 13px` in Settings).
 - No breakpoints: things shrink, ellipsize and scroll. Logical properties for right to left.
 - The start screen sits on the golden section, a column at most 610px wide: the prompt, the horizontal logo (arriving with `float-in`), the lead, the ways to start.
 
@@ -103,11 +103,11 @@ Short face (`--short`, `--mono`): JetBrains Mono Variable, the brand's face (the
 
 - **Buttons**: 26px, `3px 8px`, 3px corners; default `raised`; primary amber with `gold-ink`; danger red with `error-ink` (`button.primary.danger`); on/selected amber wash with amber text and a 55% amber border; flat icon-only tool buttons (`3px 5px`) in `weak` with a tooltip; `button.link` amber, `.quiet` a dotted-underline sentence; focus a 1px amber outline inside the edge.
 - **Fields**: `deep` wells, hairline, 26px, `3px 8px`; focus turns the border amber, no glow; placeholders are examples in `weak`; native checks, radios, ranges tinted with `accent-color: var(--gold)`.
-- **Menus**: panel at `--float-alpha` (98%, or the Opacity setting with Transparent on), hairline, 5px corners, 3px padding, at least 190px; 26px items; `.sep` groups; `.danger` last, red on a 14% red wash when pointed at.
+- **Menus**: panel at `--float-alpha` (98%, solid with Transparent on), hairline, 5px corners, 3px padding, at least 190px; 26px items; `.sep` groups; `.danger` last, red on a 14% red wash when pointed at.
 - **Tab strip**: 34px; flat tabs split by hairlines; the active tab takes `bg` and drops its bottom line; a 2px connector on top in the tab's mark or kind hue (hidden idle, 50% when visible in a split, full when active); a 2px amber insertion bar while dragging.
 - **Session rack**: 21px rows, carets rotating 0.12s, a hairline guide per level, a 7px green dot on an open session's icon (hollow once the connection is gone).
 - **Status bar**: 21px, label size in the mono, `user@host` first, the folder with its tags as amber chips (`Production/Web · prod`), a state dot, the amber broadcast marker last.
-- **Dialogs**: panel at `--float-alpha` (98%, or the Opacity setting with Transparent on), 8px corners, hairline header `8px 8px 8px 13px`, 13px body; `foot` for long bodies; `top` dialogs hang at 12vh (the session editor).
+- **Dialogs**: panel at `--float-alpha` (98%, solid with Transparent on), 8px corners, hairline header `8px 8px 8px 13px`, 13px body; `foot` for long bodies; `top` dialogs hang at 12vh (the session editor).
 - **Palette**: 610px wide, 12vh from the top, at most 1/φ of the window tall; empty, it lists open tabs, then saved sessions, then actions.
 - **Lock screen**: an opaque window over everything, fading in 0.16s; a 377px column with a 34px amber lock icon, password or PIN with Unlock, then passkey and Windows Hello, then "Your sessions keep running." in `weak`.
 - **Kind glyph**: a 21px tile, 3px corners, the hue on 15% of itself; the session editor's type picker is a row of them.

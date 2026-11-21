@@ -517,7 +517,8 @@
     gap: 8px;
     padding: 5px 8px;
     color: var(--fg);
-    background: var(--raised);
+    /* a floating layer's fill: `--raised` turns to a tint on a see-through window */
+    background: rgba(var(--panel-rgb), var(--float-alpha));
     border: 1px solid var(--line);
     border-radius: var(--r-menu);
     box-shadow: var(--shadow-float);

@@ -727,11 +727,12 @@
     const r = (e.currentTarget as HTMLElement).parentElement!.getBoundingClientRect();
     workspaceMenu = { x: document.documentElement.dir === "rtl" ? r.right : r.left, y: r.bottom + 3, w: r.width };
   }
-  /** Opens a menu under the button `e` came from, at its start; a second click closes it. */
-  const below = (e: MouseEvent, was: { x: number; y: number } | null) => {
+  /** Opens a menu beside the activity bar's button `e` came from, level with its top, on the
+   *  panels' side (right to left a menu at x opens leftwards, app.css); a second click closes it. */
+  const beside = (e: MouseEvent, was: { x: number; y: number } | null) => {
     e.stopPropagation();
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    return was ? null : { x: document.documentElement.dir === "rtl" ? r.right : r.left, y: r.bottom + 3 };
+    return was ? null : { x: document.documentElement.dir === "rtl" ? r.left - 3 : r.right + 3, y: r.top };
   };
 
   // ---- dragging: a tab along the strip (its place) or onto a pane, a pane's status bar onto
@@ -1339,18 +1340,52 @@
     const r = el.previousElementSibling!.getBoundingClientRect();
     // Right to left, the sidebar is on the right.
     const rtl = document.documentElement.dir === "rtl";
-    // Dragging a collapsed sidebar's handle opens it out.
     const move = (m: PointerEvent) => {
-      app.settings!.sidebar_collapsed = false;
       app.settings!.sidebar_width = Math.round(Math.max(180, Math.min(600, rtl ? r.right - m.clientX : m.clientX - r.left)));
     };
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerup", () => el.removeEventListener("pointermove", move), { once: true });
   }
 
-  /** Opens a collapsed sidebar out. */
+  /** Shows the sessions beside the activity bar. */
   function expandSidebar() {
     app.settings!.sidebar_collapsed = false;
+  }
+
+  /** New sessions saved while the sidebar was hidden, not yet seen: a count on the activity bar's
+   *  Sessions, as a code editor badges a view with news. Showing the sessions clears it. */
+  let unseen = $state(0);
+  /** The new sessions behind the count, then, once the sidebar shows, the rows that pulse there
+   *  (Sidebar `arrived`) until the pulse is over. By `sessionId` (given as the session is made,
+   *  `newSession`): the store can be read afresh after a save, and indexes move. */
+  let waiting: string[] = [];
+  let arrived = $state.raw<string[]>([]);
+  let arrivedTimer = 0;
+  function pulseRows(list: string[]) {
+    clearTimeout(arrivedTimer);
+    arrived = [...new Set([...arrived, ...list])];
+    // two pulses of 1.2s (Sidebar `.arrived`), and a little over
+    arrivedTimer = setTimeout(() => (arrived = []), 2600);
+  }
+  $effect(() => {
+    if (!(showSidebar && !app.settings?.sidebar_collapsed) || !unseen) return;
+    untrack(() => pulseRows(waiting));
+    [unseen, waiting] = [0, []];
+  });
+  // Another workspace: the sessions counted aren't the ones on show.
+  $effect(() => {
+    void app.store.id;
+    untrack(() => ([unseen, waiting, arrived] = [0, [], []]));
+  });
+  /** A new session was saved (SessionEditor `onadded`). With the sidebar showing, its row pulses
+   *  there; hidden, the Sessions button counts it (the count pulses as it grows, and the rows
+   *  pulse once the sidebar shows) and, unless its tab is opening anyway, a toast says where it
+   *  went and offers to show it. */
+  function added(s: Session, opening: boolean) {
+    if (showSidebar && !app.settings?.sidebar_collapsed) return pulseRows([sessionId(s)]);
+    waiting.push(sessionId(s));
+    unseen++;
+    if (!opening) toast(_("{name} is saved in your sessions.", { name: s.name }), { label: _("Show"), run: () => ((showSidebar = true), expandSidebar()) });
   }
 
   /** Double-click on the handle: the sidebar opens out just wide enough for the rows on show (a
@@ -1549,18 +1584,6 @@
   {#if k}<span class="keys"><kbd>{k}</kbd></span>{/if}
 {/snippet}
 
-{#snippet corner()}
-  <!-- The sidebar's foot (the rail's, collapsed), at its end: settings (About is a page there),
-       then the account. -->
-  <button class="flat icon-only settings" class:on={app.showSettings} onclick={() => (app.showSettings = !app.showSettings)} title={tip(_("Settings"), "settings")} aria-label={_("Settings")}><Icon name="cog" size={16} /></button>
-  {#if lock.info && (lock.info.password || lock.info.pin || lock.info.passkey || lock.info.biometrics)}
-    <button class="flat icon-only" onclick={() => run("lock")} title={tip(_("Lock xtermium"), "lock")} aria-label={_("Lock xtermium")}><Icon name="lock-alt" size={16} /></button>
-  {/if}
-  {#if app.coop.ring || (app.settings?.sync_token && (app.settings.coop_button || app.settings.sync_pro))}
-    <button class="flat icon-only" class:on={!!app.coop.ring} onclick={() => run("coop")} title={tip(_("Terminal Co-op"), "coop")} aria-label={_("Terminal Co-op")}><Icon name="group" size={16} /></button>
-  {/if}
-  <Account onsettings={() => openSettings("sync")} />
-{/snippet}
 
 <svelte:window
   onpointermovecapture={active}
@@ -1573,24 +1596,43 @@
 />
 
 {#if ready}
-  <div class="app">
-    {#if showSidebar && app.settings?.sidebar_collapsed}
-      <!-- Collapsed: the sidebar's foot in a column (the title bar's burger opens it out). -->
-      <aside class="rack rail">
-        <Backdrop place="sidebar" tint={(a) => `rgba(var(--panel-rgb), ${a})`} />
-        <!-- The sidebar shows messages; collapsed, they wait behind this. -->
-        {#if app.status}
-          <button class="flat icon-only" onclick={() => expandSidebar()} title={app.status} aria-label={app.status}><Icon name="info-circle" size={16} color="var(--weak)" /></button>
+  <!-- inert while locked: Tab from the lock screen mustn't reach the activity bar's tools behind it -->
+  <div class="app" inert={app.locked !== null || lock.locked}>
+    {#if showSidebar}
+      {@const sessions = !app.settings?.sidebar_collapsed}
+      {@const label = unseen ? _("Sessions: {n} new", { n: unseen }) : _("Sessions")}
+      <!-- The activity bar, as in a code editor: on the window down its edge, under the mark. New
+           session first, in amber (the bar's one call to act); Sessions shows or hides the sidebar
+           beside it; then what reaches past any one session (a local shell, tunnels, saved
+           layouts); at the foot the account, Co-op and Settings. Lock is in the title bar. -->
+      <nav class="activity" aria-label={_("Sidebar")}>
+        <button class="primary icon-only new" onclick={() => run("new-session")} title={tip(_("New session"), "new-session")} aria-label={_("New session")}><Icon name="plus" size={18} /></button>
+        <button class="flat icon-only" class:on={sessions} onclick={() => run("collapse-sidebar")} title={tip(label, "collapse-sidebar")} aria-label={label} aria-expanded={sessions}>
+          <Icon name="layers" size={21} />
+          <!-- keyed by the count, so each new one starts the pulse over -->
+          {#if unseen}{#key unseen}<span class="badge" aria-hidden="true">{unseen}</span>{/key}{/if}
+        </button>
+        <button class="flat icon-only" onclick={localShell} title={tip(_("Open a local shell"), "local-shell")} aria-label={_("Open a local shell")}><Icon name="terminal" size={21} /></button>
+        <button class="flat icon-only" class:on={showTunnels} onclick={() => (showTunnels = !showTunnels)} title={tip(_("SSH tunnels"), "tunnels")} aria-label={_("SSH tunnels")}><Icon name="transfer-alt" size={21} /></button>
+        <button class="flat icon-only" class:on={!!layoutsMenu} onclick={(e) => (layoutsMenu = beside(e, layoutsMenu))} title={_("Saved layouts: sessions opened together in panes")} aria-label={_("Saved layouts")} aria-haspopup="menu" aria-expanded={!!layoutsMenu}><Icon name="grid-alt" size={21} /></button>
+        <div class="grow"></div>
+        <!-- The sidebar shows messages; with it hidden, they wait behind this. -->
+        {#if app.status && !sessions}
+          <button class="flat icon-only" onclick={() => expandSidebar()} title={app.status} aria-label={app.status}><Icon name="info-circle" size={21} /></button>
         {/if}
-        <span class="grow"></span>
-        {@render corner()}
-      </aside>
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <div class="splitter" onpointerdown={resizeSidebar} ondblclick={fitSidebar} title={_("Drag to resize; double-click to fit the names")}></div>
-    {:else if showSidebar}
+        <!-- The account on top, then Co-op, then Settings (About is a page there) at the very foot,
+             as a code editor stacks Accounts over Manage -->
+        <Account onsettings={() => openSettings("sync")} />
+        {#if app.coop.ring || (app.settings?.sync_token && (app.settings.coop_button || app.settings.sync_pro))}
+          <button class="flat icon-only" class:on={!!app.coop.ring} onclick={() => run("coop")} title={tip(_("Terminal Co-op"), "coop")} aria-label={_("Terminal Co-op")}><Icon name="group" size={21} /></button>
+        {/if}
+        <button class="flat icon-only" class:on={app.showSettings} onclick={() => (app.showSettings = !app.showSettings)} title={tip(_("Settings"), "settings")} aria-label={_("Settings")}><Icon name="cog" size={21} /></button>
+      </nav>
+    {/if}
+    {#if showSidebar && !app.settings?.sidebar_collapsed}
       <aside class="rack" style:width="{app.settings?.sidebar_width ?? 280}px">
-        <Backdrop place="sidebar" tint={(a) => `rgba(var(--panel-rgb), ${a})`} />
-        <Sidebar {live} current={activeTab && !coopTab(activeTab) && activeTab.workspace === app.store.id ? sessionId(activeTab.session) : ""} onopen={open} onedit={(session, index) => (editor = { session, index })} />
+        <Backdrop place="sidebar" tint={(a) => `rgba(var(--bg-rgb), ${a})`} />
+        <Sidebar {live} {arrived} current={activeTab && !coopTab(activeTab) && activeTab.workspace === app.store.id ? sessionId(activeTab.session) : ""} onopen={open} onedit={(session, index) => (editor = { session, index })} onimport={() => (showImport = true)} />
         {#if app.status}
           <div class="status row" role="status">
             {#if app.statusLink?.text === app.status}
@@ -1602,7 +1644,6 @@
             <button class="flat icon-only" title={_("Dismiss")} onclick={() => (app.status = "")}><Icon name="x" size={16} /></button>
           </div>
         {/if}
-        <div class="corner row">{@render corner()}</div>
       </aside>
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div class="splitter" onpointerdown={resizeSidebar} ondblclick={fitSidebar} title={_("Drag to resize; double-click to fit the names")}></div>
@@ -2068,7 +2109,7 @@
     <WorkspacePicker x={workspaceMenu.x} y={workspaceMenu.y} width={workspaceMenu.w} onclose={() => ((workspaceMenu = null), refocus())} />
   {/if}
   {#if layoutsMenu}
-    <div class="menu tasks-list" {@attach menu(() => (layoutsMenu = null), layoutsMenu.x, layoutsMenu.y)}>
+    <div class="menu tasks-list beside" {@attach menu(() => (layoutsMenu = null), layoutsMenu.x, layoutsMenu.y)}>
       {#each app.store.layout as l (l.name)}
         <div class="row task">
           <button class="grow" title={l.pane.map((s) => s.name).join(", ")} onclick={() => openLayout(l)}>
@@ -2139,7 +2180,7 @@
       {/each}
     </div>
   {/if}
-  {#if editor}<SessionEditor session={editor.session} index={editor.index} onclose={() => (editor = null)} onconnect={open} />{/if}
+  {#if editor}<SessionEditor session={editor.session} index={editor.index} onclose={() => (editor = null)} onconnect={open} onadded={added} />{/if}
   {#if showTunnels}<Tunnels onclose={() => (showTunnels = false)} />{/if}
   {#if app.showSettings}<Settings onclose={() => (app.showSettings = false)} onrun={runInShell} />{/if}
   {#if customCss}
@@ -2308,22 +2349,15 @@
 
 <!-- The bar's centre says where the keyboard goes, the focused tab, and opens the palette, which goes anywhere else. Locked, it says nothing. -->
 <TitleBar>
-  <!-- What reaches past any one session stands by the mark: the sidebar's burger, a local shell,
-       tunnels, saved layouts and a new session. -->
-  {#snippet tools()}
-    {#if ready && app.locked === null && !lock.locked}
-      {@const open = showSidebar && !app.settings?.sidebar_collapsed}
-      <button class="flat icon-only bar-tool" tabindex="-1" onclick={() => run("collapse-sidebar")} title={tip(open ? _("Collapse the sidebar") : _("Expand the sidebar"), "collapse-sidebar")} aria-label={open ? _("Collapse the sidebar") : _("Expand the sidebar")} aria-expanded={open}><Icon name="menu" size={21} /></button>
-      <button class="flat icon-only bar-tool" tabindex="-1" onclick={localShell} title={tip(_("Open a local shell"), "local-shell")} aria-label={_("Open a local shell")}><Icon name="terminal" size={21} /></button>
-      <button class="flat icon-only bar-tool" tabindex="-1" class:on={showTunnels} onclick={() => (showTunnels = !showTunnels)} title={tip(_("SSH tunnels"), "tunnels")} aria-label={_("SSH tunnels")}><Icon name="transfer-alt" size={21} /></button>
-      <button class="flat icon-only bar-tool" tabindex="-1" class:on={!!layoutsMenu} onclick={(e) => (layoutsMenu = below(e, layoutsMenu))} title={_("Saved layouts: sessions opened together in panes")} aria-label={_("Saved layouts")}><Icon name="grid-alt" size={21} /></button>
-      <button class="icon-only bar-tool new" tabindex="-1" onclick={createSession} title={tip(_("New session"), "new-session")} aria-label={_("New session")}><Icon name="plus" size={21} /></button>
-    {/if}
-  {/snippet}
   <!-- The centre: what has the keyboard (a way into the palette), and the workspace's picker. Locked, nothing. -->
   {#if ready && app.locked === null && !lock.locked}
     {@const ws = _("Workspace: {name}", { name: app.workspace || _("Default") })}
     <div class="finder">
+      <!-- Lock, once a way to unlock is set, just before the field: it acts on the whole window, as
+           the field does. The other tools are on the activity bar under the mark. -->
+      {#if lock.info && (lock.info.password || lock.info.pin || lock.info.passkey || lock.info.biometrics)}
+        <button class="flat icon-only bar-tool lock-now" tabindex="-1" onclick={() => run("lock")} title={tip(_("Lock xtermium"), "lock")} aria-label={_("Lock xtermium")}><Icon name="lock-alt" size={18} /></button>
+      {/if}
       <div class="field" class:tinted-field={!!app.store.color} style:--ws={app.store.color || null}>
         <button class="flat where" tabindex="-1" title={tip(_("Command palette"), "palette")} onclick={() => run("palette")}>
           {#if activeTab}
@@ -2365,12 +2399,13 @@
 </div>
 
 <style>
-  /* Rounded panels floating on the window, like a modern code editor: the sidebar, the tabs
-     with their panes, the file panel. The splitter is the gap between the first two. */
+  /* Rounded panels floating on the window, like a modern code editor: the sidebar, the tabs with
+     their panes, and the file panel. The activity bar sits on the window itself, beside them, as the
+     title bar does above. The splitter is the gap between the sidebar and the tabs. */
   .app {
     height: 100%;
     display: flex;
-    padding: 0 var(--gap) var(--gap); /* the title bar is the room above */
+    padding: 0 var(--panel-gap) var(--panel-gap); /* the title bar is the room above */
   }
   .rack,
   .center,
@@ -2381,6 +2416,8 @@
   }
 
   /* ---- the session rack (sidebar) ---- */
+  /* A panel like the tabs' beside it, a gap from the activity bar on the window, in the work
+     area's own colour (`bg`, as the terminals and the start screen), so the two read as one. */
   .rack {
     flex: none;
     display: flex;
@@ -2388,7 +2425,7 @@
     position: relative;
     isolation: isolate; /* its Backdrop goes under the rest */
     min-width: 0;
-    background: rgba(var(--panel-rgb), var(--chrome-alpha));
+    background: rgba(var(--bg-rgb), var(--chrome-alpha));
   }
   .status {
     gap: var(--gap);
@@ -2409,13 +2446,87 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  /* settings, then the account, at the end of the sidebar's foot */
-  .corner {
-    gap: 2px;
-    padding: 0 5px 5px;
+  /* ---- the activity bar: the window's tools in a column down its edge, as in a code editor ---- */
+  /* On the window, no panel, like the title bar above it. As wide as its 26px buttons, so it stands
+     the panels' gap from the window's edge and from the sidebar, as the panels do from each other;
+     the mark above is as wide and as far in (TitleBar.svelte), so the buttons centre under it. */
+  .activity {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: var(--control);
+    /* the first button level with the tab strip, inside the panels' 1px edge; a gap from them */
+    padding-block: 1px 2px;
+    margin-inline-end: var(--panel-gap);
   }
-  .corner .settings {
-    margin-inline-start: auto;
+  /* Rows as tall as the tab strip, the icons stepping back like the bar's until pointed at; no
+     slab under the pointer. The one that's showing (Sessions open, a menu up) is in full ink with
+     an amber mark at the bar's edge: you are here. */
+  .activity :global(button) {
+    position: relative;
+    width: 100%;
+    height: var(--bar);
+    min-height: 0;
+    padding: 0;
+    justify-content: center;
+    border: 0;
+    border-radius: var(--r-control);
+  }
+  .activity :global(button:not(.primary)) {
+    background: none;
+    color: var(--weak);
+  }
+  .activity :global(button:not(.primary):hover:not(:disabled)) {
+    background: none;
+    color: var(--fg);
+  }
+  /* what's showing wears the amber, its icon as the mark beside it and the + above: you are here.
+     The fill's amber on both themes (the text accent `--gold` deepens to bronze on light). */
+  .activity :global(button.on),
+  .activity :global(button.on:hover:not(:disabled)) {
+    background: none;
+    color: var(--gold-fill);
+  }
+  /* New session, the bar's one call to act: the primary button's amber fill and dark glyph
+     (app.css, hover and the light theme included), a control-sized square centred in its row */
+  .activity .new {
+    align-self: center;
+    width: var(--control);
+    height: var(--control);
+    margin-block: calc((var(--bar) - var(--control)) / 2);
+  }
+  /* new sessions not yet seen: a count on the icon's trailing foot, in the primary's amber, a
+     little out past the bar's edge into the gap so it covers less of the icon */
+  .activity .badge {
+    position: absolute;
+    inset-block-end: 3px;
+    inset-inline-end: -3px;
+    min-width: 13px;
+    height: 13px;
+    padding: 0 3px;
+    border-radius: 13px;
+    background: var(--gold-fill);
+    color: var(--gold-fill-ink);
+    font-size: var(--t-s);
+    font-weight: 600;
+    line-height: 13px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    /* each new count: a ring widens out of it and fades, three times, as the progress button's
+       first showing does (`guide-nudge`), so a glance at the bar finds it; none under reduced motion,
+       where the count alone says it */
+    animation: guide-nudge 1.2s var(--ease-out) 3;
+  }
+  /* the mark at the window's own edge, out in the gap, as a code editor has it */
+  .activity :global(button.on)::before {
+    content: "";
+    position: absolute;
+    inset-block: 8px;
+    inset-inline-start: calc(-1 * var(--panel-gap));
+    width: 2px;
+    border-radius: 1px;
+    background: var(--gold-fill);
   }
   /* Getting started's progress at the tab bar's end: a ring filling with the steps done, the
      name and the count, on an amber wash with an amber edge (the accent as a fill, as a picked
@@ -2480,19 +2591,11 @@
     color: var(--gold);
   }
   .splitter {
-    width: var(--gap);
+    width: var(--panel-gap);
     flex: none;
     cursor: col-resize;
   }
-  /* the collapsed sidebar: its foot in a column */
-  .rail {
-    width: calc(var(--control) + 2 * var(--gap) + 2px);
-    align-items: center;
-    gap: 2px;
-    padding: 5px 0 8px;
-  }
-
-  /* ---- the title bar: tools by the mark, a field in the centre, the layouts at the end ---- */
+  /* ---- the title bar: the mark, Lock and the field in the centre, the layouts at the end ---- */
   /* the bar's own tools step back like its text until pointed at */
   .bar-tool:not(.on, :hover) {
     color: inherit;
@@ -2506,23 +2609,9 @@
     padding: 0;
     justify-content: center;
   }
-  /* a new session is the bar's one standing action: a filled key, set a little apart */
-  .new {
-    margin-inline-start: 13px;
-    border: 0;
-    background: var(--raised);
-    color: var(--fg);
-  }
-  .new:hover {
-    background: var(--hover);
-  }
-  /* On light `raised` is barely off the bar's grey, so the key is white like the field beside it,
-     and see-through it is a second layer over the bar, as the field is. */
-  :global(:root[data-theme="light"]) .new:not(:hover) {
-    background: rgba(var(--deep-rgb), var(--chrome-alpha));
-  }
   /* the field: never so wide that no bar is left to drag the window by */
   .finder {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 3px;
@@ -2601,6 +2690,26 @@
   .layouts {
     display: flex;
     gap: 3px;
+  }
+  /* Lock, flat like the bar's other tools: a 26px square, its 18px glyph centred so the hover's
+     slab sits on it. It hangs 8px before the field's leading edge rather than taking room in the
+     row, so the field stays centred on the window whether or not a lock is set. */
+  .lock-now {
+    position: absolute;
+    inset-inline-end: calc(100% + 8px);
+    width: var(--control);
+    padding-inline: 0;
+    justify-content: center;
+  }
+  /* in amber on dark, the accent's fill (the activity bar's + is that amber as a fill), and in the
+     text's black on light, where the amber is too faint on white; at rest and under the pointer */
+  .lock-now,
+  .lock-now.bar-tool:not(.on, :hover) {
+    color: var(--gold-fill);
+  }
+  :global(:root[data-theme="light"]) .lock-now,
+  :global(:root[data-theme="light"]) .lock-now.bar-tool:not(.on, :hover) {
+    color: var(--fg);
   }
 
   /* ---- tabs and view tools share one strip ---- */
@@ -2886,7 +2995,7 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    margin-inline-start: var(--gap);
+    margin-inline-start: var(--panel-gap);
     background: rgba(var(--panel-rgb), var(--chrome-alpha));
   }
   /* one chip per tab with files when there are more than panels, under them */
@@ -3094,6 +3203,14 @@
   /* hangs from the Tasks button's end */
   .tasks-list {
     min-width: 260px;
+    translate: -100% 0;
+  }
+  /* the saved layouts' menu opens beside the activity bar, away from it (`beside`): from its start
+     edge, leftwards right to left as any menu at a point does (app.css) */
+  .tasks-list.beside {
+    translate: none;
+  }
+  :global([dir="rtl"]) .tasks-list.beside {
     translate: -100% 0;
   }
   .tasks-list .task {

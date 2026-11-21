@@ -7,13 +7,28 @@
   import { FITS, PLACES, type Place, type Settings } from "./api";
   import Icon from "./Icon.svelte";
   import { compile } from "./shader";
-  import { app } from "./state.svelte";
+  import { app, toast } from "./state.svelte";
   import { filled } from "./slider";
 
   /** `label`: the first row's ("Behind the text"). */
   let { place, label }: { place: Place; label: string } = $props();
 
   const b = $derived(app.settings![PLACES[place]]);
+  /** The strength a new background starts at (src/settings.rs `Background`), for its reset
+   *  button: null while asking. */
+  let start = $state<number | null>(null);
+  invoke<Settings>("default_settings").then((d) => (start = d[PLACES[place]].show));
+  const same = $derived(start === null || Math.abs(b.show - start) < 0.001);
+  const title = $derived(start === null ? "" : _("Reset to {keys}", { keys: _("{n} %", { n: Math.round(start * 100) }) }));
+
+  /** The strength back to its default, with an Undo, as Settings' other reset buttons do. The
+   *  button hides now, so the keyboard goes to the slider beside it. */
+  function resetShow(e: MouseEvent) {
+    const [was, slider] = [b.show, (e.currentTarget as HTMLElement).parentElement?.querySelector("input")];
+    b.show = start!;
+    slider?.focus();
+    toast(_("Back to the default."), { label: _("Undo"), run: () => (app.settings![PLACES[place]].show = was) });
+  }
   let url = $state("");
   let busy = $state(false);
   let error = $state("");
@@ -81,6 +96,8 @@
 <span>{_("Strength")}</span>
 <div class="row">
   <input type="range" min="0.05" max="0.95" step="0.05" bind:value={b.show} disabled={!b.kind} {@attach filled(b.show)} />{_("{n} %", { n: Math.round(b.show * 100) })}
+  <!-- its way back to the default, as the other sliders have; it keeps its place while hidden -->
+  <button class="flat icon-only back" class:same disabled={same || !b.kind} {title} aria-label={title} onclick={resetShow}><Icon name="refresh" /></button>
 </div>
 
 <style>
@@ -88,6 +105,13 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+  }
+  /* as Settings' own reset buttons (`back`) */
+  .back {
+    margin-block: calc((var(--row) - var(--control)) / 2);
+  }
+  .back.same {
+    visibility: hidden;
   }
   .name {
     min-width: 0;

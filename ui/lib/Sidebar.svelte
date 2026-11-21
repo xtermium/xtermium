@@ -4,6 +4,7 @@
   // command palette's job (the title bar's search). The list is one stop for Tab; arrow keys walk it.
   // Sessions with a tab open have a dot on their icon. Ctrl+click (Cmd on macOS) and Shift+click
   // pick several sessions and folders, to drag, colour, delete or move to another workspace together.
+  import { tick, untrack } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { _, N_ } from "./i18n.svelte";
   import { COLORS, host, KVM_VENDORS, newId, newSession, openUrl, type Folder, type Session, type Workspaces } from "./api";
@@ -73,11 +74,18 @@
   let {
     onopen,
     onedit,
+    onimport,
     live = new Map(),
     current = "",
+    arrived = [],
   }: {
+    /** New sessions, by `sessionId`, saved while the list was hidden (or just now): their rows
+     *  pulse, their folders open and the first comes into view. */
+    arrived?: string[];
     onopen: (s: Session) => void;
     onedit: (s: Session, index: number | null) => void;
+    /** Opens Import sessions, for the empty sidebar's second button. */
+    onimport: () => void;
     /** Sessions with a tab, by `sessionId`: true while one is connected. */
     live?: Map<string, boolean>;
     /** The `sessionId` of the focused tab's session: its row is marked, so the green dots say
@@ -502,6 +510,16 @@
     e.preventDefault();
   }
 
+  // New rows are shown: every folder above them opens, then the first scrolls into view.
+  $effect(() => {
+    if (!arrived.length) return;
+    untrack(() => {
+      for (const s of app.store.session.filter((s) => arrived.includes(sessionId(s))))
+        s.folder.split("/").filter(Boolean).forEach((__, i, p) => (open[p.slice(0, i + 1).join("/")] = true));
+      tick().then(() => list?.querySelector(".arrived")?.scrollIntoView({ block: "nearest" }));
+    });
+  });
+
   const newHere = (folder: string) => onedit(newSession("ssh", folder), null);
   const contextMenu = (e: MouseEvent, at: { i?: number; folder?: string; root?: boolean }) => {
     e.preventDefault();
@@ -529,6 +547,7 @@
     class:idle={on === false}
     class:current={current === sessionId(s)}
     class:chosen={chosen.has("s" + i)}
+    class:arrived={arrived.includes(sessionId(s))}
     data-session={i}
     tabindex="-1"
     title={details(s, on)}
@@ -579,6 +598,7 @@
 {/snippet}
 
 <nav>
+  <!-- No head: the activity bar beside the list names the place and starts with New session. -->
   <!-- svelte-ignore a11y_no_static_element_interactions, a11y_no_noninteractive_tabindex -->
   <div
     class="list"
@@ -592,6 +612,16 @@
     oncontextmenu={(e) => contextMenu(e, { root: true })}
   >
     {@render folder(tree)}
+    <!-- Nothing saved, not even a folder: say what goes here and how to fill it, rather than leave
+         a blank column. It goes once the first session or folder is there. -->
+    {#if !tree.children.size && !tree.items.length}
+      <div class="empty">
+        <p class="what">{_("No saved sessions yet")}</p>
+        <p class="weak">{_("Servers, desktops and websites you save wait here, in folders, one click from a tab.")}</p>
+        <button class="primary" onclick={() => newHere("")}><Icon name="plus" size={16} />{_("New session")}</button>
+        <button onclick={onimport}><Icon name="import" size={16} />{_("Import sessions")}</button>
+      </div>
+    {/if}
   </div>
 </nav>
 
@@ -727,14 +757,36 @@
     min-height: 0;
     display: flex;
     flex-direction: column;
-    /* the first row's middle on the tab strip's middle, beside it */
-    padding: calc((var(--bar) - var(--row)) / 2) 5px 5px;
+    padding-block-end: 5px;
   }
   .list {
     flex: 1;
     overflow: auto;
     display: flex;
     flex-direction: column;
+    padding: 5px 5px 0;
+  }
+  /* the empty sidebar: what goes here, then New session (the primary) and Import, full width */
+  .empty {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px 13px;
+  }
+  .empty p {
+    margin: 0;
+    line-height: 1.4;
+  }
+  .empty .what {
+    font-weight: 600;
+  }
+  .empty .weak {
+    margin-block-end: 8px;
+    font-size: var(--t-s);
+  }
+  .empty button {
+    justify-content: center;
+    gap: var(--gap);
   }
   /* where a dragged session or folder would land */
   .into {
@@ -774,7 +826,10 @@
     position: absolute;
     inset-inline-start: calc(var(--lead) + 18px - 6px); /* over the icon's corner */
     top: 50%;
-    translate: 0 2px;
+    translate: 0 1px;
+    /* 7px whole, the hollow one's ring included, so with its 1.5px halo it ends inside the 21px
+       row: the row's paint containment (`content-visibility`) cut a larger one off */
+    box-sizing: border-box;
     width: 7px;
     height: 7px;
     border-radius: 50%;
@@ -791,6 +846,22 @@
   .item.chosen {
     background: var(--gold-soft);
   }
+  /* a new session's row as it is first seen: the picked rows' amber wash swells and ebbs twice
+     (App.svelte clears `arrived` after); under reduced motion the wash just shows while it lasts */
+  .item.arrived {
+    animation: arrived 1.2s ease-in-out 2;
+  }
+  @keyframes arrived {
+    50% {
+      background: var(--gold-soft);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .item.arrived {
+      background: var(--gold-soft);
+    }
+  }
   /* the session whose tab has the keyboard: a lifted row with the focus ring's amber at its edge,
      as the focused pane wears it */
   .item.current {
@@ -800,6 +871,11 @@
   }
   :global([dir="rtl"]) .item.current {
     box-shadow: inset -2px 0 0 var(--gold);
+  }
+  /* over a background picture it lets the picture through a little, as a hovered row does
+     (Backdrop.svelte): solid, it stood on it as a slab */
+  :global(:has(> .place-backdrop)) .item.current {
+    background: color-mix(in srgb, var(--raised) 60%, transparent);
   }
   /* the selection menu's colour row, lined up with the items' text */
   .tints {

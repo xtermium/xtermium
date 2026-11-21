@@ -27,23 +27,32 @@
   --r-window: 8px;
   --r-menu: 5px;
   --r-control: 3px;
-  /* the small gap: between panels and panes, and inside rows and forms */
+  /* the small gap: between panes, and inside rows and forms */
   --gap: 5px;
+  /* between the window's main sections (the activity bar, the sidebar, the tabs, the file panel)
+     and round them at the window's edges: as far as the title bar's field stands from them */
+  --panel-gap: 8px;
   /* interface icons: in controls and rows, and the smaller one in a search field */
   --icon: 18px;
   --icon-s: 16px;
   --row: 21px;
   --control: 26px;
   --bar: 34px;
-  /* The window's own title bar (TitleBar.svelte); the page, dialogs and the lock start under it. */
-  --titlebar: var(--bar);
+  /* The window's own title bar (TitleBar.svelte); the page, dialogs and the lock start under it.
+     Its controls (`--control`) get 8px of air above and below, the panels' gap (`--panel-gap`),
+     so the field stands as far from the panels under it as they stand from each other. */
+  --titlebar: calc(var(--control) + 2 * var(--panel-gap));
   --t-s: 11.5px;
   --t: 13px;
   --t-l: 14.5px;
   --t-xl: 16.5px;
   --t-xxl: 18.5px;
-  /* Opacity of the chrome; < 1 only while a window effect is on. */
+  /* Opacity of the window's ground and of the chrome on it; < 1 only while a window effect is on
+     (api.ts `seeThrough`). */
+  --window-alpha: 1;
   --chrome-alpha: 1;
+  /* menus, dialogs, the palette: near solid, and solid with a window effect (below), so what's
+     behind never shows through their text */
   --float-alpha: 0.98;
   --solid: 1;
   /* the title bar's icons (TitleBar.svelte) */
@@ -71,8 +80,9 @@
   --scrim-soft: rgba(5, 5, 6, 0.32);
 
   color-scheme: dark;
-  /* the site's ground and surfaces, a hair apart, near-black and neutral */
-  --window-rgb: 5, 5, 6;
+  /* the site's ground and surfaces, a hair apart, near-black and neutral; the window's ground is
+     the work area's own colour (and the xtermium Dark terminal's, #0b0b0d), as light's is white */
+  --window-rgb: 11, 11, 13;
   --deep-rgb: 8, 8, 10;
   --bg-rgb: 11, 11, 13;
   --panel-rgb: 17, 17, 20;
@@ -122,16 +132,16 @@
 
 :root[data-theme="light"] {
   color-scheme: light;
-  /* The same elements as dark in light colours: a light grey ground with near-white panels on it,
-     white where the work and the fields are, hairlines, and soft shadows. Each layer nearer the hand
-     is a step lighter up to white. */
-  --window-rgb: 229, 229, 232;
+  /* The same elements as dark in light colours: a white ground, as white as where the work and the
+     fields are, with near-white panels on it, set apart by hairlines, and soft shadows. */
+  --window-rgb: 255, 255, 255;
   --deep-rgb: 255, 255, 255;
   --bg-rgb: 255, 255, 255;
   --panel-rgb: 247, 247, 248;
   --raised: #ececef;
   --hover: #e2e2e6;
-  --line: #dcdce1;
+  /* hairlines: dark enough to set the panels apart on the white ground */
+  --line: #b4b4bb;
   /* a white field on a near-white panel needs its edge to show where it is: 3.0:1 on panel (WCAG
      1.4.11), still a quiet grey line */
   --field-line: #8e8e94;
@@ -173,9 +183,10 @@
   /* a warning paragraph's box (`.warn` below): amber reads on white only as a fill */
   --warn-fill: #ffb000;
   --warn-wash: color-mix(in srgb, var(--warn-fill) 22%, transparent);
-  /* broadcast is the accent's one piece of text that must stand out (your keys go to many servers),
-     and amber text doesn't read on light: it takes the warning orange, the nearest colour that does */
-  --broadcast: var(--warn);
+  /* broadcast is amber on light too, as the accent's fill (your keys go to many servers): the
+     outline as it is, and the status bar's marker as an amber chip, since amber text doesn't read
+     on white (StatusBar.svelte) */
+  --broadcast: var(--gold-fill);
   --k-ssh: #2f62d0;
   --k-shell: #138a7b;
   --k-serial: #5a7d14;
@@ -188,6 +199,25 @@
   --k-agent: #b8443a;
   --k-coop: #7a5f52;
   --mark: #141414;
+}
+/* See-through (api.ts `seeThrough` sets the flag), the fills a pointer or a picked item lays on a
+   panel are tints of it rather than solid greys, or they'd stand as opaque slabs on the glass; and
+   the desktop washing out the light greys, hairlines take stronger ink, alike everywhere. */
+:root[data-see-through] {
+  /* on the glass, even 0.98 lets the screen behind a dialog show through its text */
+  --float-alpha: 1;
+  --raised: rgba(255, 255, 255, 0.05);
+  --hover: rgba(255, 255, 255, 0.09);
+  /* secondary text holds 4.5:1 at the lowest opacity (0.8) over a white desktop */
+  --weak: #c4c4cc;
+}
+:root[data-theme="light"][data-see-through] {
+  --raised: rgba(0, 0, 20, 0.075);
+  --hover: rgba(0, 0, 20, 0.115);
+  --line: #85858d;
+  /* text holds 4.5:1 at the lowest opacity over a black desktop */
+  --weak: #38383e;
+  --fg: #000000;
 }
 
 * {
@@ -207,7 +237,7 @@ body,
 body {
   font: 400 var(--t)/1.4 var(--ui);
   color: var(--fg);
-  background: rgba(var(--window-rgb), var(--chrome-alpha));
+  background: rgba(var(--window-rgb), var(--window-alpha));
   user-select: none;
   -webkit-user-select: none;
 }
@@ -509,6 +539,9 @@ input[type="range"] {
 input[type="range"] {
   appearance: none;
   height: var(--control);
+  /* as tall as a field and no taller: the engine's own 2px margin made a slider's row 4px taller
+     than the rows around it */
+  margin: 0;
   background: transparent;
 }
 /* amber up to the knob's centre (`--f`, the filled share, from slider.ts), grey after it */
@@ -852,6 +885,10 @@ progress {
 }
 :root[data-theme="light"] .outline::after {
   --ocx: oklab(from var(--oc) min(l, 0.7) a b);
+}
+/* the default amber is drawn as it is: only a picked colour (`--oc` set on the pane) is darkened */
+:root[data-theme="light"] .outline:not([style*="--oc"])::after {
+  --ocx: var(--oc);
 }
 .outline[data-outline="breathe"]::after {
   animation: outline-breathe 2.6s ease-in-out infinite;

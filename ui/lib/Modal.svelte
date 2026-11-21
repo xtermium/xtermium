@@ -114,7 +114,9 @@
   }
   .window {
     max-width: calc(100vw - 2 * 21px);
-    max-height: calc(100vh - 2 * 21px);
+    /* the room under the title bar (the backdrop starts there), less a margin above and below: a
+       tall dialog on a short window scrolls its body and keeps its buttons in view */
+    max-height: calc(100vh - var(--titlebar) - 2 * 21px);
     display: flex;
     flex-direction: column;
     background: rgba(var(--panel-rgb), var(--float-alpha));
@@ -142,7 +144,7 @@
     padding-top: 12vh;
   }
   .backdrop.top .window {
-    max-height: calc(88vh - 21px);
+    max-height: calc(88vh - var(--titlebar) - 21px);
   }
   header {
     padding: 8px;

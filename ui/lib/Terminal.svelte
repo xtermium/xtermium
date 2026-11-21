@@ -130,6 +130,9 @@
   let bg = $state("");
   /** The terminal's background colour (`bg` is it as a see-through layer: see App.svelte). */
   let base = $state(0);
+  /** Its colours are light ones: on the dark theme, or dark ones on the light theme, it is painted
+   *  near solid while the window is see-through (the `light-ground` rules below). */
+  const lightGround = $derived(0.2126 * (base >> 16) + 0.7152 * ((base >> 8) & 255) + 0.0722 * (base & 255) > 127.5);
 
   let queued = false;
   let wheel = 0;
@@ -152,7 +155,7 @@
   function frame(f: Frame) {
     if (f.style) {
       look = f.style;
-      bg = "rgb(" + [look.bg >> 16, (look.bg >> 8) & 255, look.bg & 255].join(" ") + " / var(--chrome-alpha))";
+      bg = "rgb(" + [look.bg >> 16, (look.bg >> 8) & 255, look.bg & 255].join(" ") + " / var(--term-alpha))";
       base = look.bg;
       measure();
       blink();
@@ -387,6 +390,8 @@
 
     // Text on the cell grid, each row clipped to itself so repainting a neighbour never leaves a
     // glyph's overhang behind.
+    // Cells run left to right in any interface language (as in glyphs.ts `pad`).
+    c.direction = "ltr";
     c.textBaseline = "alphabetic";
     c.font = font(0);
     for (let y = 0; y < n; y++) {
@@ -897,7 +902,7 @@
   });
 </script>
 
-<div class="term" bind:this={box} style:background={bg} style:--pad="{app.settings?.pane_padding ?? 5}px">
+<div class="term" class:light-ground={lightGround} bind:this={box} style:background={bg} style:--pad="{app.settings?.pane_padding ?? 5}px">
   <!-- What's behind the text (Settings › Terminal), under the terminal's own colour; cells with
        a colour of their own stay solid. -->
   <Backdrop place="terminal" tint={(a) => css(base, a)} />
@@ -987,6 +992,15 @@
     inset: 0;
     overflow: hidden;
     isolation: isolate; /* the Backdrop goes under the text, over the background colour */
+    --term-alpha: var(--chrome-alpha);
+  }
+  /* In the other theme's colours (a dark scheme on the light theme, a light one on dark), a
+     see-through terminal is painted near solid: the window's ground under it is the theme's colour
+     and takes most of the see-through (api.ts `GROUND`), so at the panel's share its text would
+     stand on the wrong ground and couldn't be read. */
+  :global(:root[data-theme="light"]) .term:not(.light-ground),
+  :global(:root:not([data-theme="light"])) .term.light-ground {
+    --term-alpha: max(var(--chrome-alpha), 0.9);
   }
   canvas {
     position: absolute;

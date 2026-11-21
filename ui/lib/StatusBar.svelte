@@ -137,4 +137,11 @@
   .broadcast {
     color: var(--broadcast);
   }
+  /* on light amber text doesn't read on the bar: the marker is an amber chip with dark text */
+  :global(:root[data-theme="light"]) .broadcast {
+    padding: 0 5px;
+    border-radius: var(--r-control);
+    background: var(--broadcast);
+    color: var(--gold-fill-ink);
+  }
 </style>

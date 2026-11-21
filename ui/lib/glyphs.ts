@@ -90,6 +90,9 @@ function pad(w: number, h: number) {
   if (!scratch || scratch.canvas.width < w || scratch.canvas.height < h) {
     const c = new OffscreenCanvas(Math.max(w, scratch?.canvas.width ?? 0), Math.max(h, scratch?.canvas.height ?? 0));
     scratch = c.getContext("2d", { willReadFrequently: true })!;
+    // A cell's glyph starts at its pen, whatever the interface's direction: inheriting right to
+    // left (Arabic) ends each glyph there instead, a cell too far left, and mirrors brackets.
+    scratch.direction = "ltr";
   }
   scratch.clearRect(0, 0, w, h);
   return scratch;

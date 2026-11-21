@@ -276,7 +276,7 @@
       "window": {
         "role": "neutral",
         "displayName": "Ground",
-        "canonical": "#050506",
+        "canonical": "#0b0b0d",
         "tonalRamp": [
           "oklch(15% 0.003 285.9)",
           "oklch(26% 0.003 285.9)",
@@ -287,7 +287,7 @@
           "oklch(83% 0.003 285.9)",
           "oklch(95% 0.003 285.9)"
         ],
-        "light": "#e5e5e8"
+        "light": "#ffffff"
       },
       "deep": {
         "role": "neutral",
@@ -383,7 +383,7 @@
           "oklch(83% 0.013 285.6)",
           "oklch(95% 0.013 285.6)"
         ],
-        "light": "#dcdce1"
+        "light": "#b4b4bb"
       },
       "field-line": {
         "role": "neutral",

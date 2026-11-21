@@ -27,7 +27,7 @@
   "Layout: side by side": "Διάταξη: δίπλα-δίπλα",
   "Layout: stacked": "Διάταξη: στοιβαγμένα",
   "Layout: 2 × 2 grid": "Διάταξη: πλέγμα 2 × 2",
-  "Show or hide the sidebar": "Εμφάνιση ή απόκρυψη της πλαϊνής στήλης",
+  "Show or hide the activity bar and sessions": "Εμφάνιση ή απόκρυψη της γραμμής δραστηριότητας και των συνεδριών",
   "Show or hide the file panel": "Εμφάνιση ή απόκρυψη του πλαισίου αρχείων",
   "Show or hide the status bar": "Εμφάνιση ή απόκρυψη της γραμμής κατάστασης",
   "Tunnels": "Σήραγγες",
@@ -516,9 +516,7 @@
   "Edit {name}": "Επεξεργασία {name}",
   "Start when xtermium opens": "Έναρξη όταν ανοίγει το xtermium",
   "a saved SSH session…": "αποθηκευμένη συνεδρία SSH…",
-  "Expand the sidebar": "Ανάπτυξη πλαϊνής στήλης",
   "Drag to resize; double-click to fit the names": "Σύρετε για αλλαγή μεγέθους· διπλό κλικ για προσαρμογή στα ονόματα",
-  "Collapse the sidebar": "Σύμπτυξη πλαϊνής στήλης",
   "The tunnel is running: stop it to save the changes.": "Η σήραγγα τρέχει: σταματήστε τη για να αποθηκεύσετε τις αλλαγές.",
   "{name} is running: stop it first, then edit it.": "Η {name} τρέχει: σταματήστε τη πρώτα και μετά επεξεργαστείτε τη.",
   "Stop the tunnel to edit it": "Σταματήστε τη σήραγγα για να την επεξεργαστείτε",
@@ -593,7 +591,7 @@
   "{who} checks certificates and can't be told to skip it, so it may refuse xtermium's self-signed one. If it does, forward the port over SSH from that machine (ssh -L {port}:127.0.0.1:{port} this computer) and use http://127.0.0.1:{port}/mcp there.": "Το {who} ελέγχει τα πιστοποιητικά και δεν γίνεται να το παραλείψει, οπότε ίσως απορρίψει το αυτο-υπογεγραμμένο του xtermium. Αν συμβεί αυτό, προώθησε τη θύρα μέσω SSH από εκείνον τον υπολογιστή (ssh -L {port}:127.0.0.1:{port} αυτός-ο-υπολογιστής) και χρησιμοποίησε εκεί το http://127.0.0.1:{port}/mcp.",
   "Third-party notices": "Σημειώσεις τρίτων",
   "Move tab to a new window": "Μετακίνηση καρτέλας σε νέο παράθυρο",
-  "Collapse or expand the sidebar": "Σύμπτυξη ή ανάπτυξη της πλαϊνής στήλης",
+  "Show or hide the sessions": "Εμφάνιση ή απόκρυψη των συνεδριών",
   "Turn broadcast on or off": "Ενεργοποίηση ή απενεργοποίηση της μετάδοσης",
   "Terminal Co-op": "Terminal Co-op",
   "Sync the account now": "Συγχρονισμός του λογαριασμού τώρα",
@@ -1161,5 +1159,7 @@
   "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "Το πλήκτρο Windows και οι συντομεύσεις συστήματος (Win+E, Alt+Tab) πηγαίνουν στην απομακρυσμένη επιφάνεια εργασίας όσο έχει το πληκτρολόγιο",
   "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "Ό,τι αντιγράφεις περνά ανάμεσα σε αυτόν τον υπολογιστή και τις επιφάνειες εργασίας RDP: κείμενο, εικόνες και αρχεία.",
   "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "Ό,τι αντιγράφεις περνά ανάμεσα σε αυτόν τον υπολογιστή και τις επιφάνειες εργασίας RDP: κείμενο και εικόνες και προς τις δύο κατευθύνσεις, αρχεία προς την επιφάνεια εργασίας.",
-  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Ανενεργό: ενεργούν σε αυτόν τον υπολογιστή. Τα Ctrl+Alt+Del και Win+L πάντα."
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Ανενεργό: ενεργούν σε αυτόν τον υπολογιστή. Τα Ctrl+Alt+Del και Win+L πάντα.",
+  "{name} is saved in your sessions.": "Η {name} αποθηκεύτηκε στις συνεδρίες σας.",
+  "Sessions: {n} new": "Συνεδρίες: {n} νέες"
 }

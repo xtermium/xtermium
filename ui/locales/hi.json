@@ -27,7 +27,7 @@
   "Layout: side by side": "लेआउट: अगल-बगल",
   "Layout: stacked": "लेआउट: ऊपर-नीचे",
   "Layout: 2 × 2 grid": "लेआउट: 2 × 2 ग्रिड",
-  "Show or hide the sidebar": "साइडबार दिखाएँ या छिपाएँ",
+  "Show or hide the activity bar and sessions": "गतिविधि बार और सत्र दिखाएँ या छिपाएँ",
   "Show or hide the file panel": "फ़ाइल पैनल दिखाएँ या छिपाएँ",
   "Show or hide the status bar": "स्टेटस बार दिखाएँ या छिपाएँ",
   "Tunnels": "टनल",
@@ -516,9 +516,7 @@
   "Edit {name}": "{name} संपादित करें",
   "Start when xtermium opens": "xtermium खुलने पर शुरू करें",
   "a saved SSH session…": "एक सहेजा गया SSH सत्र…",
-  "Expand the sidebar": "साइडबार फैलाएँ",
   "Drag to resize; double-click to fit the names": "आकार बदलने के लिए खींचें; नामों के अनुसार चौड़ाई के लिए डबल-क्लिक करें",
-  "Collapse the sidebar": "साइडबार समेटें",
   "The tunnel is running: stop it to save the changes.": "टनल चल रहा है: बदलाव सहेजने के लिए उसे रोकें।",
   "{name} is running: stop it first, then edit it.": "{name} चल रहा है: पहले रोकें, फिर संपादित करें।",
   "Stop the tunnel to edit it": "संपादित करने के लिए टनल रोकें",
@@ -593,7 +591,7 @@
   "{who} checks certificates and can't be told to skip it, so it may refuse xtermium's self-signed one. If it does, forward the port over SSH from that machine (ssh -L {port}:127.0.0.1:{port} this computer) and use http://127.0.0.1:{port}/mcp there.": "{who} प्रमाणपत्र जाँचता है और इसे छोड़ने को नहीं कहा जा सकता, इसलिए यह xtermium के स्व-हस्ताक्षरित प्रमाणपत्र को ठुकरा सकता है। ऐसा हो तो उस मशीन से SSH पर पोर्ट फ़ॉरवर्ड करें (ssh -L {port}:127.0.0.1:{port} यह-कंप्यूटर) और वहाँ http://127.0.0.1:{port}/mcp इस्तेमाल करें।",
   "Third-party notices": "तृतीय-पक्ष सूचनाएँ",
   "Move tab to a new window": "टैब को नई विंडो में ले जाएँ",
-  "Collapse or expand the sidebar": "साइडबार को समेटें या फैलाएँ",
+  "Show or hide the sessions": "सत्र दिखाएँ या छिपाएँ",
   "Turn broadcast on or off": "ब्रॉडकास्ट चालू या बंद करें",
   "Terminal Co-op": "Terminal Co-op",
   "Sync the account now": "खाता अभी सिंक करें",
@@ -1161,5 +1159,7 @@
   "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "जब तक कीबोर्ड रिमोट डेस्कटॉप के पास है, Windows कुंजी और सिस्टम शॉर्टकट (Win+E, Alt+Tab) उसी को जाते हैं",
   "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "जो आप कॉपी करते हैं, वह इस कंप्यूटर और RDP डेस्कटॉप के बीच आता-जाता है: टेक्स्ट, चित्र और फ़ाइलें।",
   "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "जो आप कॉपी करते हैं, वह इस कंप्यूटर और RDP डेस्कटॉप के बीच आता-जाता है: टेक्स्ट और चित्र दोनों ओर, फ़ाइलें डेस्कटॉप की ओर।",
-  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "बंद: वे इस कंप्यूटर पर काम करते हैं। Ctrl+Alt+Del और Win+L हमेशा यहीं काम करते हैं।"
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "बंद: वे इस कंप्यूटर पर काम करते हैं। Ctrl+Alt+Del और Win+L हमेशा यहीं काम करते हैं।",
+  "{name} is saved in your sessions.": "{name} आपके सत्रों में सहेजा गया है।",
+  "Sessions: {n} new": "सत्र: {n} नए"
 }

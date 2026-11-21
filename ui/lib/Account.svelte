@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The account button at the bottom of the sidebar: who's signed in to sync, or a plain avatar
+  // The account button at the foot of the activity bar: who's signed in to sync, or a plain avatar
   // when nobody is (sync needs an account; nothing else does). Signed out, it can be hidden.
   import { _ } from "./i18n.svelte";
   import Icon from "./Icon.svelte";
@@ -51,7 +51,7 @@
         {/if}
       </span>
     {:else}
-      <Icon name="user-circle" size={16} />
+      <Icon name="user-circle" size={21} />
     {/if}
   </button>
 {/if}

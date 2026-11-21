@@ -27,7 +27,7 @@
   "Layout: side by side": "レイアウト: 左右に並べる",
   "Layout: stacked": "レイアウト: 上下に重ねる",
   "Layout: 2 × 2 grid": "レイアウト: 2 × 2 グリッド",
-  "Show or hide the sidebar": "サイドバーの表示・非表示",
+  "Show or hide the activity bar and sessions": "アクティビティバーとセッションの表示・非表示",
   "Show or hide the file panel": "ファイルパネルの表示・非表示",
   "Show or hide the status bar": "ステータスバーの表示・非表示",
   "Tunnels": "トンネル",
@@ -516,9 +516,7 @@
   "Edit {name}": "{name} を編集",
   "Start when xtermium opens": "xtermium の起動時に開始",
   "a saved SSH session…": "保存済みの SSH セッション…",
-  "Expand the sidebar": "サイドバーを展開",
   "Drag to resize; double-click to fit the names": "ドラッグでサイズ変更、ダブルクリックで名前に合わせる",
-  "Collapse the sidebar": "サイドバーを折りたたむ",
   "The tunnel is running: stop it to save the changes.": "トンネルが実行中です。変更を保存するには停止してください。",
   "{name} is running: stop it first, then edit it.": "{name} は実行中です。停止してから編集してください。",
   "Stop the tunnel to edit it": "編集するにはトンネルを停止",
@@ -593,7 +591,7 @@
   "{who} checks certificates and can't be told to skip it, so it may refuse xtermium's self-signed one. If it does, forward the port over SSH from that machine (ssh -L {port}:127.0.0.1:{port} this computer) and use http://127.0.0.1:{port}/mcp there.": "{who} は証明書を検証し、検証を省略させることができないため、xtermium の自己署名証明書を拒否することがあります。その場合は、そのマシンから SSH でポートを転送し（ssh -L {port}:127.0.0.1:{port} このコンピューター）、そこで http://127.0.0.1:{port}/mcp を使ってください。",
   "Third-party notices": "サードパーティの通知",
   "Move tab to a new window": "タブを新しいウィンドウに移動",
-  "Collapse or expand the sidebar": "サイドバーの折りたたみ・展開",
+  "Show or hide the sessions": "セッションの表示・非表示",
   "Turn broadcast on or off": "ブロードキャストのオン・オフ",
   "Terminal Co-op": "Terminal Co-op",
   "Sync the account now": "アカウントを今すぐ同期",
@@ -1161,5 +1159,7 @@
   "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "リモートデスクトップがキーボードを持っている間、Windows キーとシステムのショートカット (Win+E、Alt+Tab) はリモートデスクトップに送られます",
   "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "コピーしたものは、このコンピューターと RDP デスクトップの間を行き来します: テキスト、画像、ファイル。",
   "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "コピーしたものは、このコンピューターと RDP デスクトップの間を行き来します: テキストと画像は双方向、ファイルはデスクトップへ。",
-  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "オフ: このコンピューターで動作します。Ctrl+Alt+Del と Win+L は常にこのコンピューターで動作します。"
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "オフ: このコンピューターで動作します。Ctrl+Alt+Del と Win+L は常にこのコンピューターで動作します。",
+  "{name} is saved in your sessions.": "{name} をセッションに保存しました。",
+  "Sessions: {n} new": "セッション: 新規 {n} 件"
 }

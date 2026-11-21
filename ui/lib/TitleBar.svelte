@@ -15,9 +15,8 @@
   import { menu } from "./menu";
 
   /** `title`: the window's name, shown in the centre unless `children` draw the centre themselves.
-   *  `tools`: buttons beside the mark; `end`: buttons before the window's own (the main window's
-   *  tools and layouts). */
-  let { title = "", children, tools, end }: { title?: string; children?: Snippet; tools?: Snippet; end?: Snippet } = $props();
+   *  `end`: buttons before the window's own (the main window's layouts). */
+  let { title = "", children, end }: { title?: string; children?: Snippet; end?: Snippet } = $props();
 
   const w = getCurrentWindow();
   let max = $state(false);
@@ -51,7 +50,6 @@
 <header class="titlebar" class:mac={OS === "macos"} class:away data-tauri-drag-region="deep" oncontextmenu={context}>
   <div class="start">
     {#if OS !== "macos"}<div class="mark"><Logo mark /></div>{/if}
-    {@render tools?.()}
   </div>
   <div class="centre">
     {#if children}{@render children()}{:else if title}<span class="name">{title}</span>{/if}
@@ -92,18 +90,20 @@
     align-items: center;
     color: var(--bar-ink);
   }
-  /* The mark, then the tools, a few pixels apart as the tab strip's are. */
+  /* The mark, the panels' gap in from the window's edge, over the activity bar below (which holds
+     the main window's tools). */
   .start {
     display: flex;
     align-items: center;
     gap: 3px;
-    padding-inline-start: 13px;
+    padding-inline-start: var(--panel-gap);
   }
   /* macOS's own buttons sit on the left, whichever way the text runs. */
   .mac .start {
     padding-left: calc(55px + 21px);
   }
-  /* An even size in an even bar: its edges land on whole pixels. */
+  /* An even size in an even bar: its edges land on whole pixels. Its centre is over the activity
+     bar's buttons (App.svelte `.activity`). */
   .mark {
     width: var(--control);
     margin-inline-end: 8px;

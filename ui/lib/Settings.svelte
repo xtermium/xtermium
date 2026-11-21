@@ -19,7 +19,7 @@
   import { onDestroy, tick } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { ACTIONS, chord, defaultKeys, isWheel, keysOf, OS, score, shown, TERMINAL_KEYS, wheelChord } from "./actions";
-  import { ACCENTS, COLORS, css, openUrl, OUTLINES, type CursorShape, type Login, type Scheme, type Settings } from "./api";
+  import { ACCENTS, COLORS, css, openUrl, OUTLINES, PLACES, type CursorShape, type Login, type Scheme, type Settings } from "./api";
   import About from "./About.svelte";
   import BackgroundPicker from "./BackgroundPicker.svelte";
   import Icon from "./Icon.svelte";
@@ -541,6 +541,8 @@
     // Everything with its own reset button (`back`) on those pages is in this list too.
     const { theme, ui_scale, effect, opacity, accent, scheme, font, font_size, override_sessions, cursor, cursor_blink, line_height, pane_padding, pane_step, scrollback, scroll_on_output, copy_on_select, right_click_paste, strip_paste, broadcast_outline, broadcast_outline_color, ...keep } =
       $state.snapshot(s);
+    // The backgrounds' strengths have reset buttons too (BackgroundPicker); the pictures stay.
+    for (const f of Object.values(PLACES)) keep[f] = { ...keep[f], show: defaults ? defaults[f].show : keep[f].show };
     app.settings = await invoke<Settings>("save_settings", { settings: keep });
   }
 
@@ -1922,6 +1924,11 @@ xtermium close 3`}</pre>
   h3 {
     margin-top: 5px;
   }
+  /* Settings is read down a long column of rows: they sit a gap apart (5px, not the 8px of a
+     dialog's few fields), so a page shows more of itself at once */
+  .form {
+    row-gap: var(--gap);
+  }
   p {
     margin: 0;
     max-width: 70ch;
@@ -1939,7 +1946,7 @@ xtermium close 3`}</pre>
   .col {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--gap);
   }
   /* the icon in use, at the size of the fields beside it */
   .app-icon {

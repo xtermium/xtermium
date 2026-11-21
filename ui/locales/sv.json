@@ -27,7 +27,7 @@
   "Layout: side by side": "Layout: sida vid sida",
   "Layout: stacked": "Layout: staplad",
   "Layout: 2 × 2 grid": "Layout: rutnät 2 × 2",
-  "Show or hide the sidebar": "Visa eller dölj sidofältet",
+  "Show or hide the activity bar and sessions": "Visa eller dölj aktivitetsfältet och sessionerna",
   "Show or hide the file panel": "Visa eller dölj filpanelen",
   "Show or hide the status bar": "Visa eller dölj statusfältet",
   "Tunnels": "Tunnlar",
@@ -516,9 +516,7 @@
   "Edit {name}": "Redigera {name}",
   "Start when xtermium opens": "Starta när xtermium öppnas",
   "a saved SSH session…": "en sparad SSH-session…",
-  "Expand the sidebar": "Fäll ut sidofältet",
   "Drag to resize; double-click to fit the names": "Dra för att ändra storlek; dubbelklicka för att anpassa till namnen",
-  "Collapse the sidebar": "Fäll ihop sidofältet",
   "The tunnel is running: stop it to save the changes.": "Tunneln körs: stoppa den för att spara ändringarna.",
   "{name} is running: stop it first, then edit it.": "{name} körs: stoppa den först och redigera den sedan.",
   "Stop the tunnel to edit it": "Stoppa tunneln för att redigera den",
@@ -593,7 +591,7 @@
   "{who} checks certificates and can't be told to skip it, so it may refuse xtermium's self-signed one. If it does, forward the port over SSH from that machine (ssh -L {port}:127.0.0.1:{port} this computer) and use http://127.0.0.1:{port}/mcp there.": "{who} kontrollerar certifikat och kan inte bes att låta bli, så det kan vägra xtermiums självsignerade. Gör det det, vidarebefordra porten över SSH från den datorn (ssh -L {port}:127.0.0.1:{port} den-här-datorn) och använd http://127.0.0.1:{port}/mcp där.",
   "Third-party notices": "Tredjepartsmeddelanden",
   "Move tab to a new window": "Flytta fliken till ett nytt fönster",
-  "Collapse or expand the sidebar": "Fäll ihop eller ut sidofältet",
+  "Show or hide the sessions": "Visa eller dölj sessionerna",
   "Turn broadcast on or off": "Slå rundsändning på eller av",
   "Terminal Co-op": "Terminal Co-op",
   "Sync the account now": "Synkronisera kontot nu",
@@ -1161,5 +1159,7 @@
   "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "Windows-tangenten och systemets kortkommandon (Win+E, Alt+Tab) går till fjärrskrivbordet medan det har tangentbordet",
   "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "Det du kopierar går mellan den här datorn och RDP-skrivbord: text, bilder och filer.",
   "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "Det du kopierar går mellan den här datorn och RDP-skrivbord: text och bilder åt båda håll, filer till skrivbordet.",
-  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Av: de verkar på den här datorn. Ctrl+Alt+Del och Win+L gör alltid det."
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Av: de verkar på den här datorn. Ctrl+Alt+Del och Win+L gör alltid det.",
+  "{name} is saved in your sessions.": "{name} har sparats bland dina sessioner.",
+  "Sessions: {n} new": "Sessioner: {n} nya"
 }

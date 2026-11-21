@@ -89,8 +89,7 @@
   "Cloud": "Sky",
   "Codex reads the token from an environment variable, so this command also saves it as <code>XTERMIUM_TOKEN</code> in your user environment (setx). Open a new terminal before starting Codex, and run it again if you make a new token.": "Codex leser tokenet fra en miljøvariabel, så denne kommandoen lagrer det også som <code>XTERMIUM_TOKEN</code> i brukermiljøet ditt (setx). Åpne en ny terminal før du starter Codex, og kjør den på nytt hvis du lager et nytt token.",
   "Codex reads the token from an environment variable, so this command also saves it as <code>XTERMIUM_TOKEN</code> in ~/.profile. Open a new terminal before starting Codex, and run it again if you make a new token.": "Codex leser tokenet fra en miljøvariabel, så denne kommandoen lagrer det også som <code>XTERMIUM_TOKEN</code> i ~/.profile. Åpne en ny terminal før du starter Codex, og kjør den på nytt hvis du lager et nytt token.",
-  "Collapse or expand the sidebar": "Gjør sidefeltet smalt eller bredt",
-  "Collapse the sidebar": "Gjør sidefeltet smalt",
+  "Show or hide the sessions": "Vis eller skjul øktene",
   "Colour": "Farge",
   "Colour words and addresses in terminal output": "Fargelegg ord og adresser i terminalutdata",
   "Colour {c}": "Farge {c}",
@@ -169,7 +168,6 @@
   "Enter the jump host, or untick it.": "Skriv inn hoppverten, eller fjern avkryssingen.",
   "Everything, protected by a passphrase. Import it on any xtermium.": "Alt, beskyttet av en passfrase. Importer det i hvilken som helst xtermium.",
   "Exit": "Avslutt",
-  "Expand the sidebar": "Utvid sidefeltet",
   "Export": "Eksporter",
   "Export all sessions": "Eksporter alle økter",
   "Export sessions…": "Eksporter økter …",
@@ -466,7 +464,7 @@
   "Show a scroll bar": "Vis et rullefelt",
   "Show in the tiles": "Vis i flisene",
   "Show or hide the file panel": "Vis eller skjul filpanelet",
-  "Show or hide the sidebar": "Vis eller skjul sidefeltet",
+  "Show or hide the activity bar and sessions": "Vis eller skjul aktivitetslinjen og øktene",
   "Show or hide the status bar": "Vis eller skjul statuslinjen",
   "Show passphrase": "Vis passfrasen",
   "Show the account button in the sidebar": "Vis kontoknappen i sidefeltet",
@@ -1161,5 +1159,7 @@
   "The Windows key and system shortcuts (Win+E, Alt+Tab) go to the remote desktop while it has the keyboard": "Windows-tasten og systemsnarveier (Win+E, Alt+Tab) går til det eksterne skrivebordet mens det har tastaturet",
   "What you copy crosses between this computer and RDP desktops: text, pictures and files.": "Det du kopierer, går mellom denne datamaskinen og RDP-skrivebord: tekst, bilder og filer.",
   "What you copy crosses between this computer and RDP desktops: text and pictures both ways, files to the desktop.": "Det du kopierer, går mellom denne datamaskinen og RDP-skrivebord: tekst og bilder begge veier, filer til skrivebordet.",
-  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Av: De virker på denne datamaskinen. Ctrl+Alt+Del og Win+L gjør alltid det."
+  "Off: they act on this computer. Ctrl+Alt+Del and Win+L always do.": "Av: De virker på denne datamaskinen. Ctrl+Alt+Del og Win+L gjør alltid det.",
+  "{name} is saved in your sessions.": "{name} er lagret blant øktene dine.",
+  "Sessions: {n} new": "Økter: {n} nye"
 }
